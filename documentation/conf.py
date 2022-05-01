@@ -13,9 +13,11 @@
 import os
 import sys
 
-from . import api_documentation
-
 sys.path.insert(0, os.path.abspath("../."))
+sys.path.append(os.path.abspath("./"))
+
+import api_documentation
+
 sys.path.append(os.path.abspath(api_documentation.MUTWO_PATH))
 
 

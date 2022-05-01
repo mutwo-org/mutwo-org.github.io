@@ -41,6 +41,8 @@ def create_api_documentation():
             "-d",
             "1",
             "-o",
+            "--implicit-namespaces",
+            "-E",
             API_DOCUMENTATION_PATH,
             MUTWO_PATH,
         ]
