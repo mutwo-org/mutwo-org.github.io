@@ -91,8 +91,7 @@ install_package_tuple(MUTWO_PACKAGE_TUPLE + SPHINX_PACKAGE_TUPLE)
 create_api_documentation()
 
 sys.path.insert(0, os.path.abspath("../."))
-
-sys.path.append(os.path.abspath("../virtualenv/lib/python3.9/site-packages/mutwo"))
+sys.path.append(os.path.abspath("./virtualenv/lib/python3.9/site-packages/mutwo"))
 
 
 # -- Project information -----------------------------------------------------
