@@ -12,17 +12,22 @@ The following example generates a short midi file:
 
 .. code-block:: python
 
-    from mutwo.events import basic, music
-    from mutwo.parameters import pitches
-    from mutwo.converters import frontends
-    simple_melody = basic.SequentialEvent(
+    from mutwo import core_events
+    from mutwo import music_events
+    from mutwo import midi_converters
+    simple_melody = core_events.SequentialEvent(
         [
-            music.NoteLike(pitches.WesternPitch(pitch_name), duration=0.5, volume=0.75)
-            for pitch_name in ("c", "a", "g", "e")
+            music_events.NoteLike(pitch_name, duration=duration, volume="mf")
+            for pitch_name, duration in (
+                ("c", 0.75),
+                ("a", 0.25),
+                ("g", 1 / 6),
+                ("es", 1 / 12),
+            )
         ]
     )
-    midi_file_converter = frontends.midi.MidiFileConverter()
-    midi_file_converter.convert(simple_melody, 'my_simple_melody.mid')
+    event_to_midi_file = midi_converters.EventToMidiFile()
+    event_to_midi_file.convert(simple_melody, "my_simple_melody.mid")
 
 
 .. toctree::
