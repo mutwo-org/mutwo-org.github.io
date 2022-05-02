@@ -39,10 +39,10 @@ def create_api_documentation():
             API_DOCUMENTATION_TREE_NAME,
             "-M",
             "-d",
-            "1",
-            "-o",
+            "2",
             "--implicit-namespaces",
             "-E",
+            "-o",
             API_DOCUMENTATION_PATH,
             MUTWO_PATH,
         ]
@@ -56,7 +56,8 @@ BIN_PATH = f"{VENV_PATH}/bin"
 PIP_PATH = f"{BIN_PATH}/pip3"
 SPHINX_APIDOC_PATH = f"{BIN_PATH}/sphinx-apidoc"
 SPHINX_BUILD_PATH = f"{BIN_PATH}/sphinx-build"
-MUTWO_PATH = f"{VENV_PATH}/lib/python3.9/site-packages/mutwo"
+SITE_PACKAGES_PATH = f"{VENV_PATH}/lib/python3.9/site-packages"
+MUTWO_PATH = f"{SITE_PACKAGES_PATH}/mutwo"
 
 DOCUMENTATION_PATH = "."
 SPHINX_OUTPUT_PATH = "{DOCUMENTATION_PATH}/_build"
@@ -86,4 +87,5 @@ SPHINX_PACKAGE_TUPLE = (
 
 setup_venv()
 install_package_tuple(MUTWO_PACKAGE_TUPLE + SPHINX_PACKAGE_TUPLE)
+subprocess.call([PIP_PATH, '-r', 'requirements.txt'])
 create_api_documentation()

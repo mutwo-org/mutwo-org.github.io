@@ -1,5 +1,13 @@
 mutwo.ext-core
 mutwo.ext-music
+mutwo.ext-common-generators
+mutwo.ext-mbrola
+mutwo.ext-csound
+mutwo.ext-reaper
+mutwo.ext-midi
+mutwo.ext-isis
+mutwo.ext-abjad
+mutwo.ext-ekmelily
 
 sphinx==4.5.0
 sphinx-autodoc-annotation==1.0-1

@@ -18,6 +18,7 @@ sys.path.append(os.path.abspath("./"))
 
 import api_documentation
 
+sys.path.append(os.path.abspath(api_documentation.SITE_PACKAGES_PATH))
 sys.path.append(os.path.abspath(api_documentation.MUTWO_PATH))
 
 
