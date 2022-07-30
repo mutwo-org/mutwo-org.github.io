@@ -18,8 +18,10 @@ sys.path.append(os.path.abspath("./"))
 
 import api_documentation
 
-sys.path.append(os.path.abspath(api_documentation.SITE_PACKAGES_PATH))
-sys.path.append(os.path.abspath(api_documentation.MUTWO_PATH))
+api_documentation.make_api_documentation()
+
+sys.path.append(api_documentation.SITE_PACKAGES_PATH)
+sys.path.append(api_documentation.MUTWO_PATH)
 
 
 # -- Project information -----------------------------------------------------
@@ -38,13 +40,15 @@ release = "2022"
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    "autoclasstoc",
     "sphinx.ext.autodoc",
-    "autodocsumm",
+    # "autodocsumm",
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
     "sphinx.ext.autosummary",
     "sphinx.ext.doctest",
     "sphinx.ext.inheritance_diagram",
+    "insipid_sphinx_theme",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -61,11 +65,25 @@ autosummary_generate = False
 autosummary_generate_overwrite = False
 autodoc_typehints = "description"
 autodoc_member_order = "groupwise"
-autodoc_default_options = {
-    # "ignore-module-all": True,
-    "autosummary": True,
-}
 add_module_names = False
+
+autodoc_default_options = {
+    "ignore-module-all": False,
+    "autosummary": True,
+    "members": True,
+    "special-members": False,
+    "private-members": False,
+    "inherited-members": True,
+    "undoc-members": False,
+    "exclude-members": "__weakref__",
+}
+
+autoclasstoc_sections = [
+    "public-attrs",
+    "public-methods",
+    "private-attrs",
+    "private-methods",
+]
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -75,6 +93,14 @@ add_module_names = False
 #
 html_permalinks_icon = "§"
 html_theme = "insipid"
+html_style = "css/mutwo.css"
+html_theme_options = {
+    "body_centered": False,
+    "breadcrumbs": True,
+    "show_insipid": False,
+    "body_max_width": None,
+}
+
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

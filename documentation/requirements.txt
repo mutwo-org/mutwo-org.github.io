@@ -13,3 +13,4 @@ sphinx==4.5.0
 sphinx-autodoc-annotation==1.0-1
 autodocsumm==0.2.4
 insipid-sphinx-theme==0.2.8
+autoclasstoc==1.5.1

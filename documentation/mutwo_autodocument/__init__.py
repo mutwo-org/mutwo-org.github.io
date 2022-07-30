@@ -1,0 +1,3 @@
+from .AutoDocumentedObject import AutoDocumentedObject
+from .AutoDocumentedModule import AutoDocumentedModule
+from .AutoDocumentedPackage import AutoDocumentedPackage
