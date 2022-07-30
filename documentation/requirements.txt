@@ -1,7 +1,6 @@
 mutwo.ext-core
 mutwo.ext-music
 mutwo.ext-common-generators
-mutwo.ext-mbrola
 mutwo.ext-csound
 mutwo.ext-reaper
 mutwo.ext-midi
