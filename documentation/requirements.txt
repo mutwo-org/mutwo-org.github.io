@@ -1,6 +1,6 @@
 mutwo.core
 mutwo.music
-mutwo.common-generators
+mutwo.common
 mutwo.csound
 mutwo.reaper
 mutwo.midi
