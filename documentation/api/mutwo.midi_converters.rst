@@ -43,51 +43,51 @@ mutwo.midi_converters
 
 
 
-.. autoclass:: PitchBendingNumberToPitchInterval
+.. autoclass:: mutwo.midi_converters.PitchBendingNumberToPitchInterval
         .. autoclasstoc::
     
 
-.. autoclass:: PitchBendingNumberToDirectPitchInterval
+.. autoclass:: mutwo.midi_converters.PitchBendingNumberToDirectPitchInterval
         .. autoclasstoc::
     
 
-.. autoclass:: MidiPitchToMutwoPitch
+.. autoclass:: mutwo.midi_converters.MidiPitchToMutwoPitch
         .. autoclasstoc::
     
 
-.. autoclass:: MidiPitchToDirectPitch
+.. autoclass:: mutwo.midi_converters.MidiPitchToDirectPitch
         .. autoclasstoc::
     
 
-.. autoclass:: MidiPitchToMutwoMidiPitch
+.. autoclass:: mutwo.midi_converters.MidiPitchToMutwoMidiPitch
         .. autoclasstoc::
     
 
-.. autoclass:: MidiVelocityToMutwoVolume
+.. autoclass:: mutwo.midi_converters.MidiVelocityToMutwoVolume
         .. autoclasstoc::
     
 
-.. autoclass:: MidiVelocityToWesternVolume
+.. autoclass:: mutwo.midi_converters.MidiVelocityToWesternVolume
         .. autoclasstoc::
     
 
-.. autoclass:: MidiFileToEvent
+.. autoclass:: mutwo.midi_converters.MidiFileToEvent
         .. autoclasstoc::
     
 
-.. autoclass:: SimpleEventToControlMessageTuple
+.. autoclass:: mutwo.midi_converters.SimpleEventToControlMessageTuple
         .. autoclasstoc::
     
 
-.. autoclass:: CentDeviationToPitchBendingNumber
+.. autoclass:: mutwo.midi_converters.CentDeviationToPitchBendingNumber
         .. autoclasstoc::
     
 
-.. autoclass:: MutwoPitchToMidiPitch
+.. autoclass:: mutwo.midi_converters.MutwoPitchToMidiPitch
         .. autoclasstoc::
     
 
-.. autoclass:: EventToMidiFile
+.. autoclass:: mutwo.midi_converters.EventToMidiFile
         .. autoclasstoc::
     
 

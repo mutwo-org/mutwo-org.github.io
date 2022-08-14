@@ -99,163 +99,163 @@ mutwo.music_parameters
 
 
 
-.. autoclass:: OctaveAmbitus
+.. autoclass:: mutwo.music_parameters.OctaveAmbitus
         .. autoclasstoc::
     
 
-.. autoclass:: Comma
+.. autoclass:: mutwo.music_parameters.Comma
         .. autoclasstoc::
     
 
-.. autoclass:: CommaCompound
+.. autoclass:: mutwo.music_parameters.CommaCompound
         .. autoclasstoc::
     
 
-.. autoclass:: DirectLyric
+.. autoclass:: mutwo.music_parameters.DirectLyric
         .. autoclasstoc::
     
 
-.. autoclass:: LanguageBasedLyric
+.. autoclass:: mutwo.music_parameters.LanguageBasedLyric
         .. autoclasstoc::
     
 
-.. autoclass:: LanguageBasedSyllable
+.. autoclass:: mutwo.music_parameters.LanguageBasedSyllable
         .. autoclasstoc::
     
 
-.. autoclass:: DirectPitchInterval
+.. autoclass:: mutwo.music_parameters.DirectPitchInterval
         .. autoclasstoc::
     
 
-.. autoclass:: WesternPitchInterval
+.. autoclass:: mutwo.music_parameters.WesternPitchInterval
         .. autoclasstoc::
     
 
-.. autoclass:: DirectPitch
+.. autoclass:: mutwo.music_parameters.DirectPitch
         .. autoclasstoc::
     
 
-.. autoclass:: JustIntonationPitch
+.. autoclass:: mutwo.music_parameters.JustIntonationPitch
         .. autoclasstoc::
     
 
-.. autoclass:: Partial
+.. autoclass:: mutwo.music_parameters.Partial
         .. autoclasstoc::
     
 
-.. autoclass:: EqualDividedOctavePitch
+.. autoclass:: mutwo.music_parameters.EqualDividedOctavePitch
         .. autoclasstoc::
     
 
-.. autoclass:: WesternPitch
+.. autoclass:: mutwo.music_parameters.WesternPitch
         .. autoclasstoc::
     
 
-.. autoclass:: MidiPitch
+.. autoclass:: mutwo.music_parameters.MidiPitch
         .. autoclasstoc::
     
 
-.. autoclass:: CommonHarmonic
+.. autoclass:: mutwo.music_parameters.CommonHarmonic
         .. autoclasstoc::
     
 
-.. autoclass:: DirectVolume
+.. autoclass:: mutwo.music_parameters.DirectVolume
         .. autoclasstoc::
     
 
-.. autoclass:: DecibelVolume
+.. autoclass:: mutwo.music_parameters.DecibelVolume
         .. autoclasstoc::
     
 
-.. autoclass:: WesternVolume
+.. autoclass:: mutwo.music_parameters.WesternVolume
         .. autoclasstoc::
     
 
-.. autoclass:: BarLine
+.. autoclass:: mutwo.music_parameters.BarLine
         .. autoclasstoc::
     
 
-.. autoclass:: Clef
+.. autoclass:: mutwo.music_parameters.Clef
         .. autoclasstoc::
     
 
-.. autoclass:: Ottava
+.. autoclass:: mutwo.music_parameters.Ottava
         .. autoclasstoc::
     
 
-.. autoclass:: MarginMarkup
+.. autoclass:: mutwo.music_parameters.MarginMarkup
         .. autoclasstoc::
     
 
-.. autoclass:: Markup
+.. autoclass:: mutwo.music_parameters.Markup
         .. autoclasstoc::
     
 
-.. autoclass:: RehearsalMark
+.. autoclass:: mutwo.music_parameters.RehearsalMark
         .. autoclasstoc::
     
 
-.. autoclass:: NotationIndicatorCollection
+.. autoclass:: mutwo.music_parameters.NotationIndicatorCollection
         .. autoclasstoc::
     
 
-.. autoclass:: Tremolo
+.. autoclass:: mutwo.music_parameters.Tremolo
         .. autoclasstoc::
     
 
-.. autoclass:: Articulation
+.. autoclass:: mutwo.music_parameters.Articulation
         .. autoclasstoc::
     
 
-.. autoclass:: Arpeggio
+.. autoclass:: mutwo.music_parameters.Arpeggio
         .. autoclasstoc::
     
 
-.. autoclass:: Pedal
+.. autoclass:: mutwo.music_parameters.Pedal
         .. autoclasstoc::
     
 
-.. autoclass:: StringContactPoint
+.. autoclass:: mutwo.music_parameters.StringContactPoint
         .. autoclasstoc::
     
 
-.. autoclass:: Ornamentation
+.. autoclass:: mutwo.music_parameters.Ornamentation
         .. autoclasstoc::
     
 
-.. autoclass:: BendAfter
+.. autoclass:: mutwo.music_parameters.BendAfter
         .. autoclasstoc::
     
 
-.. autoclass:: ArtificalHarmonic
+.. autoclass:: mutwo.music_parameters.ArtificalHarmonic
         .. autoclasstoc::
     
 
-.. autoclass:: PreciseNaturalHarmonic
+.. autoclass:: mutwo.music_parameters.PreciseNaturalHarmonic
         .. autoclasstoc::
     
 
-.. autoclass:: Fermata
+.. autoclass:: mutwo.music_parameters.Fermata
         .. autoclasstoc::
     
 
-.. autoclass:: Hairpin
+.. autoclass:: mutwo.music_parameters.Hairpin
         .. autoclasstoc::
     
 
-.. autoclass:: Trill
+.. autoclass:: mutwo.music_parameters.Trill
         .. autoclasstoc::
     
 
-.. autoclass:: WoodwindFingering
+.. autoclass:: mutwo.music_parameters.WoodwindFingering
         .. autoclasstoc::
     
 
-.. autoclass:: Cue
+.. autoclass:: mutwo.music_parameters.Cue
         .. autoclasstoc::
     
 
-.. autoclass:: PlayingIndicatorCollection
+.. autoclass:: mutwo.music_parameters.PlayingIndicatorCollection
         .. autoclasstoc::
     
 

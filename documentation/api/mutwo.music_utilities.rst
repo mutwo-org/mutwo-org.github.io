@@ -21,7 +21,7 @@ mutwo.music_utilities
 
 
 
-.. autoclass:: DuplicatePlayingIndicatorConverterMappingWarning
+.. autoclass:: mutwo.music_utilities.DuplicatePlayingIndicatorConverterMappingWarning
         .. autoclasstoc::
     
 

@@ -21,7 +21,7 @@ mutwo.music_events
 
 
 
-.. autoclass:: NoteLike
+.. autoclass:: mutwo.music_events.NoteLike
         .. autoclasstoc::
     
 

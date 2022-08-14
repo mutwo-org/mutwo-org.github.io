@@ -69,103 +69,103 @@ mutwo.music_converters
 
 
 
-.. autoclass:: GraceNotesConverter
+.. autoclass:: mutwo.music_converters.GraceNotesConverter
         .. autoclasstoc::
     
 
-.. autoclass:: LoudnessToAmplitude
+.. autoclass:: mutwo.music_converters.LoudnessToAmplitude
         .. autoclasstoc::
     
 
-.. autoclass:: RhythmicalStrataToIndispensability
+.. autoclass:: mutwo.music_converters.RhythmicalStrataToIndispensability
         .. autoclasstoc::
     
 
-.. autoclass:: SimpleEventToPitchList
+.. autoclass:: mutwo.music_converters.SimpleEventToPitchList
         .. autoclasstoc::
     
 
-.. autoclass:: SimpleEventToVolume
+.. autoclass:: mutwo.music_converters.SimpleEventToVolume
         .. autoclasstoc::
     
 
-.. autoclass:: SimpleEventToLyric
+.. autoclass:: mutwo.music_converters.SimpleEventToLyric
         .. autoclasstoc::
     
 
-.. autoclass:: SimpleEventToPlayingIndicatorCollection
+.. autoclass:: mutwo.music_converters.SimpleEventToPlayingIndicatorCollection
         .. autoclasstoc::
     
 
-.. autoclass:: SimpleEventToNotationIndicatorCollection
+.. autoclass:: mutwo.music_converters.SimpleEventToNotationIndicatorCollection
         .. autoclasstoc::
     
 
-.. autoclass:: SimpleEventToGraceNoteSequentialEvent
+.. autoclass:: mutwo.music_converters.SimpleEventToGraceNoteSequentialEvent
         .. autoclasstoc::
     
 
-.. autoclass:: SimpleEventToAfterGraceNoteSequentialEvent
+.. autoclass:: mutwo.music_converters.SimpleEventToAfterGraceNoteSequentialEvent
         .. autoclasstoc::
     
 
-.. autoclass:: MutwoParameterDictToPitchList
+.. autoclass:: mutwo.music_converters.MutwoParameterDictToPitchList
         .. autoclasstoc::
     
 
-.. autoclass:: MutwoParameterDictToVolume
+.. autoclass:: mutwo.music_converters.MutwoParameterDictToVolume
         .. autoclasstoc::
     
 
-.. autoclass:: MutwoParameterDictToPlayingIndicatorCollection
+.. autoclass:: mutwo.music_converters.MutwoParameterDictToPlayingIndicatorCollection
         .. autoclasstoc::
     
 
-.. autoclass:: MutwoParameterDictToNotationIndicatorCollection
+.. autoclass:: mutwo.music_converters.MutwoParameterDictToNotationIndicatorCollection
         .. autoclasstoc::
     
 
-.. autoclass:: MutwoParameterDictToGraceNoteSequentialEvent
+.. autoclass:: mutwo.music_converters.MutwoParameterDictToGraceNoteSequentialEvent
         .. autoclasstoc::
     
 
-.. autoclass:: MutwoParameterDictToAfterGraceNoteSequentialEvent
+.. autoclass:: mutwo.music_converters.MutwoParameterDictToAfterGraceNoteSequentialEvent
         .. autoclasstoc::
     
 
-.. autoclass:: MutwoParameterDictToNoteLike
+.. autoclass:: mutwo.music_converters.MutwoParameterDictToNoteLike
         .. autoclasstoc::
     
 
-.. autoclass:: ImproveWesternPitchListSequenceReadability
+.. autoclass:: mutwo.music_converters.ImproveWesternPitchListSequenceReadability
         .. autoclasstoc::
     
 
-.. autoclass:: PlayingIndicatorConverter
+.. autoclass:: mutwo.music_converters.PlayingIndicatorConverter
         .. autoclasstoc::
     
 
-.. autoclass:: ArpeggioConverter
+.. autoclass:: mutwo.music_converters.ArpeggioConverter
         .. autoclasstoc::
     
 
-.. autoclass:: StacattoConverter
+.. autoclass:: mutwo.music_converters.StacattoConverter
         .. autoclasstoc::
     
 
-.. autoclass:: ArticulationConverter
+.. autoclass:: mutwo.music_converters.ArticulationConverter
         .. autoclasstoc::
     
 
-.. autoclass:: TrillConverter
+.. autoclass:: mutwo.music_converters.TrillConverter
         .. autoclasstoc::
     
 
-.. autoclass:: PlayingIndicatorsConverter
+.. autoclass:: mutwo.music_converters.PlayingIndicatorsConverter
         .. autoclasstoc::
     
 
-.. autoclass:: TwoPitchesToCommonHarmonicTuple
+.. autoclass:: mutwo.music_converters.TwoPitchesToCommonHarmonicTuple
         .. autoclasstoc::
     
 

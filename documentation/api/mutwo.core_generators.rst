@@ -21,7 +21,7 @@ mutwo.core_generators
 
 
 
-.. autoclass:: DynamicChoice
+.. autoclass:: mutwo.core_generators.DynamicChoice
         .. autoclasstoc::
     
 

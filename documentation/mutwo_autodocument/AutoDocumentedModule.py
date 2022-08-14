@@ -9,8 +9,9 @@ SUBMODULE_NAME_TUPLE = ("abc", "configurations", "constants")
 
 
 class AutoDocumentedModule(AutoDocumentedObject):
-    def __init__(self, module_to_document: types.ModuleType):
+    def __init__(self, module_to_document: types.ModuleType, package_name: str):
         self.module_to_document = module_to_document
+        self.package_name = package_name
 
     def get_submodule(self, submodule_name: str) -> typing.Optional[types.ModuleType]:
         return getattr(self.module_to_document, submodule_name, None)
@@ -45,7 +46,7 @@ class AutoDocumentedModule(AutoDocumentedObject):
         for object_to_document in self.object_tuple:
             if hasattr(object_to_document, "__mro__"):
                 class_documentation = rf"""
-.. autoclass:: {object_to_document.__name__}
+.. autoclass:: {self.module_name}.{object_to_document.__name__}
         .. autoclasstoc::
     """
                 class_documentation_list.append(class_documentation)

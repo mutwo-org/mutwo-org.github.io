@@ -21,7 +21,7 @@ mutwo.isis_utilities
 
 
 
-.. autoclass:: MonophonicSynthesizerError
+.. autoclass:: mutwo.isis_utilities.MonophonicSynthesizerError
         .. autoclasstoc::
     
 

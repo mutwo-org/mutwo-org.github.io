@@ -23,11 +23,11 @@ mutwo.isis_converters
 
 
 
-.. autoclass:: EventToIsisScore
+.. autoclass:: mutwo.isis_converters.EventToIsisScore
         .. autoclasstoc::
     
 
-.. autoclass:: EventToSingingSynthesis
+.. autoclass:: mutwo.isis_converters.EventToSingingSynthesis
         .. autoclasstoc::
     
 

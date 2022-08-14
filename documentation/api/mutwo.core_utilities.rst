@@ -174,39 +174,39 @@ mutwo.core_utilities
 .. autofunction:: get_all
     
 
-.. autoclass:: AlreadyDefinedValueNameError
+.. autoclass:: mutwo.core_utilities.AlreadyDefinedValueNameError
         .. autoclasstoc::
     
 
-.. autoclass:: InvalidAverageValueStartAndEndWarning
+.. autoclass:: mutwo.core_utilities.InvalidAverageValueStartAndEndWarning
         .. autoclasstoc::
     
 
-.. autoclass:: InvalidStartValueError
+.. autoclass:: mutwo.core_utilities.InvalidStartValueError
         .. autoclasstoc::
     
 
-.. autoclass:: InvalidPointError
+.. autoclass:: mutwo.core_utilities.InvalidPointError
         .. autoclasstoc::
     
 
-.. autoclass:: ImpossibleToSquashInError
+.. autoclass:: mutwo.core_utilities.ImpossibleToSquashInError
         .. autoclasstoc::
     
 
-.. autoclass:: InvalidStartAndEndValueError
+.. autoclass:: mutwo.core_utilities.InvalidStartAndEndValueError
         .. autoclasstoc::
     
 
-.. autoclass:: InvalidCutOutStartAndEndValuesError
+.. autoclass:: mutwo.core_utilities.InvalidCutOutStartAndEndValuesError
         .. autoclasstoc::
     
 
-.. autoclass:: SplitUnavailableChildError
+.. autoclass:: mutwo.core_utilities.SplitUnavailableChildError
         .. autoclasstoc::
     
 
-.. autoclass:: NoSolutionFoundError
+.. autoclass:: mutwo.core_utilities.NoSolutionFoundError
         .. autoclasstoc::
     
 

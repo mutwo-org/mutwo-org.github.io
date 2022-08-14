@@ -21,7 +21,7 @@ mutwo.reaper_converters
 
 
 
-.. autoclass:: ReaperMarkerConverter
+.. autoclass:: mutwo.reaper_converters.ReaperMarkerConverter
         .. autoclasstoc::
     
 

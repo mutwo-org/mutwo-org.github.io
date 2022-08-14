@@ -37,39 +37,39 @@ mutwo.core_events
 
 
 
-.. autoclass:: SimpleEvent
+.. autoclass:: mutwo.core_events.SimpleEvent
         .. autoclasstoc::
     
 
-.. autoclass:: SequentialEvent
+.. autoclass:: mutwo.core_events.SequentialEvent
         .. autoclasstoc::
     
 
-.. autoclass:: SimultaneousEvent
+.. autoclass:: mutwo.core_events.SimultaneousEvent
         .. autoclasstoc::
     
 
-.. autoclass:: TaggedSimpleEvent
+.. autoclass:: mutwo.core_events.TaggedSimpleEvent
         .. autoclasstoc::
     
 
-.. autoclass:: TaggedSequentialEvent
+.. autoclass:: mutwo.core_events.TaggedSequentialEvent
         .. autoclasstoc::
     
 
-.. autoclass:: TaggedSimultaneousEvent
+.. autoclass:: mutwo.core_events.TaggedSimultaneousEvent
         .. autoclasstoc::
     
 
-.. autoclass:: Envelope
+.. autoclass:: mutwo.core_events.Envelope
         .. autoclasstoc::
     
 
-.. autoclass:: RelativeEnvelope
+.. autoclass:: mutwo.core_events.RelativeEnvelope
         .. autoclasstoc::
     
 
-.. autoclass:: TempoEnvelope
+.. autoclass:: mutwo.core_events.TempoEnvelope
         .. autoclasstoc::
     
 

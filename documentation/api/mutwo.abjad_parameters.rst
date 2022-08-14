@@ -87,139 +87,139 @@ mutwo.abjad_parameters
 
 
 
-.. autoclass:: Arpeggio
+.. autoclass:: mutwo.abjad_parameters.Arpeggio
         .. autoclasstoc::
     
 
-.. autoclass:: Articulation
+.. autoclass:: mutwo.abjad_parameters.Articulation
         .. autoclasstoc::
     
 
-.. autoclass:: Trill
+.. autoclass:: mutwo.abjad_parameters.Trill
         .. autoclasstoc::
     
 
-.. autoclass:: Cue
+.. autoclass:: mutwo.abjad_parameters.Cue
         .. autoclasstoc::
     
 
-.. autoclass:: WoodwindFingering
+.. autoclass:: mutwo.abjad_parameters.WoodwindFingering
         .. autoclasstoc::
     
 
-.. autoclass:: Tremolo
+.. autoclass:: mutwo.abjad_parameters.Tremolo
         .. autoclasstoc::
     
 
-.. autoclass:: ArtificalHarmonic
+.. autoclass:: mutwo.abjad_parameters.ArtificalHarmonic
         .. autoclasstoc::
     
 
-.. autoclass:: PreciseNaturalHarmonic
+.. autoclass:: mutwo.abjad_parameters.PreciseNaturalHarmonic
         .. autoclasstoc::
     
 
-.. autoclass:: StringContactPoint
+.. autoclass:: mutwo.abjad_parameters.StringContactPoint
         .. autoclasstoc::
     
 
-.. autoclass:: Pedal
+.. autoclass:: mutwo.abjad_parameters.Pedal
         .. autoclasstoc::
     
 
-.. autoclass:: Hairpin
+.. autoclass:: mutwo.abjad_parameters.Hairpin
         .. autoclasstoc::
     
 
-.. autoclass:: BartokPizzicato
+.. autoclass:: mutwo.abjad_parameters.BartokPizzicato
         .. autoclasstoc::
     
 
-.. autoclass:: BreathMark
+.. autoclass:: mutwo.abjad_parameters.BreathMark
         .. autoclasstoc::
     
 
-.. autoclass:: Fermata
+.. autoclass:: mutwo.abjad_parameters.Fermata
         .. autoclasstoc::
     
 
-.. autoclass:: NaturalHarmonic
+.. autoclass:: mutwo.abjad_parameters.NaturalHarmonic
         .. autoclasstoc::
     
 
-.. autoclass:: Prall
+.. autoclass:: mutwo.abjad_parameters.Prall
         .. autoclasstoc::
     
 
-.. autoclass:: Tie
+.. autoclass:: mutwo.abjad_parameters.Tie
         .. autoclasstoc::
     
 
-.. autoclass:: DurationLineTriller
+.. autoclass:: mutwo.abjad_parameters.DurationLineTriller
         .. autoclasstoc::
     
 
-.. autoclass:: DurationLineDashed
+.. autoclass:: mutwo.abjad_parameters.DurationLineDashed
         .. autoclasstoc::
     
 
-.. autoclass:: Glissando
+.. autoclass:: mutwo.abjad_parameters.Glissando
         .. autoclasstoc::
     
 
-.. autoclass:: BendAfter
+.. autoclass:: mutwo.abjad_parameters.BendAfter
         .. autoclasstoc::
     
 
-.. autoclass:: LaissezVibrer
+.. autoclass:: mutwo.abjad_parameters.LaissezVibrer
         .. autoclasstoc::
     
 
-.. autoclass:: BarLine
+.. autoclass:: mutwo.abjad_parameters.BarLine
         .. autoclasstoc::
     
 
-.. autoclass:: Clef
+.. autoclass:: mutwo.abjad_parameters.Clef
         .. autoclasstoc::
     
 
-.. autoclass:: Ottava
+.. autoclass:: mutwo.abjad_parameters.Ottava
         .. autoclasstoc::
     
 
-.. autoclass:: Markup
+.. autoclass:: mutwo.abjad_parameters.Markup
         .. autoclasstoc::
     
 
-.. autoclass:: RehearsalMark
+.. autoclass:: mutwo.abjad_parameters.RehearsalMark
         .. autoclasstoc::
     
 
-.. autoclass:: MarginMarkup
+.. autoclass:: mutwo.abjad_parameters.MarginMarkup
         .. autoclasstoc::
     
 
-.. autoclass:: Ornamentation
+.. autoclass:: mutwo.abjad_parameters.Ornamentation
         .. autoclasstoc::
     
 
-.. autoclass:: Dynamic
+.. autoclass:: mutwo.abjad_parameters.Dynamic
         .. autoclasstoc::
     
 
-.. autoclass:: Tempo
+.. autoclass:: mutwo.abjad_parameters.Tempo
         .. autoclasstoc::
     
 
-.. autoclass:: DynamicChangeIndicationStop
+.. autoclass:: mutwo.abjad_parameters.DynamicChangeIndicationStop
         .. autoclasstoc::
     
 
-.. autoclass:: GraceNoteSequentialEvent
+.. autoclass:: mutwo.abjad_parameters.GraceNoteSequentialEvent
         .. autoclasstoc::
     
 
-.. autoclass:: AfterGraceNoteSequentialEvent
+.. autoclass:: mutwo.abjad_parameters.AfterGraceNoteSequentialEvent
         .. autoclasstoc::
     
 

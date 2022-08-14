@@ -27,19 +27,19 @@ mutwo.common_utilities
 
 
 
-.. autoclass:: InvalidMinimaCurveAndMaximaCurveCombination
+.. autoclass:: mutwo.common_utilities.InvalidMinimaCurveAndMaximaCurveCombination
         .. autoclasstoc::
     
 
-.. autoclass:: UnequalEnvelopeDurationError
+.. autoclass:: mutwo.common_utilities.UnequalEnvelopeDurationError
         .. autoclasstoc::
     
 
-.. autoclass:: InvalidStartAtValueError
+.. autoclass:: mutwo.common_utilities.InvalidStartAtValueError
         .. autoclasstoc::
     
 
-.. autoclass:: NoSolutionFoundError
+.. autoclass:: mutwo.common_utilities.NoSolutionFoundError
         .. autoclasstoc::
     
 

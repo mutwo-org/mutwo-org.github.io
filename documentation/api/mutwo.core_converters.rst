@@ -37,39 +37,39 @@ mutwo.core_converters
 
 
 
-.. autoclass:: SimpleEventToAttribute
+.. autoclass:: mutwo.core_converters.SimpleEventToAttribute
         .. autoclasstoc::
     
 
-.. autoclass:: dict
+.. autoclass:: mutwo.core_converters.dict
         .. autoclasstoc::
     
 
-.. autoclass:: MutwoParameterDictToKeywordArgument
+.. autoclass:: mutwo.core_converters.MutwoParameterDictToKeywordArgument
         .. autoclasstoc::
     
 
-.. autoclass:: MutwoParameterDictToDuration
+.. autoclass:: mutwo.core_converters.MutwoParameterDictToDuration
         .. autoclasstoc::
     
 
-.. autoclass:: MutwoParameterDictToSimpleEvent
+.. autoclass:: mutwo.core_converters.MutwoParameterDictToSimpleEvent
         .. autoclasstoc::
     
 
-.. autoclass:: UnknownObjectToObject
+.. autoclass:: mutwo.core_converters.UnknownObjectToObject
         .. autoclasstoc::
     
 
-.. autoclass:: TempoPointConverter
+.. autoclass:: mutwo.core_converters.TempoPointConverter
         .. autoclasstoc::
     
 
-.. autoclass:: TempoConverter
+.. autoclass:: mutwo.core_converters.TempoConverter
         .. autoclasstoc::
     
 
-.. autoclass:: EventToMetrizedEvent
+.. autoclass:: mutwo.core_converters.EventToMetrizedEvent
         .. autoclasstoc::
     
 

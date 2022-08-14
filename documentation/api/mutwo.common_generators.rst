@@ -70,35 +70,35 @@ mutwo.common_generators
 .. autofunction:: alternating_hands
     
 
-.. autoclass:: NonTerminal
+.. autoclass:: mutwo.common_generators.NonTerminal
         .. autoclasstoc::
     
 
-.. autoclass:: Terminal
+.. autoclass:: mutwo.common_generators.Terminal
         .. autoclasstoc::
     
 
-.. autoclass:: ContextFreeGrammarRule
+.. autoclass:: mutwo.common_generators.ContextFreeGrammarRule
         .. autoclasstoc::
     
 
-.. autoclass:: ContextFreeGrammar
+.. autoclass:: mutwo.common_generators.ContextFreeGrammar
         .. autoclasstoc::
     
 
-.. autoclass:: ActivityLevel
+.. autoclass:: mutwo.common_generators.ActivityLevel
         .. autoclasstoc::
     
 
-.. autoclass:: Tendency
+.. autoclass:: mutwo.common_generators.Tendency
         .. autoclasstoc::
     
 
-.. autoclass:: Backtracking
+.. autoclass:: mutwo.common_generators.Backtracking
         .. autoclasstoc::
     
 
-.. autoclass:: IndexBasedBacktracking
+.. autoclass:: mutwo.common_generators.IndexBasedBacktracking
         .. autoclasstoc::
     
 

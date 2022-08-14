@@ -23,11 +23,11 @@ mutwo.csound_converters
 
 
 
-.. autoclass:: EventToCsoundScore
+.. autoclass:: mutwo.csound_converters.EventToCsoundScore
         .. autoclasstoc::
     
 
-.. autoclass:: EventToSoundFile
+.. autoclass:: mutwo.csound_converters.EventToSoundFile
         .. autoclasstoc::
     
 

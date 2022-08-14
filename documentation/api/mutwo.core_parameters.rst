@@ -23,11 +23,11 @@ mutwo.core_parameters
 
 
 
-.. autoclass:: DirectDuration
+.. autoclass:: mutwo.core_parameters.DirectDuration
         .. autoclasstoc::
     
 
-.. autoclass:: TempoPoint
+.. autoclass:: mutwo.core_parameters.TempoPoint
         .. autoclasstoc::
     
 

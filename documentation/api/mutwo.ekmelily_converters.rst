@@ -25,15 +25,15 @@ mutwo.ekmelily_converters
 
 
 
-.. autoclass:: EkmelilyAccidental
+.. autoclass:: mutwo.ekmelily_converters.EkmelilyAccidental
         .. autoclasstoc::
     
 
-.. autoclass:: EkmelilyTuningFileConverter
+.. autoclass:: mutwo.ekmelily_converters.EkmelilyTuningFileConverter
         .. autoclasstoc::
     
 
-.. autoclass:: HEJIEkmelilyTuningFileConverter
+.. autoclass:: mutwo.ekmelily_converters.HEJIEkmelilyTuningFileConverter
         .. autoclasstoc::
     
 

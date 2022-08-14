@@ -29,7 +29,7 @@ class AutoDocumentedPackage(AutoDocumentedObject):
     @functools.cached_property
     def auto_documented_module_tuple(self) -> tuple[AutoDocumentedModule, ...]:
         return tuple(
-            AutoDocumentedModule(module_to_document)
+            AutoDocumentedModule(module_to_document, self.package_name)
             for module_to_document in self.module_tuple
         )
 
