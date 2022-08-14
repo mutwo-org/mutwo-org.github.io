@@ -47,6 +47,7 @@ class AutoDocumentedModule(AutoDocumentedObject):
             if hasattr(object_to_document, "__mro__"):
                 class_documentation = rf"""
 .. autoclass:: {self.module_name}.{object_to_document.__name__}
+
         .. autoclasstoc::
     """
                 class_documentation_list.append(class_documentation)
@@ -116,8 +117,14 @@ class AutoDocumentedModule(AutoDocumentedObject):
 """
 
     @functools.cached_property
+    def module_directive(self):
+        return rf".. currentmodule:: {self.module_name}"
+
+    @functools.cached_property
     def documentation(self) -> str:
         module_to_document = rf"""
+{self.module_directive}
+
 {self.module_name}
 {self.get_underline(self.module_name, "=")}
 

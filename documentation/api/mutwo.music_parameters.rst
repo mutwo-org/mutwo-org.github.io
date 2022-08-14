@@ -1,4 +1,6 @@
 
+.. currentmodule:: mutwo.music_parameters
+
 mutwo.music_parameters
 ======================
 
@@ -100,162 +102,202 @@ mutwo.music_parameters
 
 
 .. autoclass:: mutwo.music_parameters.OctaveAmbitus
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.Comma
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.CommaCompound
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.DirectLyric
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.LanguageBasedLyric
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.LanguageBasedSyllable
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.DirectPitchInterval
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.WesternPitchInterval
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.DirectPitch
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.JustIntonationPitch
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.Partial
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.EqualDividedOctavePitch
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.WesternPitch
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.MidiPitch
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.CommonHarmonic
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.DirectVolume
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.DecibelVolume
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.WesternVolume
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.BarLine
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.Clef
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.Ottava
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.MarginMarkup
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.Markup
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.RehearsalMark
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.NotationIndicatorCollection
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.Tremolo
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.Articulation
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.Arpeggio
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.Pedal
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.StringContactPoint
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.Ornamentation
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.BendAfter
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.ArtificalHarmonic
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.PreciseNaturalHarmonic
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.Fermata
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.Hairpin
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.Trill
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.WoodwindFingering
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.Cue
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_parameters.PlayingIndicatorCollection
+
         .. autoclasstoc::
     
 

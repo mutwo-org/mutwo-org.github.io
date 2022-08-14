@@ -1,4 +1,6 @@
 
+.. currentmodule:: mutwo.reaper_version
+
 mutwo.reaper_version
 ====================
 

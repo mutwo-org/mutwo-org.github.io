@@ -1,4 +1,6 @@
 
+.. currentmodule:: mutwo.isis_version
+
 mutwo.isis_version
 ==================
 

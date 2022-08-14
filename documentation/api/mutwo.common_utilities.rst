@@ -1,4 +1,6 @@
 
+.. currentmodule:: mutwo.common_utilities
+
 mutwo.common_utilities
 ======================
 
@@ -28,18 +30,22 @@ mutwo.common_utilities
 
 
 .. autoclass:: mutwo.common_utilities.InvalidMinimaCurveAndMaximaCurveCombination
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.common_utilities.UnequalEnvelopeDurationError
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.common_utilities.InvalidStartAtValueError
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.common_utilities.NoSolutionFoundError
+
         .. autoclasstoc::
     
 

@@ -1,4 +1,6 @@
 
+.. currentmodule:: mutwo.abjad_version
+
 mutwo.abjad_version
 ===================
 

@@ -1,4 +1,6 @@
 
+.. currentmodule:: mutwo.abjad_converters
+
 mutwo.abjad_converters
 ======================
 
@@ -66,94 +68,117 @@ mutwo.abjad_converters
 
 
 .. autoclass:: mutwo.abjad_converters.SequentialEventToQuantizedAbjadContainer
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.abjad_converters.NauertSequentialEventToQuantizedAbjadContainer
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.abjad_converters.NauertSequentialEventToDurationLineBasedQuantizedAbjadContainer
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.abjad_converters.LeafMakerSequentialEventToQuantizedAbjadContainer
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.abjad_converters.LeafMakerSequentialEventToDurationLineBasedQuantizedAbjadContainer
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.abjad_converters.ComplexEventToAbjadContainer
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.abjad_converters.SequentialEventToAbjadVoice
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.abjad_converters.NestedComplexEventToAbjadContainer
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.abjad_converters.NestedComplexEventToComplexEventToAbjadContainers
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.abjad_converters.CycleBasedNestedComplexEventToComplexEventToAbjadContainers
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.abjad_converters.TagBasedNestedComplexEventToComplexEventToAbjadContainers
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.abjad_converters.MutwoLyricToAbjadString
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.abjad_converters.MutwoPitchToAbjadPitch
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.abjad_converters.TempoEnvelopeToAbjadAttachmentTempo
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.abjad_converters.ComplexTempoEnvelopeToAbjadAttachmentTempo
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.abjad_converters.MutwoVolumeToAbjadAttachmentDynamic
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.abjad_converters.MutwoPitchToHEJIAbjadPitch
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.abjad_converters.ProcessAbjadContainerRoutine
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.abjad_converters.AddDurationLineEngraver
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.abjad_converters.PrepareForDurationLineBasedNotation
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.abjad_converters.AddInstrumentName
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.abjad_converters.AddAccidentalStyle
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.abjad_converters.SetStaffSize
+
         .. autoclasstoc::
     
 

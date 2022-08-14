@@ -1,4 +1,6 @@
 
+.. currentmodule:: mutwo.core_generators
+
 mutwo.core_generators
 =====================
 
@@ -22,6 +24,7 @@ mutwo.core_generators
 
 
 .. autoclass:: mutwo.core_generators.DynamicChoice
+
         .. autoclasstoc::
     
 

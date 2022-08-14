@@ -1,4 +1,6 @@
 
+.. currentmodule:: mutwo.ekmelily_converters
+
 mutwo.ekmelily_converters
 =========================
 
@@ -26,14 +28,17 @@ mutwo.ekmelily_converters
 
 
 .. autoclass:: mutwo.ekmelily_converters.EkmelilyAccidental
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.ekmelily_converters.EkmelilyTuningFileConverter
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.ekmelily_converters.HEJIEkmelilyTuningFileConverter
+
         .. autoclasstoc::
     
 

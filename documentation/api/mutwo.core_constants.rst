@@ -1,4 +1,6 @@
 
+.. currentmodule:: mutwo.core_constants
+
 mutwo.core_constants
 ====================
 

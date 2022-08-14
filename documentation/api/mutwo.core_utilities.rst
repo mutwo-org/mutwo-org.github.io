@@ -1,4 +1,6 @@
 
+.. currentmodule:: mutwo.core_utilities
+
 mutwo.core_utilities
 ====================
 
@@ -175,38 +177,47 @@ mutwo.core_utilities
     
 
 .. autoclass:: mutwo.core_utilities.AlreadyDefinedValueNameError
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.core_utilities.InvalidAverageValueStartAndEndWarning
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.core_utilities.InvalidStartValueError
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.core_utilities.InvalidPointError
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.core_utilities.ImpossibleToSquashInError
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.core_utilities.InvalidStartAndEndValueError
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.core_utilities.InvalidCutOutStartAndEndValuesError
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.core_utilities.SplitUnavailableChildError
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.core_utilities.NoSolutionFoundError
+
         .. autoclasstoc::
     
 

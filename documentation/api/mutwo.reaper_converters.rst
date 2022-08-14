@@ -1,4 +1,6 @@
 
+.. currentmodule:: mutwo.reaper_converters
+
 mutwo.reaper_converters
 =======================
 
@@ -22,6 +24,7 @@ mutwo.reaper_converters
 
 
 .. autoclass:: mutwo.reaper_converters.ReaperMarkerConverter
+
         .. autoclasstoc::
     
 

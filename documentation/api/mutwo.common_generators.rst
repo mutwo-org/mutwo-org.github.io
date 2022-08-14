@@ -1,4 +1,6 @@
 
+.. currentmodule:: mutwo.common_generators
+
 mutwo.common_generators
 =======================
 
@@ -71,34 +73,42 @@ mutwo.common_generators
     
 
 .. autoclass:: mutwo.common_generators.NonTerminal
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.common_generators.Terminal
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.common_generators.ContextFreeGrammarRule
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.common_generators.ContextFreeGrammar
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.common_generators.ActivityLevel
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.common_generators.Tendency
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.common_generators.Backtracking
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.common_generators.IndexBasedBacktracking
+
         .. autoclasstoc::
     
 

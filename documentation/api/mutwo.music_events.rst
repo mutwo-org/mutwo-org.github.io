@@ -1,4 +1,6 @@
 
+.. currentmodule:: mutwo.music_events
+
 mutwo.music_events
 ==================
 
@@ -22,6 +24,7 @@ mutwo.music_events
 
 
 .. autoclass:: mutwo.music_events.NoteLike
+
         .. autoclasstoc::
     
 

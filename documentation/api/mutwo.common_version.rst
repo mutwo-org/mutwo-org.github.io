@@ -1,4 +1,6 @@
 
+.. currentmodule:: mutwo.common_version
+
 mutwo.common_version
 ====================
 

@@ -1,4 +1,6 @@
 
+.. currentmodule:: mutwo.csound_version
+
 mutwo.csound_version
 ====================
 

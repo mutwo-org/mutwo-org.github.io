@@ -1,4 +1,6 @@
 
+.. currentmodule:: mutwo.ekmelily_version
+
 mutwo.ekmelily_version
 ======================
 

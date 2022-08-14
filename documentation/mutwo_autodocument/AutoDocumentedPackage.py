@@ -43,8 +43,7 @@ class AutoDocumentedPackage(AutoDocumentedObject):
 
         title = f"{self.package_name} API documentation"
 
-        documentation = fr"""
-{title}
+        documentation = fr"""{title}
 {self.get_underline(title)}
 
 .. py:module:: {self.package_name}

@@ -1,4 +1,6 @@
 
+.. currentmodule:: mutwo.core_converters
+
 mutwo.core_converters
 =====================
 
@@ -38,38 +40,47 @@ mutwo.core_converters
 
 
 .. autoclass:: mutwo.core_converters.SimpleEventToAttribute
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.core_converters.dict
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.core_converters.MutwoParameterDictToKeywordArgument
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.core_converters.MutwoParameterDictToDuration
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.core_converters.MutwoParameterDictToSimpleEvent
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.core_converters.UnknownObjectToObject
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.core_converters.TempoPointConverter
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.core_converters.TempoConverter
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.core_converters.EventToMetrizedEvent
+
         .. autoclasstoc::
     
 

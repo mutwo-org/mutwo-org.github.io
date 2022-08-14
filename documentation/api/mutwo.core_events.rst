@@ -1,4 +1,6 @@
 
+.. currentmodule:: mutwo.core_events
+
 mutwo.core_events
 =================
 
@@ -38,38 +40,47 @@ mutwo.core_events
 
 
 .. autoclass:: mutwo.core_events.SimpleEvent
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.core_events.SequentialEvent
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.core_events.SimultaneousEvent
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.core_events.TaggedSimpleEvent
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.core_events.TaggedSequentialEvent
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.core_events.TaggedSimultaneousEvent
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.core_events.Envelope
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.core_events.RelativeEnvelope
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.core_events.TempoEnvelope
+
         .. autoclasstoc::
     
 

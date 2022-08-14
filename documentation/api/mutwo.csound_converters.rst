@@ -1,4 +1,6 @@
 
+.. currentmodule:: mutwo.csound_converters
+
 mutwo.csound_converters
 =======================
 
@@ -24,10 +26,12 @@ mutwo.csound_converters
 
 
 .. autoclass:: mutwo.csound_converters.EventToCsoundScore
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.csound_converters.EventToSoundFile
+
         .. autoclasstoc::
     
 

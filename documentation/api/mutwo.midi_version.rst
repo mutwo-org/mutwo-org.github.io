@@ -1,4 +1,6 @@
 
+.. currentmodule:: mutwo.midi_version
+
 mutwo.midi_version
 ==================
 

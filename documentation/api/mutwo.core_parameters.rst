@@ -1,4 +1,6 @@
 
+.. currentmodule:: mutwo.core_parameters
+
 mutwo.core_parameters
 =====================
 
@@ -24,10 +26,12 @@ mutwo.core_parameters
 
 
 .. autoclass:: mutwo.core_parameters.DirectDuration
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.core_parameters.TempoPoint
+
         .. autoclasstoc::
     
 

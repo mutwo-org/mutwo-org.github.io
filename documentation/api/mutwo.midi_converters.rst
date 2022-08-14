@@ -1,4 +1,6 @@
 
+.. currentmodule:: mutwo.midi_converters
+
 mutwo.midi_converters
 =====================
 
@@ -44,50 +46,62 @@ mutwo.midi_converters
 
 
 .. autoclass:: mutwo.midi_converters.PitchBendingNumberToPitchInterval
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.midi_converters.PitchBendingNumberToDirectPitchInterval
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.midi_converters.MidiPitchToMutwoPitch
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.midi_converters.MidiPitchToDirectPitch
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.midi_converters.MidiPitchToMutwoMidiPitch
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.midi_converters.MidiVelocityToMutwoVolume
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.midi_converters.MidiVelocityToWesternVolume
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.midi_converters.MidiFileToEvent
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.midi_converters.SimpleEventToControlMessageTuple
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.midi_converters.CentDeviationToPitchBendingNumber
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.midi_converters.MutwoPitchToMidiPitch
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.midi_converters.EventToMidiFile
+
         .. autoclasstoc::
     
 

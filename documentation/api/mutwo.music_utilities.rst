@@ -1,4 +1,6 @@
 
+.. currentmodule:: mutwo.music_utilities
+
 mutwo.music_utilities
 =====================
 
@@ -22,6 +24,7 @@ mutwo.music_utilities
 
 
 .. autoclass:: mutwo.music_utilities.DuplicatePlayingIndicatorConverterMappingWarning
+
         .. autoclasstoc::
     
 

@@ -1,4 +1,6 @@
 
+.. currentmodule:: mutwo.isis_utilities
+
 mutwo.isis_utilities
 ====================
 
@@ -22,6 +24,7 @@ mutwo.isis_utilities
 
 
 .. autoclass:: mutwo.isis_utilities.MonophonicSynthesizerError
+
         .. autoclasstoc::
     
 

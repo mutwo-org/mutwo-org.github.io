@@ -1,4 +1,6 @@
 
+.. currentmodule:: mutwo.music_converters
+
 mutwo.music_converters
 ======================
 
@@ -70,102 +72,127 @@ mutwo.music_converters
 
 
 .. autoclass:: mutwo.music_converters.GraceNotesConverter
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_converters.LoudnessToAmplitude
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_converters.RhythmicalStrataToIndispensability
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_converters.SimpleEventToPitchList
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_converters.SimpleEventToVolume
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_converters.SimpleEventToLyric
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_converters.SimpleEventToPlayingIndicatorCollection
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_converters.SimpleEventToNotationIndicatorCollection
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_converters.SimpleEventToGraceNoteSequentialEvent
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_converters.SimpleEventToAfterGraceNoteSequentialEvent
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_converters.MutwoParameterDictToPitchList
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_converters.MutwoParameterDictToVolume
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_converters.MutwoParameterDictToPlayingIndicatorCollection
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_converters.MutwoParameterDictToNotationIndicatorCollection
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_converters.MutwoParameterDictToGraceNoteSequentialEvent
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_converters.MutwoParameterDictToAfterGraceNoteSequentialEvent
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_converters.MutwoParameterDictToNoteLike
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_converters.ImproveWesternPitchListSequenceReadability
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_converters.PlayingIndicatorConverter
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_converters.ArpeggioConverter
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_converters.StacattoConverter
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_converters.ArticulationConverter
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_converters.TrillConverter
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_converters.PlayingIndicatorsConverter
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.music_converters.TwoPitchesToCommonHarmonicTuple
+
         .. autoclasstoc::
     
 

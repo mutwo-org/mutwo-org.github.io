@@ -1,4 +1,6 @@
 
+.. currentmodule:: mutwo.core_version
+
 mutwo.core_version
 ==================
 

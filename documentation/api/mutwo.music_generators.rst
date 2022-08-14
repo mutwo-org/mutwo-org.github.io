@@ -1,4 +1,6 @@
 
+.. currentmodule:: mutwo.music_generators
+
 mutwo.music_generators
 ======================
 

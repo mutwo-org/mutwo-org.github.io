@@ -1,4 +1,6 @@
 
+.. currentmodule:: mutwo.music_version
+
 mutwo.music_version
 ===================
 

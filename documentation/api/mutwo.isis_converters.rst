@@ -1,4 +1,6 @@
 
+.. currentmodule:: mutwo.isis_converters
+
 mutwo.isis_converters
 =====================
 
@@ -24,10 +26,12 @@ mutwo.isis_converters
 
 
 .. autoclass:: mutwo.isis_converters.EventToIsisScore
+
         .. autoclasstoc::
     
 
 .. autoclass:: mutwo.isis_converters.EventToSingingSynthesis
+
         .. autoclasstoc::
     
 
