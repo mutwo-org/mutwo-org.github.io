@@ -21,3 +21,11 @@ formats:
 python:
   install:
     - requirements: documentation/requirements.txt
+
+
+build:
+  apt_packages:
+    - espeak-ng
+    - mbrola
+    - mbrola-en1
+
