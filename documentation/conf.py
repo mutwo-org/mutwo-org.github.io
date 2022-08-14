@@ -82,7 +82,7 @@ autoclasstoc_sections = [
     "public-attrs",
     "public-methods",
     "private-attrs",
-    "private-methods",
+    # "private-methods",
 ]
 
 
