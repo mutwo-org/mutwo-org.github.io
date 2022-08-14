@@ -1,0 +1,47 @@
+
+mutwo.csound_converters
+=======================
+
+.. contents:: Table of content
+   :depth: 3
+
+.. automodule:: mutwo.csound_converters
+   :members:
+
+
+.. list-table::
+   :width: 95%
+   :header-rows: 1
+
+   * - Object
+     - Documentation
+   * - :class:`mutwo.csound_converters.EventToCsoundScore`
+     - Class to convert mutwo events to a Csound score file.
+   * - :class:`mutwo.csound_converters.EventToSoundFile`
+     - Generate audio files with `Csound <http://www.csounds.com/>`_.
+
+
+
+
+.. autoclass:: EventToCsoundScore
+        .. autoclasstoc::
+    
+
+.. autoclass:: EventToSoundFile
+        .. autoclasstoc::
+    
+
+
+mutwo.csound_converters.configurations
+--------------------------------------
+
+.. automodule:: mutwo.csound_converters.configurations
+   :members:
+
+
+mutwo.csound_converters.constants
+---------------------------------
+
+.. automodule:: mutwo.csound_converters.constants
+   :members:
+
