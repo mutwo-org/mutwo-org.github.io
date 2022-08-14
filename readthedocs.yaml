@@ -8,6 +8,8 @@ version: 2
 # Set the version of Python and other tools you might need
 build:
   image: testing
+  tools:
+    python: "3.9"
 
 sphinx:
    configuration: "documentation/conf.py"
@@ -17,7 +19,6 @@ formats:
    - epub
 
 python:
-  version: "3.9"
   install:
     - requirements: documentation/requirements.txt
 
