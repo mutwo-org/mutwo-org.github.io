@@ -29,6 +29,8 @@ Modules
    mutwo.isis_converters
    mutwo.isis_utilities
    mutwo.isis_version
+   mutwo.mbrola_converters
+   mutwo.mbrola_version
    mutwo.midi_converters
    mutwo.midi_version
    mutwo.music_converters
