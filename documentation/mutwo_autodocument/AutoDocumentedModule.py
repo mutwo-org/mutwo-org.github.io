@@ -46,10 +46,6 @@ class AutoDocumentedModule(AutoDocumentedObject):
             if hasattr(object_to_document, "__mro__"):
                 class_documentation = rf"""
 .. autoclass:: {object_to_document.__name__}
-    :members:
-    :inherited-members:
-    :show-inheritance:
-
         .. autoclasstoc::
     """
                 class_documentation_list.append(class_documentation)
