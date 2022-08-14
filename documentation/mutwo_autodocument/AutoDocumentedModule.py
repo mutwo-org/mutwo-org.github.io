@@ -82,12 +82,16 @@ class AutoDocumentedModule(AutoDocumentedObject):
         submodule_documentation_list = []
         for submodule in self.submodule_tuple:
             submodule_name = submodule.__name__
+            member_to_document_list = ["members"]
+            if submodule_name.split('_')[-1] == "version":
+                member_to_document_list.extend(["special-members", "private-members"])
+            member_to_document = "\n".join([f"   :{member}:" for member in member_to_document_list])
             submodule_documentation = rf"""
 {submodule_name}
 {self.get_underline(submodule_name, '-')}
 
 .. automodule:: {submodule_name}
-   :members:
+{member_to_document}
 """
             submodule_documentation_list.append(submodule_documentation)
         return "\n".join(submodule_documentation_list)
