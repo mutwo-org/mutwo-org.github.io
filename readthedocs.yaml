@@ -17,6 +17,7 @@ formats:
    - epub
 
 python:
+  version: "3.9"
   install:
     - requirements: documentation/requirements.txt
 
