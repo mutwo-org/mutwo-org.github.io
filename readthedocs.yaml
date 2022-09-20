@@ -14,6 +14,7 @@ build:
     - espeak-ng
     - mbrola
     - mbrola-en1
+    - mbrola-fr1
 
 sphinx:
    configuration: "documentation/conf.py"
