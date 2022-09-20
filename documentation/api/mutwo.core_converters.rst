@@ -19,8 +19,6 @@ mutwo.core_converters
      - Documentation
    * - :class:`mutwo.core_converters.SimpleEventToAttribute`
      - Extract from a simple event an attribute.
-   * - :class:`mutwo.core_converters.dict`
-     - dict() -> new empty dictionary
    * - :class:`mutwo.core_converters.MutwoParameterDictToKeywordArgument`
      - Extract from a dict of mutwo parameters specific objects.
    * - :class:`mutwo.core_converters.MutwoParameterDictToDuration`
@@ -40,11 +38,6 @@ mutwo.core_converters
 
 
 .. autoclass:: mutwo.core_converters.SimpleEventToAttribute
-
-        .. autoclasstoc::
-    
-
-.. autoclass:: mutwo.core_converters.dict
 
         .. autoclasstoc::
     
