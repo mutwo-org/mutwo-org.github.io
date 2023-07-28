@@ -48,8 +48,8 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.doctest",
     "sphinx.ext.inheritance_diagram",
-    "insipid_sphinx_theme",
 ]
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -91,15 +91,11 @@ autoclasstoc_sections = [
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_permalinks_icon = "§"
-html_theme = "insipid"
-html_style = "css/mutwo.css"
-html_theme_options = {
-    "body_centered": False,
-    "breadcrumbs": True,
-    "show_insipid": False,
-    "body_max_width": None,
-}
+html_theme = "traditional"
+# html_permalinks_icon = "§"
+# html_style = "css/mutwo.css"
+# html_theme_options = {
+# }
 
 
 # Add any paths that contain custom static files (such as style sheets) here,
