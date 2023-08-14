@@ -1,0 +1,8 @@
+echo "Deploy documentation..."
+./scripts/build
+echo "      Override documentation branch"
+ghp-import _build/html/
+echo "Now do the following commands to push updated page:"
+echo ""
+echo "  >>> git checkout gh-pages"
+echo "  >>> git push origin gh-pages"

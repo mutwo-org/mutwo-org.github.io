@@ -117,6 +117,9 @@ EOF
       sphinx-autodoc-annotation
       autodocsumm
       autoclasstoc
+
+      # For uploading to github pages
+      ghp-import
     ];
   };
 
