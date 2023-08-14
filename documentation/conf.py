@@ -76,6 +76,7 @@ autodoc_default_options = {
     "inherited-members": False,
     "undoc-members": False,
     "exclude-members": "__weakref__",
+    "show-inheritance": True,
 }
 
 autoclasstoc_sections = [
