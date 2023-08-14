@@ -79,9 +79,10 @@ autodoc_default_options = {
     "show-inheritance": True,
 }
 
+
 autoclasstoc_sections = [
     "public-attrs",
-    "public-methods",
+    "public-methods-without-dunders",
     # "private-attrs",
     # "private-methods",
 ]
