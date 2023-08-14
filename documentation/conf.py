@@ -81,7 +81,7 @@ autodoc_default_options = {
 autoclasstoc_sections = [
     "public-attrs",
     "public-methods",
-    "private-attrs",
+    # "private-attrs",
     # "private-methods",
 ]
 
