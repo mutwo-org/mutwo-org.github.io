@@ -110,7 +110,6 @@ EOF
 
       # mutwo module extra dependencies
       pillow
-      ortools
 
       # Auto doc building
       sphinx
