@@ -27,11 +27,11 @@ sys.path.append(api_documentation.MUTWO_PATH)
 # -- Project information -----------------------------------------------------
 
 project = "mutwo"
-copyright = "2022, Levin Eric Zimmermann, Tim Pauli"
+copyright = "2023, Levin Eric Zimmermann, Tim Pauli"
 author = "Levin Eric Zimmermann, Tim Pauli"
 
 # The full version, including alpha/beta/rc tags
-release = "2022"
+release = "2023"
 
 
 # -- General configuration ---------------------------------------------------
