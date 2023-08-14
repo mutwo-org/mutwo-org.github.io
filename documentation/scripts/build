@@ -1,5 +1,5 @@
 echo "Build documentation..."
 echo "      Rebuild API documentation"
-./scripts/make_api_documentation
+./make_api_documentation
 echo "      Generate HTML files"
 make html
