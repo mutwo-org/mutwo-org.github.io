@@ -1,0 +1,3 @@
+echo "Make documentation..."
+./scripts/build
+./scripts/deploy
