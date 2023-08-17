@@ -16,22 +16,13 @@ import sys
 sys.path.insert(0, os.path.abspath("../."))
 sys.path.append(os.path.abspath("./"))
 
-import api_documentation
-
-# api_documentation.make_api_documentation()
-
-sys.path.append(api_documentation.SITE_PACKAGES_PATH)
-sys.path.append(api_documentation.MUTWO_PATH)
-
 
 # -- Project information -----------------------------------------------------
 
 project = "mutwo"
-copyright = "2023, Levin Eric Zimmermann, Tim Pauli"
+copyright = "2023, mutwo authors"
 author = "Levin Eric Zimmermann, Tim Pauli"
-
-# The full version, including alpha/beta/rc tags
-release = "2023"
+language = "en"
 
 
 # -- General configuration ---------------------------------------------------
@@ -93,14 +84,39 @@ autoclasstoc_sections = [
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "traditional"
-# html_permalinks_icon = "§"
-# html_style = "css/mutwo.css"
-# html_theme_options = {
-# }
+html_theme = "classic"
 
+html_css_files = ["custom.css"]
+
+# html_permalinks_icon = "§"
+linkcolor = "dimgray"
+html_theme_options = {
+    "body_max_width": "none",
+    "sidebarbgcolor": "white",
+    "sidebartextcolor": "black",
+    "sidebarlinkcolor": linkcolor,
+    "visitedlinkcolor": linkcolor,
+    "headbgcolor": "white",
+    "headtextcolor": "black",
+    "linkcolor": linkcolor,
+    "visitedlinkcolor": linkcolor,
+    "footerbgcolor": "white",
+    "footertextcolor": "black",
+    "relbarbgcolor": "white",
+    "relbartextcolor": "black",
+    "relbarlinkcolor": linkcolor,
+    "codebgcolor": "WhiteSmoke",
+}
+
+
+html_sidebars = {
+    "**": ["localtoc.html", "searchbox.html"],
+    "using/windows": ["windowssidebar.html", "searchbox.html"],
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
+
+html_show_sphinx = False

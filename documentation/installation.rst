@@ -1,31 +1,57 @@
 Installation
 ============
 
-pypi
-####
+:mod:`mutwo` is written and used in the programming language `Python <https://www.python.org/>`_.
+You need to have Python 3.10 or any later version to use *mutwo*.
+Perhaps your machine already has Python installed, if not `consult the Python documentation <https://www.python.org/about/gettingstarted/>`_.
+To check whether you python version is new enough, simply run:
 
-Mutwo is available on pypi and can be installed via pip.
-Because mutwo is split into different packages there are many packages which can be installed depending on the specific use case.
-Nevertheless all mutwo packages depend on the basic 'mutwo.core' package.
+.. code-block:: sh
+
+    python3 --version
+
+Python dependencies
+###################
+
+*Mutwo* packages are available on the `Python package ecosystem pypi <https://pypi.org/>`_ and can be installed via `the package installer pip <https://pip.pypa.io/en/stable/>`_.
+*Mutwo* doesn't consist of one single package, but is split into small packages where each of those packages fulfill only one specific purpose.
+In this way users only need to install the functionality they need and *mutwo* becomes easily extendable.
+All *mutwo* packages depend on the fundamental `mutwo.core <https://pypi.org/project/mutwo.core/>`_ package.
 
 .. code-block:: sh
 
     pip3 install mutwo.core
 
-For using different backends or frontends (midi, abjad, ...) mutwo may need additional packages.
+In order to use different backends or frontends (midi, abjad, ...) and to have more inner functionality,  *mutwo* needs additional packages.
+
+To represent musical structures in mutwo, you need `mutwo.music <https://pypi.org/project/mutwo.music/>`_:
+
+.. code-block:: sh
+
+    pip3 install mutwo.music
+
+If want to import or export MIDI files, you need to install `mutwo.midi <https://pypi.org/project/mutwo.midi/>`_:
 
 .. code-block:: sh
 
     pip3 install mutwo.midi
 
-Depending on the used converter classes, mutwo may need additional software to work properly.
-For using the Csound converter, you should install `Csound <https://csound.com/>`_ first.
-For using Lilypond via mutwos abjad Converter, install `Lilypond <https://lilypond.org/>`_ first.
-For using the ISiS converter, install `ISiS <https://isis-documentation.readthedocs.io/en/latest/Intro.html>`_ first.
+Other dependencies
+##################
 
+Some export or import functionalities need additional software that isn't automatically installed when using pip.
+You need to manually install this additional software by either using your OS package manager (Linux) or by downloading and installing precompiled binaries (OSX, Windows)
 
-nix
-###
+To use the Csound converter, install `Csound <https://csound.com/>`_ first.
+To use Lilypond via mutwos abjad converter (`mutwo.abjad <https://pypi.org/project/mutwo.abjad/>`_), install `Lilypond <https://lilypond.org/>`_ first.
 
-Alternatively you can use the package manager `Nix <https://nixos.org/>`_ to install mutwo.
-Mutwo has `its own repo <https://github.com/mutwo-org/mutwo-nix>`_ for the packages.
+Use nix to install python and other dependencies together
+#########################################################
+
+Alternatively to pip and your OS package manager, you can use the package manager `Nix <https://nixos.org/>`_ to install all *mutwo* dependencies together.
+*Mutwo* has `its own repo <https://github.com/mutwo-org/mutwo-nix>`_ for the packages.
+
+Operating system
+################
+
+*mutwo* is tested on Linux, but may equally well work on OSX or Windows.

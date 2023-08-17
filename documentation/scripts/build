@@ -3,3 +3,6 @@ echo "      Rebuild API documentation"
 ./make_api_documentation
 echo "      Generate HTML files"
 make html
+# Sound files aren't copied automatically (we need to use the 'raw' tag).
+echo "      copy sound files"
+cp *.ogg _build/html/

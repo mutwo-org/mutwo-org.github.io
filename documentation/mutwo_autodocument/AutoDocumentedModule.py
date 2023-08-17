@@ -120,6 +120,7 @@ class AutoDocumentedModule(AutoDocumentedObject):
         object_string = "\n".join(object_documentation_list)
         return f"""
 .. list-table::
+   :align: center
    :width: 95%
    :header-rows: 1
 
