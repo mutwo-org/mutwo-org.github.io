@@ -1,3 +1,4 @@
+import builtins
 import functools
 import types
 import typing
@@ -22,7 +23,12 @@ class AutoDocumentedModule(AutoDocumentedObject):
 
     @functools.cached_property
     def object_name_tuple(self) -> tuple[str, ...]:
-        return getattr(self.module_to_document, "__all__", tuple([]))
+        return tuple(
+            n
+            for n in getattr(self.module_to_document, "__all__", tuple([]))
+            # Never document builtin objects
+            if n not in builtins.__dict__
+        )
 
     @functools.cached_property
     def object_tuple(self) -> tuple[typing.Type, ...]:
@@ -83,9 +89,11 @@ class AutoDocumentedModule(AutoDocumentedObject):
         for submodule in self.submodule_tuple:
             submodule_name = submodule.__name__
             member_to_document_list = ["members"]
-            if submodule_name.split('_')[-1] == "version":
+            if submodule_name.split("_")[-1] == "version":
                 member_to_document_list.extend(["special-members", "private-members"])
-            member_to_document = "\n".join([f"   :{member}:" for member in member_to_document_list])
+            member_to_document = "\n".join(
+                [f"   :{member}:" for member in member_to_document_list]
+            )
             submodule_documentation = rf"""
 {submodule_name}
 {self.get_underline(submodule_name, '-')}
@@ -105,7 +113,7 @@ class AutoDocumentedModule(AutoDocumentedObject):
                 part_list.append(object_.__doc__.splitlines()[0])
             else:
                 part_list.append("")
-            object_documentation_part = [f'- {part}' for part in part_list]
+            object_documentation_part = [f"- {part}" for part in part_list]
             object_documentation_part[0] = "   * " + object_documentation_part[0]
             object_documentation_part[1] = "     " + object_documentation_part[1]
             object_documentation_list.extend(object_documentation_part)
