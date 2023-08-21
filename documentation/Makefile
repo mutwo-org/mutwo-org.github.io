@@ -7,6 +7,9 @@ SPHINXOPTS    ?=
 SPHINXBUILD   ?= sphinx-build
 SOURCEDIR     = .
 BUILDDIR      = _build
+# See https://github.com/sphinx-doc/sphinx/issues/3451 and
+# https://github.com/ibis-project/ibis/pull/3272
+SOURCE_DATE_EPOCH = $(shell git log -1 --format=%ct)
 
 # Put it first so that "make" without argument is like "make help".
 help:
