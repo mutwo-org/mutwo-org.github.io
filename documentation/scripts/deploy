@@ -4,4 +4,4 @@ ghp-import -o --no-jekyll _build/html/
 echo "Now do the following commands to push updated page:"
 echo ""
 echo "  >>> git checkout gh-pages"
-echo "  >>> git push origin gh-pages"
+echo "  >>> git push -f origin gh-pages"
