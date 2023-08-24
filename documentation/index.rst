@@ -18,7 +18,7 @@ The general design philosophy stresses out the independence and freedom of the u
 - create sound files by writing & rendering csound scores
 - builtin support for microtonality
 - hackable: designed with a high focus on extendability & flexibility
-- fully open source & not related to any big institution
+- fully `open source <https://github.com/mutwo-org>`_ & not related to any big institution
 
 Why *mutwo*?
 ############
