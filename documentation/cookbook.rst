@@ -69,7 +69,7 @@ All events have a :attr:`~mutwo.core_events.abc.Event.tempo_envelope` attribute,
 Write polytempic music
 ######################
 
-Because each :class:`~mutwo.core_events.abc.Event` has its own :class:`~mutwo.core_events.TempoEnvelope`, so it's very easy to describe polytempic music:
+Because each :class:`~mutwo.core_events.abc.Event` has its own :class:`~mutwo.core_events.TempoEnvelope`, it's very easy to describe polytempic music:
 
 .. code-block:: python
 
@@ -102,13 +102,13 @@ You can use :meth:`~mutwo.core_events.abc.Event.set_parameter` or :meth:`~mutwo.
    )
 
    # Set the volume of all 'NoteLike' to 'fff':
-   e,set_parameter('volume', music_parameters.WesternVolume('fff'))
+   e.set_parameter('volume', music_parameters.WesternVolume('fff'))
 
    # 'set_parameter' also allows to parse a function
    # which gets the previous value of the parameter.
    #
    # Let's rise all pitches by an octave:
-   e,set_parameter(
+   e.set_parameter(
        'pitch_list',
        lambda pitch_list: pitch_list[0].add(music_parameters.DirectPitchInterval(1200))
    )
