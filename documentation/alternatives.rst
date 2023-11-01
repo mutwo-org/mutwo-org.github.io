@@ -13,6 +13,9 @@ Maybe one of them fits better to your specific purpose:
 - `scamp <http://scamp.marcevanstein.com/>`_: "SCAMP is a computer-assisted composition framework in Python designed to act as a hub, flexibly connecting the composer-programmer to a variety of resources for playback and notation."
 - `isobar <https://github.com/ideoforms/isobar>`_: "isobar is a Python library for creating and manipulating musical patterns, designed for use in algorithmic composition, generative music and sonification."
 - `JythonMusic <https://jythonmusic.me/>`_: "JythonMusic is an environment for music making and creative programming."
+- `music21 <http://web.mit.edu/music21/>`_: "A Toolkit for Computational Musicology"
+- `musx <https://github.com/musx-admin/musx>`_: "musx (pronounced muse ex) is a package for composing and processing symbolic music information."
+- `musicpy <https://github.com/Rainbow-Dreamer/musicpy>`_: "Musicpy is a music programming language in Python designed to write music in very handy syntax through music theory and algorithms."
 
 
 **Composition frameworks in other languages:**
@@ -23,5 +26,6 @@ Maybe one of them fits better to your specific purpose:
 - `jMusic <http://explodingart.com/jmusic/>`_: "jMusic is a project designed to provide composers and software developers with a library of compositional and audio processing tools."
 - `MusicKit <https://github.com/benzguo/MusicKit>`_: "MusicKit is a framework and DSL for creating, analyzing, and transforming music in Swift."
 - `opusmodus <https://www.opusmodus.com/>`_: "Opusmodus is a comprehensive computer-aided environment for the whole work of music composition a virtual space where a composer can develop ideas and experiments for projects large and small" (commercial, closed-source)
+- `gm <https://github.com/flujoo/gm>`_: "R Package for Music Score and Audio Generation"
 
 
