@@ -24,7 +24,6 @@ Why *mutwo*?
 ############
 
 There already exist many similar :ref:`alternatives` projects, so why would we need another one?
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 It's fascinating to see how many computer-assisted composition framework exist (and existed) within the not-so-long history of computer-assisted composition.
 A lot of musicians create their own system that they use for themselves, accompanied by a mostly small circle of similar-minded people (who are perhaps the musicians students).
