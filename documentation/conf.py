@@ -110,7 +110,7 @@ html_theme_options = {
 
 
 html_sidebars = {
-    "**": ["localtoc.html", "searchbox.html"],
+    "**": ["searchbox.html"],
     "using/windows": ["windowssidebar.html", "searchbox.html"],
 }
 
