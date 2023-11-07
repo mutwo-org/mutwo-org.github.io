@@ -1,7 +1,6 @@
 echo "Deploy documentation..."
 echo "      Override documentation branch"
 ghp-import -o --no-jekyll _build/html/
-echo "Now do the following commands to push updated page:"
-echo ""
-echo "  >>> git checkout gh-pages"
-echo "  >>> git push -f origin gh-pages"
+git checkout gh-pages
+git push -f origin gh-pages
+git switch main
