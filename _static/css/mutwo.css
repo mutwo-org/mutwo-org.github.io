@@ -1,0 +1,54 @@
+/*
+@font-face {
+    font-family: "pica";
+    src: url('/_static/font/Pica_10_Pitch_Regular.otf');
+}
+
+body {
+    font-family: "pica";
+    background-color: #fffff0;
+}
+*/
+
+a {
+    text-decoration: none;
+    color: blue;
+}
+a:hover {
+    text-decoration: none;
+    color: red;
+}
+a:visited { text-decoration: none; }
+a:active { text-decoration: none; }
+
+/*
+ 
+
+
+
+div.related {
+    width: 100%;
+    font-size: 90%;
+    background-color: white;
+}
+
+div.related h3 {
+    display: none;
+}
+
+div.related ul {
+    margin: 0;
+    padding: 0 0 0 10px;
+    list-style: none;
+}
+
+div.related li {
+    display: inline;
+}
+
+div.related li.right {
+    float: right;
+    margin-right: 5px;
+}
+
+*/

@@ -1,0 +1,1114 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mutwo.music_parameters.abc &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.music_parameters.abc</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mutwo.music_parameters.abc</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Abstract base classes for different parameters.</span>
+
+<span class="sd">This module defines the public API of parameters.</span>
+<span class="sd">Most other mutwo classes rely on this API. This means</span>
+<span class="sd">when someone creates a new class inheriting from any of the</span>
+<span class="sd">abstract parameter classes which are defined in this module,</span>
+<span class="sd">she or he can make use of all other mutwo modules with this</span>
+<span class="sd">newly created parameter class.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">abc</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">dataclasses</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">quicktions</span> <span class="k">as</span> <span class="nn">fractions</span>  <span class="c1"># type: ignore</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">fractions</span>  <span class="c1"># type: ignore</span>
+
+<span class="kn">import</span> <span class="nn">ranges</span>
+
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_constants</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_events</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_parameters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_utilities</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_parameters</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;PitchInterval&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Pitch&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Volume&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;PitchAmbitus&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;PlayingIndicator&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;NotationIndicator&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Lyric&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Syllable&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Instrument&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;PitchedInstrument&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="PitchInterval"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.PitchInterval">[docs]</a><span class="k">class</span> <span class="nc">PitchInterval</span><span class="p">(</span>
+    <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">SingleNumberParameter</span><span class="p">,</span>
+    <span class="n">value_name</span><span class="o">=</span><span class="s2">&quot;interval&quot;</span><span class="p">,</span>
+    <span class="n">value_return_type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Abstract base class for any pitch interval class</span>
+
+<span class="sd">    If the user wants to define a new pitch interval class, the abstract</span>
+<span class="sd">    property :attr:`interval` and the abstract method `inverse`</span>
+<span class="sd">    have to be overridden.</span>
+
+<span class="sd">    :attr:`interval` is stored in unit `cents`.</span>
+
+<span class="sd">    See `wikipedia entry &lt;https://en.wikipedia.org/wiki/Cent_(music)&gt;`_</span>
+<span class="sd">    for definition of &#39;cents&#39;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PitchInterval.inverse"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.PitchInterval.inverse">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">inverse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mutate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PitchInterval</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Makes falling interval to rising and vice versa.</span>
+
+<span class="sd">        In `music21` the method for equal semantics is called</span>
+<span class="sd">        `reverse &lt;https://web.mit.edu/music21/doc/moduleReference/moduleInterval.html#music21.interval.Interval.reverse&gt;`_.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+    <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">PitchInterval</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PitchInterval</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">DirectPitchInterval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interval</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">interval</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">PitchInterval</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PitchInterval</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">DirectPitchInterval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interval</span> <span class="o">-</span> <span class="n">other</span><span class="o">.</span><span class="n">interval</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Pitch"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.Pitch">[docs]</a><span class="k">class</span> <span class="nc">Pitch</span><span class="p">(</span>
+    <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">SingleNumberParameter</span><span class="p">,</span>
+    <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ParameterWithEnvelope</span><span class="p">,</span>
+    <span class="n">value_name</span><span class="o">=</span><span class="s2">&quot;frequency&quot;</span><span class="p">,</span>
+    <span class="n">value_return_type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Abstract base class for any pitch class.</span>
+
+<span class="sd">    If the user wants to define a new pitch class, the abstract</span>
+<span class="sd">    property :attr:`frequency` has to be overridden. Starting</span>
+<span class="sd">    from mutwo version = 0.46.0 the user will furthermore have</span>
+<span class="sd">    to define an :func:`add` method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Pitch.PitchEnvelope"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.Pitch.PitchEnvelope">[docs]</a>    <span class="k">class</span> <span class="nc">PitchEnvelope</span><span class="p">(</span><span class="n">core_events</span><span class="o">.</span><span class="n">Envelope</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Default resolution envelope class for :class:`Pitch`&quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+            <span class="n">event_to_parameter</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+                <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">],</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span><span class="p">]</span>
+            <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">value_to_parameter</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+                <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+                    <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">Envelope</span><span class="o">.</span><span class="n">Value</span><span class="p">],</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span>
+                <span class="p">]</span>
+            <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">parameter_to_value</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+                <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+                    <span class="p">[</span><span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span><span class="p">],</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Envelope</span><span class="o">.</span><span class="n">Value</span>
+                <span class="p">]</span>
+            <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">apply_parameter_on_event</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+                <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+                    <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">,</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span><span class="p">],</span> <span class="kc">None</span>
+                <span class="p">]</span>
+            <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="n">event_to_parameter</span> <span class="o">=</span> <span class="n">event_to_parameter</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_to_parameter</span>
+            <span class="n">value_to_parameter</span> <span class="o">=</span> <span class="n">value_to_parameter</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value_to_parameter</span>
+            <span class="n">apply_parameter_on_event</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">apply_parameter_on_event</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_parameter_on_event</span>
+            <span class="p">)</span>
+            <span class="n">parameter_to_value</span> <span class="o">=</span> <span class="n">parameter_to_value</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameter_to_value</span>
+
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+                <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                <span class="n">event_to_parameter</span><span class="o">=</span><span class="n">event_to_parameter</span><span class="p">,</span>
+                <span class="n">value_to_parameter</span><span class="o">=</span><span class="n">value_to_parameter</span><span class="p">,</span>
+                <span class="n">parameter_to_value</span><span class="o">=</span><span class="n">parameter_to_value</span><span class="p">,</span>
+                <span class="n">apply_parameter_on_event</span><span class="o">=</span><span class="n">apply_parameter_on_event</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
+
+<div class="viewcode-block" id="Pitch.PitchEnvelope.frequency_and_envelope_to_pitch"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.Pitch.PitchEnvelope.frequency_and_envelope_to_pitch">[docs]</a>        <span class="nd">@classmethod</span>
+        <span class="k">def</span> <span class="nf">frequency_and_envelope_to_pitch</span><span class="p">(</span>
+            <span class="bp">cls</span><span class="p">,</span>
+            <span class="n">frequency</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span>
+            <span class="n">envelope</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+                <span class="n">Pitch</span><span class="o">.</span><span class="n">PitchIntervalEnvelope</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span>
+            <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pitch</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">DirectPitch</span><span class="p">(</span><span class="n">frequency</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="n">envelope</span><span class="p">)</span></div>
+
+        <span class="nd">@classmethod</span>
+        <span class="k">def</span> <span class="nf">_value_to_parameter</span><span class="p">(</span>
+            <span class="bp">cls</span><span class="p">,</span>
+            <span class="n">value</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Envelope</span><span class="o">.</span><span class="n">Value</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span><span class="p">:</span>
+            <span class="c1"># For inner calculation (value) cents are used instead</span>
+            <span class="c1"># of frequencies. In this way we can ensure that the transitions</span>
+            <span class="c1"># are closer to the human logarithmic hearing.</span>
+            <span class="c1"># See als `_parameter_to_value`.</span>
+            <span class="n">frequency</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">Pitch</span><span class="o">.</span><span class="n">cents_to_ratio</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="o">*</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">PITCH_ENVELOPE_REFERENCE_FREQUENCY</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">frequency_and_envelope_to_pitch</span><span class="p">(</span><span class="n">frequency</span><span class="p">)</span>
+
+        <span class="nd">@classmethod</span>
+        <span class="k">def</span> <span class="nf">_event_to_parameter</span><span class="p">(</span>
+            <span class="bp">cls</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span>
+                <span class="n">event</span><span class="p">,</span>
+                <span class="n">music_parameters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_PITCH_ENVELOPE_PARAMETER_NAME</span><span class="p">,</span>
+            <span class="p">):</span>
+                <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span>
+                    <span class="n">event</span><span class="p">,</span>
+                    <span class="n">music_parameters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_PITCH_ENVELOPE_PARAMETER_NAME</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">frequency_and_envelope_to_pitch</span><span class="p">(</span>
+                    <span class="n">music_parameters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_CONCERT_PITCH</span>
+                <span class="p">)</span>
+
+        <span class="nd">@classmethod</span>
+        <span class="k">def</span> <span class="nf">_apply_parameter_on_event</span><span class="p">(</span>
+            <span class="bp">cls</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">,</span> <span class="n">parameter</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span>
+        <span class="p">):</span>
+            <span class="nb">setattr</span><span class="p">(</span>
+                <span class="n">event</span><span class="p">,</span>
+                <span class="n">music_parameters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_PITCH_ENVELOPE_PARAMETER_NAME</span><span class="p">,</span>
+                <span class="n">parameter</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="nd">@classmethod</span>
+        <span class="k">def</span> <span class="nf">_parameter_to_value</span><span class="p">(</span>
+            <span class="bp">cls</span><span class="p">,</span> <span class="n">parameter</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">:</span>
+            <span class="c1"># For inner calculation (value) cents are used instead</span>
+            <span class="c1"># of frequencies. In this way we can ensure that the transitions</span>
+            <span class="c1"># are closer to the human logarithmic hearing.</span>
+            <span class="c1"># See als `_value_to_parameter`.</span>
+            <span class="k">return</span> <span class="n">Pitch</span><span class="o">.</span><span class="n">hertz_to_cents</span><span class="p">(</span>
+                <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">PITCH_ENVELOPE_REFERENCE_FREQUENCY</span><span class="p">,</span>
+                <span class="n">parameter</span><span class="o">.</span><span class="n">frequency</span><span class="p">,</span>
+            <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Pitch.PitchIntervalEnvelope"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.Pitch.PitchIntervalEnvelope">[docs]</a>    <span class="k">class</span> <span class="nc">PitchIntervalEnvelope</span><span class="p">(</span><span class="n">core_events</span><span class="o">.</span><span class="n">RelativeEnvelope</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Default envelope class for :class:`Pitch`</span>
+
+<span class="sd">        Resolves into :class:`Pitch.PitchEnvelope`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+            <span class="n">event_to_parameter</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+                <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">],</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span><span class="p">]</span>
+            <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">value_to_parameter</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+                <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+                    <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">Envelope</span><span class="o">.</span><span class="n">Value</span><span class="p">],</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span>
+                <span class="p">]</span>
+            <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">parameter_to_value</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+                <span class="p">[</span><span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span><span class="p">],</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Envelope</span><span class="o">.</span><span class="n">Value</span>
+            <span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">parameter</span><span class="p">:</span> <span class="n">parameter</span><span class="o">.</span><span class="n">interval</span><span class="p">,</span>
+            <span class="n">apply_parameter_on_event</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+                <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+                    <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">,</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span><span class="p">],</span> <span class="kc">None</span>
+                <span class="p">]</span>
+            <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">base_parameter_and_relative_parameter_to_absolute_parameter</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+                <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+                    <span class="p">[</span><span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span><span class="p">,</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span><span class="p">],</span>
+                    <span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span><span class="p">,</span>
+                <span class="p">]</span>
+            <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">event_to_parameter</span><span class="p">:</span>
+                <span class="n">event_to_parameter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_to_parameter</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">value_to_parameter</span><span class="p">:</span>
+                <span class="n">value_to_parameter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value_to_parameter</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">apply_parameter_on_event</span><span class="p">:</span>
+                <span class="n">apply_parameter_on_event</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_parameter_on_event</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">base_parameter_and_relative_parameter_to_absolute_parameter</span><span class="p">:</span>
+                <span class="n">base_parameter_and_relative_parameter_to_absolute_parameter</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_base_parameter_and_relative_parameter_to_absolute_parameter</span>
+                <span class="p">)</span>
+
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+                <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                <span class="n">event_to_parameter</span><span class="o">=</span><span class="n">event_to_parameter</span><span class="p">,</span>
+                <span class="n">value_to_parameter</span><span class="o">=</span><span class="n">value_to_parameter</span><span class="p">,</span>
+                <span class="n">parameter_to_value</span><span class="o">=</span><span class="n">parameter_to_value</span><span class="p">,</span>
+                <span class="n">apply_parameter_on_event</span><span class="o">=</span><span class="n">apply_parameter_on_event</span><span class="p">,</span>
+                <span class="n">base_parameter_and_relative_parameter_to_absolute_parameter</span><span class="o">=</span><span class="n">base_parameter_and_relative_parameter_to_absolute_parameter</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
+
+<div class="viewcode-block" id="Pitch.PitchIntervalEnvelope.cents_to_pitch_interval"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.Pitch.PitchIntervalEnvelope.cents_to_pitch_interval">[docs]</a>        <span class="nd">@classmethod</span>
+        <span class="k">def</span> <span class="nf">cents_to_pitch_interval</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">cents</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PitchInterval</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">DirectPitchInterval</span><span class="p">(</span><span class="n">cents</span><span class="p">)</span></div>
+
+        <span class="nd">@classmethod</span>
+        <span class="k">def</span> <span class="nf">_event_to_parameter</span><span class="p">(</span>
+            <span class="bp">cls</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span>
+                <span class="n">event</span><span class="p">,</span>
+                <span class="n">music_parameters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_PITCH_INTERVAL_ENVELOPE_PARAMETER_NAME</span><span class="p">,</span>
+            <span class="p">):</span>
+                <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span>
+                    <span class="n">event</span><span class="p">,</span>
+                    <span class="n">music_parameters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_PITCH_INTERVAL_ENVELOPE_PARAMETER_NAME</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">cents_to_pitch_interval</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="nd">@classmethod</span>
+        <span class="k">def</span> <span class="nf">_value_to_parameter</span><span class="p">(</span>
+            <span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Envelope</span><span class="o">.</span><span class="n">Value</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">cents_to_pitch_interval</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="nd">@classmethod</span>
+        <span class="k">def</span> <span class="nf">_apply_parameter_on_event</span><span class="p">(</span>
+            <span class="bp">cls</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">,</span> <span class="n">parameter</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span>
+        <span class="p">):</span>
+            <span class="nb">setattr</span><span class="p">(</span>
+                <span class="n">event</span><span class="p">,</span>
+                <span class="n">music_parameters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_PITCH_INTERVAL_ENVELOPE_PARAMETER_NAME</span><span class="p">,</span>
+                <span class="n">parameter</span><span class="p">,</span>
+            <span class="p">),</span>
+
+        <span class="nd">@classmethod</span>
+        <span class="k">def</span> <span class="nf">_base_parameter_and_relative_parameter_to_absolute_parameter</span><span class="p">(</span>
+            <span class="bp">cls</span><span class="p">,</span> <span class="n">base_parameter</span><span class="p">:</span> <span class="n">Pitch</span><span class="p">,</span> <span class="n">relative_parameter</span><span class="p">:</span> <span class="n">PitchInterval</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pitch</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">base_parameter</span> <span class="o">+</span> <span class="n">relative_parameter</span></div>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">envelope</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">Pitch</span><span class="o">.</span><span class="n">PitchIntervalEnvelope</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">envelope</span> <span class="o">=</span> <span class="n">envelope</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#     conversion methods between different pitch describing units        #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+<div class="viewcode-block" id="Pitch.hertz_to_cents"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.Pitch.hertz_to_cents">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">hertz_to_cents</span><span class="p">(</span>
+        <span class="n">frequency0</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span> <span class="n">frequency1</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Calculates the difference in cents between two frequencies.</span>
+
+<span class="sd">        :param frequency0: The first frequency in Hertz.</span>
+<span class="sd">        :param frequency1: The second frequency in Hertz.</span>
+<span class="sd">        :return: The difference in cents between the first and the second</span>
+<span class="sd">            frequency.</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo import music_parameters</span>
+<span class="sd">        &gt;&gt;&gt; music_parameters.abc.Pitch.hertz_to_cents(200, 400)</span>
+<span class="sd">        1200.0</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="mi">1200</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">frequency1</span> <span class="o">/</span> <span class="n">frequency0</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Pitch.ratio_to_cents"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.Pitch.ratio_to_cents">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">ratio_to_cents</span><span class="p">(</span><span class="n">ratio</span><span class="p">:</span> <span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Converts a frequency ratio to its respective cent value.</span>
+
+<span class="sd">        :param ratio: The frequency ratio which cent value shall be</span>
+<span class="sd">            calculated.</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo import music_parameters</span>
+<span class="sd">        &gt;&gt;&gt; music_parameters.abc.Pitch.ratio_to_cents(fractions.Fraction(3, 2))</span>
+<span class="sd">        701.9550008653874</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">CENT_CALCULATION_CONSTANT</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">ratio</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Pitch.cents_to_ratio"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.Pitch.cents_to_ratio">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">cents_to_ratio</span><span class="p">(</span><span class="n">cents</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Converts a cent value to its respective frequency ratio.</span>
+
+<span class="sd">        :param cents: Cents that shall be converted to a frequency ratio.</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo import music_parameters</span>
+<span class="sd">        &gt;&gt;&gt; music_parameters.abc.Pitch.cents_to_ratio(1200)</span>
+<span class="sd">        Fraction(2, 1)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">(</span>
+            <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="n">cents</span> <span class="o">/</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">CENT_CALCULATION_CONSTANT</span><span class="p">)</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Pitch.hertz_to_midi_pitch_number"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.Pitch.hertz_to_midi_pitch_number">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">hertz_to_midi_pitch_number</span><span class="p">(</span><span class="n">frequency</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Converts a frequency in hertz to its respective midi pitch.</span>
+
+<span class="sd">        :param frequency: The frequency that shall be translated to a midi pitch</span>
+<span class="sd">            number.</span>
+<span class="sd">        :return: The midi pitch number (potentially a floating point number if the</span>
+<span class="sd">            entered frequency isn&#39;t on the grid of the equal divided octave tuning</span>
+<span class="sd">            with a = 440 Hertz).</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo import music_parameters</span>
+<span class="sd">        &gt;&gt;&gt; music_parameters.abc.Pitch.hertz_to_midi_pitch_number(440)</span>
+<span class="sd">        69.0</span>
+<span class="sd">        &gt;&gt;&gt; music_parameters.abc.Pitch.hertz_to_midi_pitch_number(440 * 3 / 2)</span>
+<span class="sd">        75.98044999134612</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">closest_frequency_index</span> <span class="o">=</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">find_closest_index</span><span class="p">(</span>
+            <span class="n">frequency</span><span class="p">,</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">MIDI_PITCH_FREQUENCY_TUPLE</span>
+        <span class="p">)</span>
+        <span class="n">closest_frequency</span> <span class="o">=</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">MIDI_PITCH_FREQUENCY_TUPLE</span><span class="p">[</span>
+            <span class="n">closest_frequency_index</span>
+        <span class="p">]</span>
+        <span class="n">closest_midi_pitch_number</span> <span class="o">=</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">MIDI_PITCH_NUMBER_TUPLE</span><span class="p">[</span>
+            <span class="n">closest_frequency_index</span>
+        <span class="p">]</span>
+        <span class="n">difference_in_cents</span> <span class="o">=</span> <span class="n">Pitch</span><span class="o">.</span><span class="n">hertz_to_cents</span><span class="p">(</span><span class="n">frequency</span><span class="p">,</span> <span class="n">closest_frequency</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">closest_midi_pitch_number</span> <span class="o">+</span> <span class="p">(</span><span class="n">difference_in_cents</span> <span class="o">/</span> <span class="mi">100</span><span class="p">))</span></div>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                            public properties                           #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">midi_pitch_number</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;The midi pitch number (from 0 to 127) of the pitch.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hertz_to_midi_pitch_number</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frequency</span><span class="p">)</span>
+
+    <span class="nd">@core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ParameterWithEnvelope</span><span class="o">.</span><span class="n">envelope</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">envelope</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">envelope_or_envelope_argument</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+            <span class="n">Pitch</span><span class="o">.</span><span class="n">PitchIntervalEnvelope</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span>
+        <span class="p">],</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">envelope_or_envelope_argument</span><span class="p">:</span>
+            <span class="n">generic_pitch_interval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">PitchIntervalEnvelope</span><span class="o">.</span><span class="n">cents_to_pitch_interval</span><span class="p">(</span>
+                <span class="mi">0</span>
+            <span class="p">)</span>
+            <span class="n">envelope</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">PitchIntervalEnvelope</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="n">generic_pitch_interval</span><span class="p">]])</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">envelope_or_envelope_argument</span><span class="p">,</span> <span class="n">core_events</span><span class="o">.</span><span class="n">RelativeEnvelope</span><span class="p">):</span>
+            <span class="n">envelope</span> <span class="o">=</span> <span class="n">envelope_or_envelope_argument</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">envelope</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">PitchIntervalEnvelope</span><span class="p">(</span><span class="n">envelope_or_envelope_argument</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_envelope</span> <span class="o">=</span> <span class="n">envelope</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                            comparison methods                          #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+<div class="viewcode-block" id="Pitch.add"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.Pitch.add">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pitch_interval</span><span class="p">:</span> <span class="n">PitchInterval</span><span class="p">,</span> <span class="n">mutate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pitch</span><span class="p">:</span>
+        <span class="o">...</span></div>
+
+<div class="viewcode-block" id="Pitch.subtract"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.Pitch.subtract">[docs]</a>    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">subtract</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pitch_interval</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PitchInterval</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pitch</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">DirectPitchInterval</span><span class="p">(</span><span class="o">-</span><span class="n">pitch_interval</span><span class="o">.</span><span class="n">interval</span><span class="p">))</span>  <span class="c1"># type: ignore</span></div>
+
+    <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pitch_interval</span><span class="p">:</span> <span class="n">PitchInterval</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pitch</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pitch_interval</span><span class="p">,</span> <span class="n">mutate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pitch_interval</span><span class="p">:</span> <span class="n">PitchInterval</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pitch</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">pitch_interval</span><span class="p">,</span> <span class="n">mutate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Pitch.resolve_envelope"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.Pitch.resolve_envelope">[docs]</a>    <span class="k">def</span> <span class="nf">resolve_envelope</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">duration</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">DurationType</span><span class="p">,</span>
+        <span class="n">resolve_envelope_class</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">type</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">Envelope</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Envelope</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">resolve_envelope_class</span><span class="p">:</span>
+            <span class="n">resolve_envelope_class</span> <span class="o">=</span> <span class="n">Pitch</span><span class="o">.</span><span class="n">PitchEnvelope</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">resolve_envelope</span><span class="p">(</span><span class="n">duration</span><span class="p">,</span> <span class="n">resolve_envelope_class</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Pitch.get_pitch_interval"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.Pitch.get_pitch_interval">[docs]</a>    <span class="k">def</span> <span class="nf">get_pitch_interval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pitch_to_compare</span><span class="p">:</span> <span class="n">Pitch</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PitchInterval</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get :class:`PitchInterval` between itself and other pitch</span>
+
+<span class="sd">        :param pitch_to_compare: The pitch which shall be compared to</span>
+<span class="sd">            the active pitch.</span>
+<span class="sd">        :type pitch_to_compare: Pitch</span>
+<span class="sd">        :return: :class:`PitchInterval` between</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo import music_parameters</span>
+<span class="sd">        &gt;&gt;&gt; a4 = music_parameters.DirectPitch(frequency=440)</span>
+<span class="sd">        &gt;&gt;&gt; a5 = music_parameters.DirectPitch(frequency=880)</span>
+<span class="sd">        &gt;&gt;&gt; pitch_interval = a4.get_pitch_interval(a5)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">cent_difference</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ratio_to_cents</span><span class="p">(</span>
+            <span class="n">pitch_to_compare</span><span class="o">.</span><span class="n">frequency</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequency</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">DirectPitchInterval</span><span class="p">(</span><span class="n">cent_difference</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="Volume"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.Volume">[docs]</a><span class="nd">@functools</span><span class="o">.</span><span class="n">total_ordering</span>  <span class="c1"># type: ignore</span>
+<span class="k">class</span> <span class="nc">Volume</span><span class="p">(</span>
+    <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">SingleNumberParameter</span><span class="p">,</span>
+    <span class="n">value_name</span><span class="o">=</span><span class="s2">&quot;amplitude&quot;</span><span class="p">,</span>
+    <span class="n">value_return_type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Abstract base class for any volume class.</span>
+
+<span class="sd">    If the user wants to define a new volume class, the abstract</span>
+<span class="sd">    property :attr:`amplitude` has to be overridden.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Volume.decibel_to_amplitude_ratio"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.Volume.decibel_to_amplitude_ratio">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">decibel_to_amplitude_ratio</span><span class="p">(</span>
+        <span class="n">decibel</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span> <span class="n">reference_amplitude</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Convert decibel to amplitude ratio.</span>
+
+<span class="sd">        :param decibel: The decibel number that shall be converted.</span>
+<span class="sd">        :param reference_amplitude: The amplitude for decibel == 0.</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo import music_parameters</span>
+<span class="sd">        &gt;&gt;&gt; music_parameters.abc.Volume.decibel_to_amplitude_ratio(0)</span>
+<span class="sd">        1.0</span>
+<span class="sd">        &gt;&gt;&gt; music_parameters.abc.Volume.decibel_to_amplitude_ratio(-6)</span>
+<span class="sd">        0.5011872336272722</span>
+<span class="sd">        &gt;&gt;&gt; music_parameters.abc.Volume.decibel_to_amplitude_ratio(0, reference_amplitude=0.25)</span>
+<span class="sd">        0.25</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">reference_amplitude</span> <span class="o">*</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="n">decibel</span> <span class="o">/</span> <span class="mi">20</span><span class="p">)))</span></div>
+
+<div class="viewcode-block" id="Volume.decibel_to_power_ratio"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.Volume.decibel_to_power_ratio">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">decibel_to_power_ratio</span><span class="p">(</span>
+        <span class="n">decibel</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span> <span class="n">reference_amplitude</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Convert decibel to power ratio.</span>
+
+<span class="sd">        :param decibel: The decibel number that shall be converted.</span>
+<span class="sd">        :param reference_amplitude: The amplitude for decibel == 0.</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo import music_parameters</span>
+<span class="sd">        &gt;&gt;&gt; music_parameters.abc.Volume.decibel_to_power_ratio(0)</span>
+<span class="sd">        1.0</span>
+<span class="sd">        &gt;&gt;&gt; music_parameters.abc.Volume.decibel_to_power_ratio(-6)</span>
+<span class="sd">        0.251188643150958</span>
+<span class="sd">        &gt;&gt;&gt; music_parameters.abc.Volume.decibel_to_power_ratio(0, reference_amplitude=0.25)</span>
+<span class="sd">        0.25</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">reference_amplitude</span> <span class="o">*</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="n">decibel</span> <span class="o">/</span> <span class="mi">10</span><span class="p">)))</span></div>
+
+<div class="viewcode-block" id="Volume.amplitude_ratio_to_decibel"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.Volume.amplitude_ratio_to_decibel">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">amplitude_ratio_to_decibel</span><span class="p">(</span>
+        <span class="n">amplitude</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span> <span class="n">reference_amplitude</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Convert amplitude ratio to decibel.</span>
+
+<span class="sd">        :param amplitude: The amplitude that shall be converted.</span>
+<span class="sd">        :param reference_amplitude: The amplitude for decibel == 0.</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo import music_parameters</span>
+<span class="sd">        &gt;&gt;&gt; music_parameters.abc.Volume.amplitude_ratio_to_decibel(1)</span>
+<span class="sd">        0.0</span>
+<span class="sd">        &gt;&gt;&gt; music_parameters.abc.Volume.amplitude_ratio_to_decibel(0)</span>
+<span class="sd">        -inf</span>
+<span class="sd">        &gt;&gt;&gt; music_parameters.abc.Volume.amplitude_ratio_to_decibel(0.5)</span>
+<span class="sd">        -6.020599913279624</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">amplitude</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="mi">20</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">amplitude</span> <span class="o">/</span> <span class="n">reference_amplitude</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Volume.power_ratio_to_decibel"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.Volume.power_ratio_to_decibel">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">power_ratio_to_decibel</span><span class="p">(</span>
+        <span class="n">amplitude</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span> <span class="n">reference_amplitude</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Convert power ratio to decibel.</span>
+
+<span class="sd">        :param amplitude: The amplitude that shall be converted.</span>
+<span class="sd">        :param reference_amplitude: The amplitude for decibel == 0.</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo import music_parameters</span>
+<span class="sd">        &gt;&gt;&gt; music_parameters.abc.Volume.power_ratio_to_decibel(1)</span>
+<span class="sd">        0.0</span>
+<span class="sd">        &gt;&gt;&gt; music_parameters.abc.Volume.power_ratio_to_decibel(0)</span>
+<span class="sd">        -inf</span>
+<span class="sd">        &gt;&gt;&gt; music_parameters.abc.Volume.power_ratio_to_decibel(0.5)</span>
+<span class="sd">        -3.010299956639812</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">amplitude</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="mi">10</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">amplitude</span> <span class="o">/</span> <span class="n">reference_amplitude</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Volume.amplitude_ratio_to_midi_velocity"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.Volume.amplitude_ratio_to_midi_velocity">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">amplitude_ratio_to_midi_velocity</span><span class="p">(</span>
+        <span class="n">amplitude</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span> <span class="n">reference_amplitude</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Convert amplitude ratio to midi velocity.</span>
+
+<span class="sd">        :param amplitude: The amplitude which shall be converted.</span>
+<span class="sd">        :type amplitude: core_constants.Real</span>
+<span class="sd">        :param reference_amplitude: The amplitude for decibel == 0.</span>
+<span class="sd">        :return: The midi velocity.</span>
+
+<span class="sd">        The method clips values that are higher than 1 / lower than 0.</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo import music_parameters</span>
+<span class="sd">        &gt;&gt;&gt; music_parameters.abc.Volume.amplitude_ratio_to_midi_velocity(1)</span>
+<span class="sd">        127</span>
+<span class="sd">        &gt;&gt;&gt; music_parameters.abc.Volume.amplitude_ratio_to_midi_velocity(0)</span>
+<span class="sd">        0</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">Volume</span><span class="o">.</span><span class="n">decibel_to_midi_velocity</span><span class="p">(</span>
+            <span class="n">Volume</span><span class="o">.</span><span class="n">amplitude_ratio_to_decibel</span><span class="p">(</span>
+                <span class="n">amplitude</span><span class="p">,</span> <span class="n">reference_amplitude</span><span class="o">=</span><span class="n">reference_amplitude</span>
+            <span class="p">)</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Volume.decibel_to_midi_velocity"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.Volume.decibel_to_midi_velocity">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">decibel_to_midi_velocity</span><span class="p">(</span>
+        <span class="n">decibel_to_convert</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span>
+        <span class="n">minimum_decibel</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">maximum_decibel</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Convert decibel to midi velocity (0 to 127).</span>
+
+<span class="sd">        :param decibel: The decibel value which shall be converted..</span>
+<span class="sd">        :type decibel: core_constants.Real</span>
+<span class="sd">        :param minimum_decibel: The decibel value which is equal to the lowest</span>
+<span class="sd">            midi velocity (0).</span>
+<span class="sd">        :type minimum_decibel: core_constants.Real, optional</span>
+<span class="sd">        :param maximum_decibel: The decibel value which is equal to the highest</span>
+<span class="sd">            midi velocity (127).</span>
+<span class="sd">        :type maximum_decibel: core_constants.Real, optional</span>
+<span class="sd">        :return: The midi velocity.</span>
+
+<span class="sd">        The method clips values which are higher than &#39;maximum_decibel&#39; and lower than</span>
+<span class="sd">        &#39;minimum_decibel&#39;.</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo import music_parameters</span>
+<span class="sd">        &gt;&gt;&gt; music_parameters.abc.Volume.decibel_to_midi_velocity(0)</span>
+<span class="sd">        127</span>
+<span class="sd">        &gt;&gt;&gt; music_parameters.abc.Volume.decibel_to_midi_velocity(-40)</span>
+<span class="sd">        0</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">minimum_decibel</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">minimum_decibel</span>
+            <span class="ow">or</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_MINIMUM_DECIBEL_FOR_MIDI_VELOCITY_AND_STANDARD_DYNAMIC_INDICATOR</span>
+        <span class="p">)</span>
+        <span class="n">maximum_decibel</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">maximum_decibel</span>
+            <span class="ow">or</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_MAXIMUM_DECIBEL_FOR_MIDI_VELOCITY_AND_STANDARD_DYNAMIC_INDICATOR</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">decibel_to_convert</span> <span class="o">&gt;</span> <span class="n">maximum_decibel</span><span class="p">:</span>
+            <span class="n">decibel_to_convert</span> <span class="o">=</span> <span class="n">maximum_decibel</span>
+
+        <span class="k">if</span> <span class="n">decibel_to_convert</span> <span class="o">&lt;</span> <span class="n">minimum_decibel</span><span class="p">:</span>
+            <span class="n">decibel_to_convert</span> <span class="o">=</span> <span class="n">minimum_decibel</span>
+
+        <span class="n">velocity</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
+            <span class="n">core_utilities</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span>
+                <span class="n">decibel_to_convert</span><span class="p">,</span>
+                <span class="n">minimum_decibel</span><span class="p">,</span>
+                <span class="n">maximum_decibel</span><span class="p">,</span>
+                <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">MINIMUM_VELOCITY</span><span class="p">,</span>
+                <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">MAXIMUM_VELOCITY</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">velocity</span></div>
+
+    <span class="c1"># properties</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">decibel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;The decibel of the volume (from -120 to 0)&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">amplitude_ratio_to_decibel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">amplitude</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">midi_velocity</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;The velocity of the volume (from 0 to 127).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">decibel_to_midi_velocity</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">decibel</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PitchAmbitus"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.PitchAmbitus">[docs]</a><span class="k">class</span> <span class="nc">PitchAmbitus</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Abstract base class for all pitch ambituses.</span>
+
+<span class="sd">    To setup a new PitchAmbitus class override the abstract method</span>
+<span class="sd">    `pitch_to_period`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minima_pitch</span><span class="p">:</span> <span class="n">Pitch</span><span class="p">,</span> <span class="n">maxima_pitch</span><span class="p">:</span> <span class="n">Pitch</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">minima_pitch</span> <span class="o">&lt;</span> <span class="n">maxima_pitch</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Found minima_pitch: </span><span class="si">{</span><span class="n">minima_pitch</span><span class="si">}</span><span class="s2"> and &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;maxima_pitch=</span><span class="si">{</span><span class="n">maxima_pitch</span><span class="si">}</span><span class="s2">. The minima pitch has to be &quot;</span>
+                    <span class="s2">&quot;a lower pitch than the maxima pitch!&quot;</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">minima_pitch</span> <span class="o">=</span> <span class="n">minima_pitch</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxima_pitch</span> <span class="o">=</span> <span class="n">maxima_pitch</span>
+
+    <span class="c1"># ######################################################## #</span>
+    <span class="c1">#                      abstract methods                    #</span>
+    <span class="c1"># ######################################################## #</span>
+
+<div class="viewcode-block" id="PitchAmbitus.pitch_to_period"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.PitchAmbitus.pitch_to_period">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">pitch_to_period</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pitch</span><span class="p">:</span> <span class="n">Pitch</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PitchInterval</span><span class="p">:</span>
+        <span class="o">...</span></div>
+
+    <span class="c1"># ######################################################## #</span>
+    <span class="c1">#                     magic methods                        #</span>
+    <span class="c1"># ######################################################## #</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">border_tuple</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Iterator</span><span class="p">[</span><span class="n">Pitch</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">border_tuple</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pitch</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">border_tuple</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pitch</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filter_pitch_sequence</span><span class="p">((</span><span class="n">pitch</span><span class="p">,)))</span>
+
+    <span class="c1"># ######################################################## #</span>
+    <span class="c1">#                       properties                         #</span>
+    <span class="c1"># ######################################################## #</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">border_tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Pitch</span><span class="p">,</span> <span class="n">Pitch</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">minima_pitch</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxima_pitch</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">range</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PitchInterval</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">minima_pitch</span><span class="o">.</span><span class="n">get_pitch_interval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maxima_pitch</span><span class="p">)</span>
+
+    <span class="c1"># ######################################################## #</span>
+    <span class="c1">#                       public methods                     #</span>
+    <span class="c1"># ######################################################## #</span>
+
+<div class="viewcode-block" id="PitchAmbitus.get_pitch_variant_tuple"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.PitchAmbitus.get_pitch_variant_tuple">[docs]</a>    <span class="k">def</span> <span class="nf">get_pitch_variant_tuple</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">pitch</span><span class="p">:</span> <span class="n">Pitch</span><span class="p">,</span> <span class="n">period</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">PitchInterval</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Pitch</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Find all pitch variants (in all octaves) of the given pitch</span>
+
+<span class="sd">        :param pitch: The pitch which variants shall be found.</span>
+<span class="sd">        :type pitch: Pitch</span>
+<span class="sd">        :param period: The repeating period (usually an octave). If the</span>
+<span class="sd">            period is set to `None` the function will fallback to them</span>
+<span class="sd">            objects method :meth:`PitchAmbitus.pitch_to_period`. Default to `None`.</span>
+<span class="sd">        :type period: typing.Optional[PitchInterval]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">period</span> <span class="o">=</span> <span class="n">period</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">pitch_to_period</span><span class="p">(</span><span class="n">pitch</span><span class="p">)</span>
+        <span class="n">pitch_variant_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">is_first</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">for</span> <span class="n">loop_condition</span><span class="p">,</span> <span class="n">append_condition</span><span class="p">,</span> <span class="n">change_pitch</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="p">(</span>
+                <span class="k">lambda</span> <span class="n">dummy_pitch</span><span class="p">:</span> <span class="n">dummy_pitch</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxima_pitch</span><span class="p">,</span>
+                <span class="k">lambda</span> <span class="n">dummy_pitch</span><span class="p">:</span> <span class="n">dummy_pitch</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minima_pitch</span><span class="p">,</span>
+                <span class="k">lambda</span> <span class="n">dummy_pitch</span><span class="p">:</span> <span class="n">dummy_pitch</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">period</span><span class="p">),</span>
+            <span class="p">),</span>
+            <span class="p">(</span>
+                <span class="k">lambda</span> <span class="n">dummy_pitch</span><span class="p">:</span> <span class="n">dummy_pitch</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minima_pitch</span><span class="p">,</span>
+                <span class="k">lambda</span> <span class="n">dummy_pitch</span><span class="p">:</span> <span class="n">dummy_pitch</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxima_pitch</span><span class="p">,</span>
+                <span class="k">lambda</span> <span class="n">dummy_pitch</span><span class="p">:</span> <span class="n">dummy_pitch</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">period</span><span class="p">),</span>
+            <span class="p">),</span>
+        <span class="p">):</span>
+            <span class="n">dummy_pitch</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">pitch</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">is_first</span><span class="p">:</span>
+                <span class="n">change_pitch</span><span class="p">(</span><span class="n">dummy_pitch</span><span class="p">)</span>
+            <span class="k">while</span> <span class="n">loop_condition</span><span class="p">(</span><span class="n">dummy_pitch</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">append_condition</span><span class="p">(</span><span class="n">dummy_pitch</span><span class="p">):</span>
+                    <span class="n">pitch_variant_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">dummy_pitch</span><span class="p">))</span>
+                <span class="n">change_pitch</span><span class="p">(</span><span class="n">dummy_pitch</span><span class="p">)</span>
+            <span class="n">is_first</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">pitch_variant_list</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="PitchAmbitus.filter_pitch_sequence"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.PitchAmbitus.filter_pitch_sequence">[docs]</a>    <span class="k">def</span> <span class="nf">filter_pitch_sequence</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">pitch_to_filter_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Pitch</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Pitch</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Filter all pitches in a sequence which aren&#39;t inside the ambitus.</span>
+
+<span class="sd">        :param pitch_to_filter_sequence: A sequence with pitches which shall</span>
+<span class="sd">            be filtered.</span>
+<span class="sd">        :type pitch_to_filter_sequence: typing.Sequence[Pitch]</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo import music_parameters</span>
+<span class="sd">        &gt;&gt;&gt; ambitus0 = music_parameters.OctaveAmbitus(</span>
+<span class="sd">        ...     music_parameters.JustIntonationPitch(&#39;1/2&#39;),</span>
+<span class="sd">        ...     music_parameters.JustIntonationPitch(&#39;2/1&#39;),</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &gt;&gt;&gt; ambitus0.filter_pitch_sequence(</span>
+<span class="sd">        ...     [</span>
+<span class="sd">        ...         music_parameters.JustIntonationPitch(&quot;3/8&quot;),</span>
+<span class="sd">        ...         music_parameters.JustIntonationPitch(&quot;3/4&quot;),</span>
+<span class="sd">        ...         music_parameters.JustIntonationPitch(&quot;3/2&quot;),</span>
+<span class="sd">        ...         music_parameters.JustIntonationPitch(&quot;3/1&quot;),</span>
+<span class="sd">        ...     ]</span>
+<span class="sd">        ... )</span>
+<span class="sd">        (JustIntonationPitch(&#39;3/4&#39;), JustIntonationPitch(&#39;3/2&#39;))</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="nb">filter</span><span class="p">(</span>
+                <span class="k">lambda</span> <span class="n">pitch</span><span class="p">:</span> <span class="n">pitch</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minima_pitch</span> <span class="ow">and</span> <span class="n">pitch</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxima_pitch</span><span class="p">,</span>
+                <span class="n">pitch_to_filter_sequence</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="Indicator"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.Indicator">[docs]</a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>  <span class="c1"># type: ignore</span>
+<span class="k">class</span> <span class="nc">Indicator</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">is_active</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="o">...</span>
+
+<div class="viewcode-block" id="Indicator.get_arguments_dict"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.Indicator.get_arguments_dict">[docs]</a>    <span class="k">def</span> <span class="nf">get_arguments_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">key</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dataclass_fields__</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>  <span class="c1"># type: ignore</span>
+        <span class="p">}</span></div></div>
+
+
+<div class="viewcode-block" id="PlayingIndicator"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.PlayingIndicator">[docs]</a><span class="k">class</span> <span class="nc">PlayingIndicator</span><span class="p">(</span><span class="n">Indicator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Abstract base class for any playing indicator.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="ExplicitPlayingIndicator"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.ExplicitPlayingIndicator">[docs]</a><span class="k">class</span> <span class="nc">ExplicitPlayingIndicator</span><span class="p">(</span><span class="n">PlayingIndicator</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_active</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_active</span> <span class="o">=</span> <span class="n">is_active</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">(</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_active</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ExplicitPlayingIndicator.get_arguments_dict"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.ExplicitPlayingIndicator.get_arguments_dict">[docs]</a>    <span class="k">def</span> <span class="nf">get_arguments_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;is_active&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_active</span><span class="p">}</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_active</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_active</span>
+
+    <span class="nd">@is_active</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">is_active</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_active</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_active</span> <span class="o">=</span> <span class="n">is_active</span></div>
+
+
+<div class="viewcode-block" id="ImplicitPlayingIndicator"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.ImplicitPlayingIndicator">[docs]</a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>
+<span class="k">class</span> <span class="nc">ImplicitPlayingIndicator</span><span class="p">(</span><span class="n">PlayingIndicator</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_active</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">all</span><span class="p">(</span>
+            <span class="nb">tuple</span><span class="p">(</span>
+                <span class="n">argument</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">argument</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_arguments_dict</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+            <span class="p">)</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="NotationIndicator"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.NotationIndicator">[docs]</a><span class="k">class</span> <span class="nc">NotationIndicator</span><span class="p">(</span><span class="n">Indicator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Abstract base class for any notation indicator.&quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_active</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">all</span><span class="p">(</span>
+            <span class="nb">tuple</span><span class="p">(</span>
+                <span class="n">argument</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">argument</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_arguments_dict</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+            <span class="p">)</span>
+        <span class="p">)</span></div>
+
+
+<span class="n">T</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">,</span> <span class="n">PlayingIndicator</span><span class="p">,</span> <span class="n">NotationIndicator</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="IndicatorCollection"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.IndicatorCollection">[docs]</a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<span class="k">class</span> <span class="nc">IndicatorCollection</span><span class="p">(</span><span class="n">typing</span><span class="o">.</span><span class="n">Generic</span><span class="p">[</span><span class="n">T</span><span class="p">]):</span>
+<div class="viewcode-block" id="IndicatorCollection.get_all_indicator"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.IndicatorCollection.get_all_indicator">[docs]</a>    <span class="k">def</span> <span class="nf">get_all_indicator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dataclass_fields__</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>  <span class="c1"># type: ignore</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="IndicatorCollection.get_indicator_dict"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.IndicatorCollection.get_indicator_dict">[docs]</a>    <span class="k">def</span> <span class="nf">get_indicator_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Indicator</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dataclass_fields__</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>  <span class="c1"># type: ignore</span></div></div>
+
+
+<div class="viewcode-block" id="Lyric"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.Lyric">[docs]</a><span class="k">class</span> <span class="nc">Lyric</span><span class="p">(</span>
+    <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">SingleValueParameter</span><span class="p">,</span>
+    <span class="n">value_name</span><span class="o">=</span><span class="s2">&quot;phonetic_representation&quot;</span><span class="p">,</span>
+    <span class="n">value_return_type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Abstract base class for any spoken, sung or written text.</span>
+
+<span class="sd">    If the user wants to define a new lyric class, the abstract</span>
+<span class="sd">    properties :attr:`phonetic_representation` and</span>
+<span class="sd">    :attr:`written_representation` have to be overridden.</span>
+
+<span class="sd">    The :attr:`phonetic_representation` should return a string of</span>
+<span class="sd">    X-SAMPA format phonemes, separated by space to indicate new words.</span>
+<span class="sd">    Consult `wikipedia entry &lt;https://en.wikipedia.org/wiki/X-SAMPA&gt;`_</span>
+<span class="sd">    for detailed information regarding X-SAMPA.</span>
+
+<span class="sd">    The :attr:`written_representation` should return a string of</span>
+<span class="sd">    normal written text, separated by space to indicate new words.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">written_representation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get text as it would be written in natural language&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="Syllable"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.Syllable">[docs]</a><span class="k">class</span> <span class="nc">Syllable</span><span class="p">(</span><span class="n">Lyric</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Syllable mixin for classes which inherit from :class:`Lyric`.</span>
+
+<span class="sd">    This adds the new attribute :attr:`is_last_syllable`. This should</span>
+<span class="sd">    be `True` if it is the last syllable of a word and `False` if it</span>
+<span class="sd">    isn&#39;t.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_last_syllable</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_last_syllable</span> <span class="o">=</span> <span class="n">is_last_syllable</span></div>
+
+
+
+<div class="viewcode-block" id="Instrument"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.Instrument">[docs]</a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">Instrument</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Model a musical instrument.</span>
+
+<span class="sd">    :param name: The name of the instrument.</span>
+<span class="sd">    :type name: str</span>
+<span class="sd">    :param short_name: The abbreviation of the instrument.</span>
+<span class="sd">        If set to ``None`` it will be the same like `name`.</span>
+<span class="sd">        Default to ``None``.</span>
+<span class="sd">    :type short_name: typing.Optional[str]</span>
+
+<span class="sd">    This is an abstract class. To create a new concrete class</span>
+<span class="sd">    you need to override the abstract `is_pitched` property.</span>
+<span class="sd">    Alternatively you can use the ready-to-go classes</span>
+<span class="sd">    :class:`mutwo.music_parameters.UnpitchedInstrument` or</span>
+<span class="sd">    :class:`mutwo.music_parameters.ContinuousPitchedInstrument` or</span>
+<span class="sd">    :class:`mutwo.music_parameters.DiscreetPitchedInstrument`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">short_name</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Auto set short_name to name if not declared</span>
+        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;short_name&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">short_name</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">is_pitched</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return ``True`` if instrument is pitched, ``False`` otherwise.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="PitchedInstrument"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.PitchedInstrument">[docs]</a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">PitchedInstrument</span><span class="p">(</span><span class="n">Instrument</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Model a pitched musical instrument.</span>
+
+<span class="sd">    :param name: The name of the instrument.</span>
+<span class="sd">    :type name: str</span>
+<span class="sd">    :param short_name: The abbreviation of the instrument.</span>
+<span class="sd">        If set to ``None`` it will be the same like `name`.</span>
+<span class="sd">        Default to ``None``.</span>
+<span class="sd">    :type short_name: typing.Optional[str]</span>
+<span class="sd">    :param pitch_count_range: Set how many simultaneous</span>
+<span class="sd">        pitches the instrument can play. Default to</span>
+<span class="sd">        `ranges.Range(1, 2)`, which means that the instrument</span>
+<span class="sd">        is monophonic.</span>
+<span class="sd">    :type pitch_count_range: ranges.Range</span>
+<span class="sd">    :param transposition_pitch_interval: Some instruments are</span>
+<span class="sd">        written with a transposition (so sounding pitch and</span>
+<span class="sd">        written pitch differs). This parameter can be used</span>
+<span class="sd">        to set the transposition interval in case sounding</span>
+<span class="sd">        and written differs. The `transposition_pitch_interval`</span>
+<span class="sd">        is added to the sounding pitches in order to reach the</span>
+<span class="sd">        written pitches. If set to ``None`` this will be</span>
+<span class="sd">        set to `DirectPitchInterval(0)` which is no transposition.</span>
+<span class="sd">        Default to ``None``.</span>
+<span class="sd">    :type transposition_pitch_interval: typing.Optional[PitchInterval]</span>
+
+<span class="sd">    You can use pythons `in` syntax to find out if a pitch</span>
+<span class="sd">    is playable by the given instrument.</span>
+
+<span class="sd">    This is an abstract class. You need to override abstract</span>
+<span class="sd">    method `__contains__` and abstract property `pitch_ambitus`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">pitch_count_range</span><span class="p">:</span> <span class="n">ranges</span><span class="o">.</span><span class="n">Range</span> <span class="o">=</span> <span class="n">ranges</span><span class="o">.</span><span class="n">Range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">transposition_pitch_interval</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+        <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">DirectPitchInterval</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__post_init__</span><span class="p">()</span>
+        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="s2">&quot;transposition_pitch_interval&quot;</span><span class="p">,</span>
+            <span class="n">music_parameters</span><span class="o">.</span><span class="n">DirectPitchInterval</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pitch</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="o">...</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">pitch_ambitus</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PitchAmbitus</span><span class="p">:</span>
+        <span class="o">...</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_pitched</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="PitchedInstrument.get_pitch_variant_tuple"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.abc.PitchedInstrument.get_pitch_variant_tuple">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">get_pitch_variant_tuple</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">pitch</span><span class="p">:</span> <span class="n">Pitch</span><span class="p">,</span> <span class="n">period</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">PitchInterval</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Pitch</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Find all pitch variants (in all octaves) of the given pitch</span>
+
+<span class="sd">        :param pitch: The pitch which variants shall be found.</span>
+<span class="sd">        :type pitch: Pitch</span>
+<span class="sd">        :param period: The repeating period (usually an octave). If the</span>
+<span class="sd">            period is set to `None` the function will fallback to them</span>
+<span class="sd">            objects method :meth:`PitchAmbitus.pitch_to_period`. Default to `None`.</span>
+<span class="sd">        :type period: typing.Optional[PitchInterval]</span>
+
+<span class="sd">        This is not necessarily the same as</span>
+<span class="sd">        ``instrument.pitch_ambitus.get_pitch_variant_tuple()``, because</span>
+<span class="sd">        a :class:`mutwo.music_parameters.DiscreetPitchedInstrument` may</span>
+<span class="sd">        not be capable of playing a pitch even if the given pitch is within</span>
+<span class="sd">        the ambitus of an instrument. It&#39;s therefore recommended to</span>
+<span class="sd">        use ``instrument.get_pitch_variant_tuple`` if one wants to find</span>
+<span class="sd">        out in which octaves the given pitch is actually playable on the</span>
+<span class="sd">        instrument.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.music_parameters.abc</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Levin Eric Zimmermann.
+    </div>
+  </body>
+</html>

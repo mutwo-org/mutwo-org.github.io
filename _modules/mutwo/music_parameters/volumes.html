@@ -1,0 +1,321 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mutwo.music_parameters.volumes &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.music_parameters.volumes</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mutwo.music_parameters.volumes</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Submodule for the parameter volume.</span>
+
+<span class="sd">&#39;Volume&#39; is defined as any object that knows a :attr:`amplitude` attribute.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>  <span class="c1"># type: ignore</span>
+
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_constants</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_utilities</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_parameters</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;DirectVolume&quot;</span><span class="p">,</span> <span class="s2">&quot;DecibelVolume&quot;</span><span class="p">,</span> <span class="s2">&quot;WesternVolume&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="DirectVolume"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.DirectVolume">[docs]</a><span class="k">class</span> <span class="nc">DirectVolume</span><span class="p">(</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Volume</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A simple volume class that gets directly initialised by its amplitude.</span>
+
+<span class="sd">    :param amplitude: The amplitude of the :class:`DirectVolume` object.</span>
+
+<span class="sd">    May be used when a converter class needs a volume object, but there is</span>
+<span class="sd">    no need or desire for a complex abstraction of the respective volume.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amplitude</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_amplitude</span> <span class="o">=</span> <span class="n">amplitude</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">amplitude</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_amplitude</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">(</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">amplitude</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DecibelVolume"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.DecibelVolume">[docs]</a><span class="k">class</span> <span class="nc">DecibelVolume</span><span class="p">(</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Volume</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A simple volume class that gets directly initialised by decibel.</span>
+
+<span class="sd">    :param decibel: The decibel of the :class:`DecibelVolume` object (should be</span>
+<span class="sd">        from -120 to 0).</span>
+
+<span class="sd">    May be used when a converter class needs a volume object, but there is</span>
+<span class="sd">    no need or desire for a complex abstraction of the respective volume.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">decibel</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_decibel</span> <span class="o">=</span> <span class="n">decibel</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">decibel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decibel</span>
+
+    <span class="nd">@decibel</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">decibel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">decibel</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_decibel</span> <span class="o">=</span> <span class="n">decibel</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">amplitude</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">decibel_to_amplitude_ratio</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">decibel</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">(</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">amplitude</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="WesternVolume"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.WesternVolume">[docs]</a><span class="k">class</span> <span class="nc">WesternVolume</span><span class="p">(</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Volume</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Volume with a traditional Western nomenclature.</span>
+
+<span class="sd">    :param name: Dynamic indicator in traditional Western nomenclature</span>
+<span class="sd">        (&#39;f&#39;, &#39;pp&#39;, &#39;mf&#39;, &#39;sfz&#39;, etc.). For a list of all supported</span>
+<span class="sd">        indicators, see :const:`mutwo.music_parameters.constants.DYNAMIC_INDICATOR_TUPLE`.</span>
+<span class="sd">    :type name: str</span>
+<span class="sd">    :param minimum_decibel: The decibel value which is equal to the lowest dynamic indicator</span>
+<span class="sd">        (ppppp).</span>
+<span class="sd">    :type minimum_decibel: core_constants.Real, optional</span>
+<span class="sd">    :param maximum_decibel: The decibel value which is equal to the highest dynamic indicator</span>
+<span class="sd">        (fffff).</span>
+<span class="sd">    :type maximum_decibel: core_constants.Real, optional</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo.music_parameters import volumes</span>
+<span class="sd">    &gt;&gt;&gt; volumes.WesternVolume(&#39;fff&#39;)</span>
+<span class="sd">    WesternVolume(fff)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">minimum_decibel</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">maximum_decibel</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">minimum_decibel</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">minimum_decibel</span>
+            <span class="ow">or</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_MINIMUM_DECIBEL_FOR_MIDI_VELOCITY_AND_STANDARD_DYNAMIC_INDICATOR</span>
+        <span class="p">)</span>
+
+        <span class="n">maximum_decibel</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">maximum_decibel</span>
+            <span class="ow">or</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_MAXIMUM_DECIBEL_FOR_MIDI_VELOCITY_AND_STANDARD_DYNAMIC_INDICATOR</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_standard_dynamic_indicator_to_decibel_mapping</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">WesternVolume</span><span class="o">.</span><span class="n">_make_standard_dynamic_indicator_to_value_dict</span><span class="p">(</span>
+                <span class="n">minimum_decibel</span><span class="p">,</span>
+                <span class="n">maximum_decibel</span><span class="p">,</span>
+                <span class="nb">float</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_indicator_to_decibel_mapping</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">WesternVolume</span><span class="o">.</span><span class="n">_make_dynamic_indicator_to_value_dict</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_standard_dynamic_indicator_to_decibel_mapping</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_decibel_to_standard_dynamic_indicator_mapping</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">decibel</span><span class="p">:</span> <span class="n">dynamic_indicator</span>
+            <span class="k">for</span> <span class="n">dynamic_indicator</span><span class="p">,</span> <span class="n">decibel</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_standard_dynamic_indicator_to_decibel_mapping</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">)&quot;</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                      static private methods                            #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_make_standard_dynamic_indicator_to_value_dict</span><span class="p">(</span>
+        <span class="n">minima</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">maxima</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Type</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">dynamic_indicator</span><span class="p">:</span> <span class="n">decibel</span>
+            <span class="k">for</span> <span class="n">dynamic_indicator</span><span class="p">,</span> <span class="n">decibel</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">STANDARD_DYNAMIC_INDICATOR</span><span class="p">,</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span>
+                    <span class="n">minima</span><span class="p">,</span>
+                    <span class="n">maxima</span><span class="p">,</span>
+                    <span class="nb">len</span><span class="p">(</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">STANDARD_DYNAMIC_INDICATOR</span><span class="p">),</span>
+                    <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">}</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_make_dynamic_indicator_to_value_dict</span><span class="p">(</span>
+        <span class="n">standard_dynamic_indicator_to_value_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="n">dynamic_indicator_to_value_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">dynamic_indicator_to_value_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">standard_dynamic_indicator_to_value_dict</span><span class="p">)</span>
+        <span class="k">for</span> <span class="p">(</span>
+            <span class="n">special_dynamic_indicator</span><span class="p">,</span>
+            <span class="n">standard_dynamic_indicator</span><span class="p">,</span>
+        <span class="p">)</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">SPECIAL_DYNAMIC_INDICATOR_TO_STANDARD_DYNAMIC_INDICATOR_DICT</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">):</span>
+            <span class="n">dynamic_indicator_to_value_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="n">special_dynamic_indicator</span><span class="p">:</span> <span class="n">dynamic_indicator_to_value_dict</span><span class="p">[</span>
+                        <span class="n">standard_dynamic_indicator</span>
+                    <span class="p">]</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">dynamic_indicator_to_value_dict</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                class methods (alternative constructors)                #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+<div class="viewcode-block" id="WesternVolume.from_amplitude"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.WesternVolume.from_amplitude">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_amplitude</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">amplitude</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;WesternVolume&quot;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Initialise `WesternVolume` from amplitude ratio.</span>
+
+<span class="sd">        :param amplitude: The amplitude which shall be converted to a `WesternVolume`</span>
+<span class="sd">            object.</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo.music_parameters import volumes</span>
+<span class="sd">        &gt;&gt;&gt; volumes.WesternVolume.from_amplitude(0.05)</span>
+<span class="sd">        WesternVolume(p)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">decibel</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">amplitude_ratio_to_decibel</span><span class="p">(</span><span class="n">amplitude</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_decibel</span><span class="p">(</span><span class="n">decibel</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WesternVolume.from_decibel"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.WesternVolume.from_decibel">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_decibel</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">decibel</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;WesternVolume&quot;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Initialise `WesternVolume` from decibel.</span>
+
+<span class="sd">        :param decibel: The decibel which shall be converted to a `WesternVolume`</span>
+<span class="sd">            object.</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo.music_parameters import volumes</span>
+<span class="sd">        &gt;&gt;&gt; volumes.WesternVolume.from_decibel(-24)</span>
+<span class="sd">        WesternVolume(p)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">volume_object</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="s2">&quot;mf&quot;</span><span class="p">)</span>
+        <span class="n">closest_decibel</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">find_closest_item</span><span class="p">(</span>
+            <span class="n">decibel</span><span class="p">,</span>
+            <span class="nb">tuple</span><span class="p">(</span><span class="n">volume_object</span><span class="o">.</span><span class="n">_decibel_to_standard_dynamic_indicator_mapping</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+        <span class="p">)</span>
+        <span class="n">indicator</span> <span class="o">=</span> <span class="n">volume_object</span><span class="o">.</span><span class="n">_decibel_to_standard_dynamic_indicator_mapping</span><span class="p">[</span>
+            <span class="n">closest_decibel</span>
+        <span class="p">]</span>
+        <span class="n">volume_object</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">indicator</span>
+        <span class="k">return</span> <span class="n">volume_object</span></div>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                             properties                                 #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;The western nomenclature name for dynamic.</span>
+
+<span class="sd">        For a list of all supported indicators, see</span>
+<span class="sd">        :const:`mutwo.music_parameters.constants.DYNAMIC_INDICATOR_TUPLE`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+
+    <span class="nd">@name</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">DYNAMIC_INDICATOR_TUPLE</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;unknown dynamic name &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;. Supported dynamic names &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;are &#39;</span><span class="si">{</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">DYNAMIC_INDICATOR_TUPLE</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">decibel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_indicator_to_decibel_mapping</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">amplitude</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">decibel_to_amplitude_ratio</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">decibel</span><span class="p">)</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.music_parameters.volumes</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Levin Eric Zimmermann.
+    </div>
+  </body>
+</html>

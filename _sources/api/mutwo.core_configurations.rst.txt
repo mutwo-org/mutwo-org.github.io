@@ -1,0 +1,27 @@
+
+.. currentmodule:: mutwo.core_configurations
+
+mutwo.core_configurations
+=========================
+
+.. contents:: Table of content
+   :depth: 3
+
+.. automodule:: mutwo.core_configurations
+   :members:
+
+
+.. list-table::
+   :align: center
+   :width: 95%
+   :header-rows: 1
+
+   * - Object
+     - Documentation
+
+
+
+
+
+
+

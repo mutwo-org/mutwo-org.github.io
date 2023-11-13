@@ -1,0 +1,37 @@
+
+.. currentmodule:: mutwo.abjad_utilities
+
+mutwo.abjad_utilities
+=====================
+
+.. contents:: Table of content
+   :depth: 3
+
+.. automodule:: mutwo.abjad_utilities
+   :members:
+
+
+.. list-table::
+   :align: center
+   :width: 95%
+   :header-rows: 1
+
+   * - Object
+     - Documentation
+   * - :class:`mutwo.abjad_utilities.AbjadTestCase`
+     - 
+   * - :class:`mutwo.abjad_utilities.run_if_ekmelily_available`
+     - Decorator which only runs test if ekmelily is found
+
+
+
+
+.. autofunction:: run_if_ekmelily_available
+    
+
+.. autoclass:: mutwo.abjad_utilities.AbjadTestCase
+
+        .. autoclasstoc::
+    
+
+

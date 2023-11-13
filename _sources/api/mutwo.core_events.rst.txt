@@ -1,0 +1,101 @@
+
+.. currentmodule:: mutwo.core_events
+
+mutwo.core_events
+=================
+
+.. contents:: Table of content
+   :depth: 3
+
+.. automodule:: mutwo.core_events
+   :members:
+
+
+.. list-table::
+   :align: center
+   :width: 95%
+   :header-rows: 1
+
+   * - Object
+     - Documentation
+   * - :class:`mutwo.core_events.SimpleEvent`
+     - A :class:`SimpleEvent` is an event without any children (a leaf).
+   * - :class:`mutwo.core_events.SequentialEvent`
+     - A :class:`SequentialEvent` is a sequence of events.
+   * - :class:`mutwo.core_events.SimultaneousEvent`
+     - A :class:`SimultaneousEvent` is a simultaneity of events.
+   * - :class:`mutwo.core_events.TaggedSimpleEvent`
+     - :class:`SimpleEvent` with tag.
+   * - :class:`mutwo.core_events.TaggedSequentialEvent`
+     - :class:`SequentialEvent` with tag.
+   * - :class:`mutwo.core_events.TaggedSimultaneousEvent`
+     - :class:`SimultaneousEvent` with tag.
+   * - :class:`mutwo.core_events.Envelope`
+     - Model continuous changing values (e.g. glissandi, crescendo).
+   * - :class:`mutwo.core_events.RelativeEnvelope`
+     - Envelope with relative durations and values / parameters.
+   * - :class:`mutwo.core_events.TempoEnvelope`
+     - Define dynamic or static tempo trajectories.
+
+
+
+
+.. autoclass:: mutwo.core_events.SimpleEvent
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.core_events.SequentialEvent
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.core_events.SimultaneousEvent
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.core_events.TaggedSimpleEvent
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.core_events.TaggedSequentialEvent
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.core_events.TaggedSimultaneousEvent
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.core_events.Envelope
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.core_events.RelativeEnvelope
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.core_events.TempoEnvelope
+
+        .. autoclasstoc::
+    
+
+
+mutwo.core_events.abc
+---------------------
+
+.. automodule:: mutwo.core_events.abc
+   :members:
+
+
+mutwo.core_events.configurations
+--------------------------------
+
+.. automodule:: mutwo.core_events.configurations
+   :members:
+

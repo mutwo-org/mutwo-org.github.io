@@ -1,0 +1,60 @@
+
+.. currentmodule:: mutwo.timeline_utilities
+
+mutwo.timeline_utilities
+========================
+
+.. contents:: Table of content
+   :depth: 3
+
+.. automodule:: mutwo.timeline_utilities
+   :members:
+
+
+.. list-table::
+   :align: center
+   :width: 95%
+   :header-rows: 1
+
+   * - Object
+     - Documentation
+   * - :class:`mutwo.timeline_utilities.EventPlacementRegisterError`
+     - 
+   * - :class:`mutwo.timeline_utilities.ExceedDurationError`
+     - 
+   * - :class:`mutwo.timeline_utilities.EventPlacementNotFoundError`
+     - 
+   * - :class:`mutwo.timeline_utilities.TooSmallRangeWarning`
+     - 
+   * - :class:`mutwo.timeline_utilities.UnresolvedConflict`
+     - 
+
+
+
+
+.. autoclass:: mutwo.timeline_utilities.EventPlacementRegisterError
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.timeline_utilities.ExceedDurationError
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.timeline_utilities.EventPlacementNotFoundError
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.timeline_utilities.TooSmallRangeWarning
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.timeline_utilities.UnresolvedConflict
+
+        .. autoclasstoc::
+    
+
+

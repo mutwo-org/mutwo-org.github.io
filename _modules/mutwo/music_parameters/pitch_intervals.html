@@ -1,0 +1,667 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mutwo.music_parameters.pitch_intervals &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.music_parameters.pitch_intervals</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mutwo.music_parameters.pitch_intervals</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_constants</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_utilities</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_parameters</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;DirectPitchInterval&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;WesternPitchInterval&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="DirectPitchInterval"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.DirectPitchInterval">[docs]</a><span class="k">class</span> <span class="nc">DirectPitchInterval</span><span class="p">(</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PitchInterval</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Simple interval class which gets directly assigned by its cents value</span>
+
+<span class="sd">    :param interval: Defines how big or small the interval is (in cents).</span>
+<span class="sd">    :type interval: float</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import music_parameters</span>
+<span class="sd">    &gt;&gt;&gt; rising_octave = music_parameters.DirectPitchInterval(1200)</span>
+<span class="sd">    &gt;&gt;&gt; falling_minor_third = music_parameters.DirectPitchInterval(-300)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interval</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interval</span> <span class="o">=</span> <span class="n">interval</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">interval</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval</span>
+
+    <span class="nd">@interval</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">interval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interval</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interval</span> <span class="o">=</span> <span class="n">interval</span>
+
+<div class="viewcode-block" id="DirectPitchInterval.inverse"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.DirectPitchInterval.inverse">[docs]</a>    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">inverse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mutate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DirectPitchInterval</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Makes falling interval to rising and vice versa.</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo import music_parameters</span>
+<span class="sd">        &gt;&gt;&gt; music_parameters.DirectPitchInterval(700).inverse().interval</span>
+<span class="sd">        -700</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interval</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">interval</span>
+        <span class="k">return</span> <span class="bp">self</span></div></div>
+
+
+<div class="viewcode-block" id="WesternPitchInterval"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.WesternPitchInterval">[docs]</a><span class="k">class</span> <span class="nc">WesternPitchInterval</span><span class="p">(</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PitchInterval</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Model intervals by using European music theory based representations</span>
+
+<span class="sd">    :param interval_name_or_semitone_count: Can be either an interval name</span>
+<span class="sd">        (a string) or a number for semitones. When using an interval</span>
+<span class="sd">        name is should have the form: QUALITY-IS_FALLING-TYPE, e.g. for having</span>
+<span class="sd">        a rising perfect fourth (where &#39;fourth&#39; is the type and &#39;perfect&#39; the</span>
+<span class="sd">        quality) you can write &quot;p4&quot;. For a falling perfect fourth it would</span>
+<span class="sd">        be &quot;p-4&quot;. The interval names are equal to the specification used</span>
+<span class="sd">        in the python library `music21 &lt;http://web.mit.edu/music21/&gt;`_.</span>
+<span class="sd">        Please also consult the specification of the quality abbreviations at</span>
+<span class="sd">        :const:`mutwo.music_parameters.configurations.WESTERN_PITCH_INTERVAL_QUALITY_NAME_TO_ABBREVIATION_DICT`</span>
+<span class="sd">        and the specification of the `is-interval-falling` indicator</span>
+<span class="sd">        :const:`mutwo.music_parameters.configurations.FALLING_WESTERN_PITCH_INTERVAL_INDICATOR`.</span>
+<span class="sd">        Both can be changed by the user. Default to &#39;p1&#39;.</span>
+<span class="sd">    :type interval_name_or_semitone_count: str | core_constants.Real</span>
+
+<span class="sd">    This class is particularly useful in combination with</span>
+<span class="sd">    :class:`mutwo.music_parameters.WesternPitch`.</span>
+
+<span class="sd">    **Disclaimer:**</span>
+
+<span class="sd">    Although :class:`mutwo.music_parameters.WesternPitch` does support</span>
+<span class="sd">    microtones, :class:`WesternPitchInterval` does not.</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import music_parameters</span>
+<span class="sd">    &gt;&gt;&gt; perfect_fifth = music_parameters.WesternPitchInterval(&#39;p5&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; falling_major_third = music_parameters.WesternPitchInterval(&#39;M-3&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; minor_third = music_parameters.WesternPitchInterval(&#39;m3&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; falling_octave = music_parameters.WesternPitchInterval(-12)</span>
+<span class="sd">    &gt;&gt;&gt; augmented_octave = music_parameters.WesternPitchInterval(&#39;A8&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; very_diminished_sixth = music_parameters.WesternPitchInterval(&#39;dddd6&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">interval_name_or_semitone_count</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span> <span class="o">=</span> <span class="s2">&quot;p1&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">get_cls_logger</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="c1"># Define mapping on the fly, so that it is only necessary to adjust</span>
+        <span class="c1"># music_parameters.configurations.WESTERN_PITCH_INTERVAL_QUALITY_NAME_TO_ABBREVIATION_DICT</span>
+        <span class="c1"># if user wants to use different abbreviations.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_abbreviation_to_western_pitch_interval_quality_name_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">abbreviation</span><span class="p">:</span> <span class="n">western_pitch_interval_quality</span>
+            <span class="k">for</span> <span class="n">western_pitch_interval_quality</span><span class="p">,</span> <span class="n">abbreviation</span> <span class="ow">in</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">WESTERN_PITCH_INTERVAL_QUALITY_NAME_TO_ABBREVIATION_DICT</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">interval_name_or_semitone_count</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">to_interval_data</span> <span class="o">=</span> <span class="n">WesternPitchInterval</span><span class="o">.</span><span class="n">_interval_name_to_interval_data</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">to_interval_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_semitone_count_to_interval_data</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_attribute_by_interval_data</span><span class="p">(</span>
+            <span class="o">*</span><span class="n">to_interval_data</span><span class="p">(</span><span class="n">interval_name_or_semitone_count</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+        <span class="p">)</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                      static private methods                            #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_interval_type_to_interval_base_type</span><span class="p">(</span><span class="n">interval_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">interval_type</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="o">%</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">WESTERN_PITCH_INTERVAL_BASE_TYPE_COUNT</span>
+            <span class="p">)</span>
+            <span class="o">+</span> <span class="mi">1</span>
+        <span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_interval_type_to_octave_count</span><span class="p">(</span><span class="n">interval_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">interval_type</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="o">//</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">WESTERN_PITCH_INTERVAL_BASE_TYPE_COUNT</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_interval_name_to_interval_data</span><span class="p">(</span><span class="n">interval_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+        <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;[0-9]+&quot;</span><span class="p">,</span> <span class="n">interval_name</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">match</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;Found invalid interval_name &#39;</span><span class="si">{interval_name}</span><span class="s2">&#39; &quot;</span>
+                <span class="s2">&quot;without any interval type. An interval type should be&quot;</span>
+                <span class="s2">&quot; an integer &gt; 0, for instance &#39;1&#39; or &#39;12&#39; or &#39;21&#39;.&quot;</span>
+            <span class="p">)</span>
+        <span class="n">interval_type_start_index</span> <span class="o">=</span> <span class="n">interval_quality_end_index</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">span</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">interval_type</span> <span class="o">=</span> <span class="n">interval_name</span><span class="p">[</span><span class="n">interval_type_start_index</span><span class="p">:]</span>
+        <span class="k">if</span> <span class="n">is_interval_falling</span> <span class="o">:=</span> <span class="p">(</span>
+            <span class="n">interval_name</span><span class="p">[</span><span class="n">interval_type_start_index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="o">==</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">FALLING_WESTERN_PITCH_INTERVAL_INDICATOR</span>
+        <span class="p">):</span>
+            <span class="n">interval_quality_end_index</span> <span class="o">=</span> <span class="n">interval_type_start_index</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">interval_quality</span> <span class="o">=</span> <span class="n">interval_name</span><span class="p">[:</span><span class="n">interval_quality_end_index</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">interval_type</span><span class="p">,</span> <span class="n">interval_quality</span><span class="p">,</span> <span class="n">is_interval_falling</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_assert_interval_quality_avoids_illegal_stacking</span><span class="p">(</span>
+        <span class="n">interval_quality_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">interval_quality_tuple</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="p">(</span>
+                    <span class="n">interval_quality_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="ow">in</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">STACKABLE_WESTERN_PITCH_INTERVAL_QUALITY_TUPLE</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s2">&quot;Found illegal stacking of interval quality &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">interval_quality_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39;! Only the following &quot;</span>
+                    <span class="s2">&quot;interval qualities can be stacked: &#39;&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">STACKABLE_WESTERN_PITCH_INTERVAL_QUALITY_TUPLE</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>
+                <span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_assert_interval_quality_is_not_mixed</span><span class="p">(</span>
+        <span class="n">interval_quality_string</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">interval_quality_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+    <span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">interval_quality_tuple</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;Found mixed interval qualities in interval &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;quality string &#39;</span><span class="si">{</span><span class="n">interval_quality_string</span><span class="si">}</span><span class="s2">&#39;. &quot;</span>
+                <span class="s2">&quot;Please don&#39;t mix up interval qualities.&quot;</span>
+            <span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_assert_interval_quality_fits_to_interval_type</span><span class="p">(</span>
+        <span class="n">is_perfect_interval</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">interval_quality_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+    <span class="p">):</span>
+        <span class="n">allowed_interval_quality_tuple</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">ALLOWED_WESTERN_PITCH_INTERVAL_QUALITY_FOR_IMPERFECT_INTERVAL_TUPLE</span><span class="p">,</span>
+            <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">ALLOWED_WESTERN_PITCH_INTERVAL_QUALITY_FOR_PERFECT_INTERVAL_TUPLE</span><span class="p">,</span>
+        <span class="p">)[</span><span class="n">is_perfect_interval</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">interval_quality</span> <span class="ow">in</span> <span class="n">interval_quality_tuple</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">interval_quality</span> <span class="ow">in</span> <span class="n">allowed_interval_quality_tuple</span>
+            <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Found illegal interval quality &#39;</span><span class="si">{</span><span class="n">interval_quality</span><span class="si">}</span><span class="s2">&#39; in &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;interval_quality_tuple &#39;</span><span class="si">{</span><span class="n">interval_quality_tuple</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;For the given interval type only the &quot;</span>
+                    <span class="s2">&quot;following interval qualities are allowed: &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">allowed_interval_quality_tuple</span><span class="si">}</span><span class="s2">&#39;!&quot;</span>
+                <span class="p">)</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                      static public methods                             #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+<div class="viewcode-block" id="WesternPitchInterval.is_interval_type_perfect"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.WesternPitchInterval.is_interval_type_perfect">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">is_interval_type_perfect</span><span class="p">(</span><span class="n">interval_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="n">interval_base_type</span> <span class="o">=</span> <span class="n">WesternPitchInterval</span><span class="o">.</span><span class="n">_interval_type_to_interval_base_type</span><span class="p">(</span>
+            <span class="n">interval_type</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">interval_base_type</span> <span class="ow">in</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">PERFECT_INTERVAL_TYPE_TUPLE</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="WesternPitchInterval.is_interval_type_imperfect"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.WesternPitchInterval.is_interval_type_imperfect">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">is_interval_type_imperfect</span><span class="p">(</span><span class="n">interval_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="n">WesternPitchInterval</span><span class="o">.</span><span class="n">is_interval_type_perfect</span><span class="p">(</span><span class="n">interval_type</span><span class="p">)</span></div>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                          magic methods                                 #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;)&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                          private methods                               #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="k">def</span> <span class="nf">_semitone_count_to_interval_data</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">semitone_count</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+        <span class="n">is_interval_falling</span> <span class="o">=</span> <span class="n">semitone_count</span> <span class="o">&lt;</span> <span class="mi">0</span>
+        <span class="n">semitone_count</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">semitone_count</span><span class="p">)</span>
+        <span class="n">semitone_count_reduced</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">semitone_count</span> <span class="o">%</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">CHROMATIC_PITCH_CLASS_COUNT</span>
+        <span class="p">)</span>
+        <span class="n">semitone_count_reduced_and_rounded</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">semitone_count_reduced</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">semitone_count_reduced_and_rounded</span> <span class="o">!=</span> <span class="n">semitone_count_reduced</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Semitone was rounded by &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">semitone_count_reduced_and_rounded</span> <span class="o">-</span> <span class="n">semitone_count_reduced</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+                <span class="s2">&quot; because WesternPitchInterval doesn&#39;t support microtones!&quot;</span>
+            <span class="p">)</span>
+        <span class="p">(</span>
+            <span class="n">interval_type</span><span class="p">,</span>
+            <span class="n">interval_quality</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">SEMITONE_TO_WESTERN_PITCH_INTERVAL_BASE_TYPE_AND_QUALITY_DICT</span><span class="p">[</span>
+            <span class="n">semitone_count_reduced_and_rounded</span>
+        <span class="p">]</span>
+        <span class="n">interval_quality_abbreviation</span> <span class="o">=</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">WESTERN_PITCH_INTERVAL_QUALITY_NAME_TO_ABBREVIATION_DICT</span><span class="p">[</span>
+            <span class="n">interval_quality</span>
+        <span class="p">]</span>
+        <span class="n">octave_count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
+            <span class="n">semitone_count</span> <span class="o">//</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">CHROMATIC_PITCH_CLASS_COUNT</span>
+        <span class="p">)</span>
+        <span class="n">interval_type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">interval_type</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">octave_count</span> <span class="o">*</span> <span class="mi">7</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">interval_type</span><span class="p">,</span> <span class="n">interval_quality_abbreviation</span><span class="p">,</span> <span class="n">is_interval_falling</span>
+
+    <span class="k">def</span> <span class="nf">_set_attribute_by_interval_data</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">interval_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">interval_quality</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">is_interval_falling</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_raise_error_if_interval_quality_and_interval_type_do_not_fit</span><span class="p">(</span>
+            <span class="n">interval_quality</span><span class="p">,</span> <span class="n">interval_type</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_raise_error_if_interval_quality_is_invalid</span><span class="p">(</span><span class="n">interval_quality</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_raise_error_if_interval_type_is_invalid</span><span class="p">(</span><span class="n">interval_type</span><span class="p">)</span>
+
+        <span class="c1"># We can&#39;t set the interval_type and interval_quality</span>
+        <span class="c1"># by their public property API</span>
+        <span class="c1"># (e.g. self.interval_type = interval_type)</span>
+        <span class="c1"># because then we would activate the tests which check if the new</span>
+        <span class="c1"># values fit to the current object state, which could potentially</span>
+        <span class="c1"># raise an unwanted exception.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interval_type</span> <span class="o">=</span> <span class="n">interval_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interval_quality</span> <span class="o">=</span> <span class="n">interval_quality</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_interval_falling</span> <span class="o">=</span> <span class="n">is_interval_falling</span>
+
+    <span class="k">def</span> <span class="nf">_raise_invalid_interval_quality_error</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">interval_quality_abbreviation</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">interval_quality</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NameError</span><span class="p">(</span>
+            <span class="s2">&quot;Found undefined interval quality abbreviation &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">interval_quality_abbreviation</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; in interval quality string &#39;</span><span class="si">{</span><span class="n">interval_quality</span><span class="si">}</span><span class="s2">&#39;. &quot;</span>
+            <span class="s2">&quot;All allowed abbreviations are only &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_abbreviation_to_western_pitch_interval_quality_name_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>
+            <span class="s2">&quot; Please consider overridding the keys of &quot;</span>
+            <span class="s2">&quot;music_parameters.configurations.WESTERN_PITCH_INTERVAL_QUALITY_NAME_TO_ABBREVIATION_DICT&quot;</span>
+            <span class="s2">&quot;if you want to use different abbreviations.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_interval_quality_string_to_interval_quality_tuple</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">interval_quality_string</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="n">interval_quality_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">interval_quality_abbreviation</span> <span class="ow">in</span> <span class="n">interval_quality_string</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">interval_quality</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_abbreviation_to_western_pitch_interval_quality_name_dict</span><span class="p">[</span>
+                        <span class="n">interval_quality_abbreviation</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_raise_invalid_interval_quality_error</span><span class="p">(</span>
+                    <span class="n">interval_quality_abbreviation</span><span class="p">,</span> <span class="n">interval_quality_string</span>
+                <span class="p">)</span>
+            <span class="n">interval_quality_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">interval_quality</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">interval_quality_list</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_raise_error_if_interval_quality_and_interval_type_do_not_fit</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">interval_quality</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">interval_type</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">):</span>
+        <span class="n">is_perfect_interval</span> <span class="o">=</span> <span class="n">WesternPitchInterval</span><span class="o">.</span><span class="n">is_interval_type_perfect</span><span class="p">(</span>
+            <span class="n">interval_type</span>
+        <span class="p">)</span>
+        <span class="n">interval_quality_tuple</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_interval_quality_string_to_interval_quality_tuple</span><span class="p">(</span><span class="n">interval_quality</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">WesternPitchInterval</span><span class="o">.</span><span class="n">_assert_interval_quality_fits_to_interval_type</span><span class="p">(</span>
+            <span class="n">is_perfect_interval</span><span class="p">,</span> <span class="n">interval_quality_tuple</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_raise_error_if_interval_quality_is_invalid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interval_quality</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">interval_quality_tuple</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_interval_quality_string_to_interval_quality_tuple</span><span class="p">(</span><span class="n">interval_quality</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">WesternPitchInterval</span><span class="o">.</span><span class="n">_assert_interval_quality_is_not_mixed</span><span class="p">(</span>
+            <span class="n">interval_quality</span><span class="p">,</span> <span class="n">interval_quality_tuple</span>
+        <span class="p">)</span>
+        <span class="n">WesternPitchInterval</span><span class="o">.</span><span class="n">_assert_interval_quality_avoids_illegal_stacking</span><span class="p">(</span>
+            <span class="n">interval_quality_tuple</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_raise_error_if_interval_type_is_invalid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interval_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">interval_type_as_integer</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">interval_type</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;Found invalid interval_type &#39;</span><span class="si">{interval_type}</span><span class="s2">&#39;! &quot;</span>
+                <span class="s2">&quot;An interval_type should be an integer encoded in a&quot;</span>
+                <span class="s2">&quot; string e.g. &#39;1&#39; or &#39;10&#39; or &#39;3123&#39;.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">interval_type_as_integer</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;Found invalid interval_type &#39;</span><span class="si">{interval_type}</span><span class="s2">&#39;! &quot;</span>
+                <span class="s2">&quot;Interval type should be bigger than 0&quot;</span>
+            <span class="p">)</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                          public properties                             #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_interval_rising</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return `True` if the interval is upwards and `False` if it falls&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_interval_falling</span>
+
+    <span class="nd">@is_interval_rising</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">is_interval_rising</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_interval_rising</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_interval_falling</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">is_interval_rising</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">interval_quality_tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Parsed the interval_quality abbreviation to their full names.&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval_quality_string_to_interval_quality_tuple</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">interval_quality</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">interval_type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;The base interval type (e.g. octave, prime, second, ...).&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval_type</span>
+
+    <span class="nd">@interval_type</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">interval_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interval_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="c1"># Test if interval_type string is allowed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_raise_error_if_interval_type_is_invalid</span><span class="p">(</span><span class="n">interval_type</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_raise_error_if_interval_quality_and_interval_type_do_not_fit</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">interval_quality</span><span class="p">,</span> <span class="n">interval_type</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Set attribute if all tests passed without any exception</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interval_type</span> <span class="o">=</span> <span class="n">interval_type</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">interval_quality</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;The abbreviation of its quality (e.g. augmented, perfect, ...).&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval_quality</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">interval_type_base_type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">WesternPitchInterval</span><span class="o">.</span><span class="n">_interval_type_to_interval_base_type</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">interval_type</span>
+        <span class="p">)</span>
+
+    <span class="nd">@interval_quality</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">interval_quality</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interval_quality</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="c1"># Test if interval_quality string is allowed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_raise_error_if_interval_quality_is_invalid</span><span class="p">(</span><span class="n">interval_quality</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_raise_error_if_interval_quality_and_interval_type_do_not_fit</span><span class="p">(</span>
+            <span class="n">interval_quality</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval_type</span>
+        <span class="p">)</span>
+
+        <span class="c1"># If all tests passed we can set the new interval quality</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interval_quality</span> <span class="o">=</span> <span class="n">interval_quality</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">interval_type_cent_deviation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get cent deviation defined by the interval type.&quot;&quot;&quot;</span>
+
+        <span class="n">interval_base_type</span> <span class="o">=</span> <span class="n">WesternPitchInterval</span><span class="o">.</span><span class="n">_interval_type_to_interval_base_type</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">interval_type</span>
+        <span class="p">)</span>
+        <span class="n">octave_count</span> <span class="o">=</span> <span class="n">WesternPitchInterval</span><span class="o">.</span><span class="n">_interval_type_to_octave_count</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">interval_type</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">WESTERN_PITCH_INTERVAL_BASE_TYPE_TO_CENT_DEVIATION_DICT</span><span class="p">[</span>
+            <span class="n">interval_base_type</span>
+        <span class="p">]</span> <span class="o">+</span> <span class="p">(</span>
+            <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">OCTAVE_IN_CENTS</span> <span class="o">*</span> <span class="n">octave_count</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">interval_quality_cent_deviation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get cent deviation defined by the interval quality.&quot;&quot;&quot;</span>
+
+        <span class="n">interval_quality_tuple</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_interval_quality_string_to_interval_quality_tuple</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">interval_quality</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">cent_deviation</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">interval_quality</span> <span class="ow">in</span> <span class="n">interval_quality_tuple</span><span class="p">:</span>
+            <span class="n">cent_deviation</span> <span class="o">+=</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">WESTERN_PITCH_INTERVAL_QUALITY_TO_CENT_DEVIATION_DICT</span><span class="p">[</span>
+                <span class="n">interval_quality</span>
+            <span class="p">]</span>
+        <span class="c1"># We have to make -100 for imperfect intervals if they are diminished,</span>
+        <span class="c1"># because then they are smaller than a minor interval, which is already</span>
+        <span class="c1"># -100.</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">is_imperfect_interval</span>
+            <span class="ow">and</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">WESTERN_PITCH_INTERVAL_QUALITY_DIMINISHED</span>
+            <span class="ow">in</span> <span class="n">interval_quality_tuple</span>
+        <span class="p">):</span>
+            <span class="n">cent_deviation</span> <span class="o">-=</span> <span class="mi">100</span>
+        <span class="k">return</span> <span class="n">cent_deviation</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">diatonic_pitch_class_count</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;How many diatonic pitch classes have to be moved&quot;&quot;&quot;</span>
+        <span class="n">diatonic_pitch_class_count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interval_type</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_interval_falling</span><span class="p">:</span>
+            <span class="k">return</span> <span class="o">-</span><span class="n">diatonic_pitch_class_count</span>
+        <span class="k">return</span> <span class="n">diatonic_pitch_class_count</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Full interval name&quot;&quot;&quot;</span>
+
+        <span class="n">falling_interval_indicator</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="n">music_parameters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">FALLING_WESTERN_PITCH_INTERVAL_INDICATOR</span><span class="p">,</span>
+        <span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">is_interval_falling</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">interval_quality</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">falling_interval_indicator</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">interval_type</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="nd">@name</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_attribute_by_interval_data</span><span class="p">(</span>
+            <span class="o">*</span><span class="n">WesternPitchInterval</span><span class="o">.</span><span class="n">_interval_name_to_interval_data</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_perfect_interval</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return `True` if interval is perfect and otherwise `False`.</span>
+
+<span class="sd">        With &#39;perfect&#39; all intervals are included which can have the</span>
+<span class="sd">        interval qualities &#39;augmented&#39;, &#39;diminished&#39; and &#39;perfect&#39;.</span>
+
+<span class="sd">        This excludes intervals as sixth, thirds, ... which have</span>
+<span class="sd">        &#39;minor&#39; and &#39;major&#39; qualities.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">WesternPitchInterval</span><span class="o">.</span><span class="n">is_interval_type_perfect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interval_type</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_imperfect_interval</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return `True` if interval is imperfect and otherwise `False`.</span>
+
+<span class="sd">        With &#39;imperfect&#39; all intervals are included which can have the</span>
+<span class="sd">        interval qualities &#39;augmented&#39;, &#39;diminished&#39;, &#39;minor&#39; and</span>
+<span class="sd">        &#39;major&#39;.</span>
+
+<span class="sd">        This excludes intervals as prime, fourth, ... which have the</span>
+<span class="sd">        &#39;perfect&#39; quality.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">WesternPitchInterval</span><span class="o">.</span><span class="n">is_interval_type_imperfect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interval_type</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">interval</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">cent_deviation</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">interval_quality_cent_deviation</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval_type_cent_deviation</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_interval_falling</span><span class="p">:</span>
+            <span class="n">cent_deviation</span> <span class="o">=</span> <span class="o">-</span><span class="n">cent_deviation</span>
+        <span class="k">return</span> <span class="n">cent_deviation</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">semitone_count</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval</span> <span class="o">//</span> <span class="mi">100</span>
+
+    <span class="nd">@semitone_count</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">semitone_count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">semitone_count</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_attribute_by_interval_data</span><span class="p">(</span>
+            <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_semitone_count_to_interval_data</span><span class="p">(</span><span class="n">semitone_count</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">can_be_simplified</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;`True` if interval could be written in a simpler way, `False` otherwise.&quot;&quot;&quot;</span>
+
+        <span class="n">diminished_abbreviation</span> <span class="o">=</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">WESTERN_PITCH_INTERVAL_QUALITY_NAME_TO_ABBREVIATION_DICT</span><span class="p">[</span>
+            <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">WESTERN_PITCH_INTERVAL_QUALITY_AUGMENTED</span>
+        <span class="p">]</span>
+        <span class="n">augmented_abbreviation</span> <span class="o">=</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">WESTERN_PITCH_INTERVAL_QUALITY_NAME_TO_ABBREVIATION_DICT</span><span class="p">[</span>
+            <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">WESTERN_PITCH_INTERVAL_QUALITY_DIMINISHED</span>
+        <span class="p">]</span>
+
+        <span class="c1"># Special treatment for tritone which can&#39;t be written in any other way</span>
+        <span class="c1"># but as a diminished or augmented interval</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">interval_type_base_type</span> <span class="o">==</span> <span class="s2">&quot;4&quot;</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval_quality</span> <span class="o">==</span> <span class="n">diminished_abbreviation</span>
+        <span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">interval_type_base_type</span> <span class="o">==</span> <span class="s2">&quot;5&quot;</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval_quality</span> <span class="o">==</span> <span class="n">augmented_abbreviation</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="c1"># Otherwise: if there is an augmented or diminished interval</span>
+        <span class="c1"># we can be sure it could also be written in another, simpler way.</span>
+        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">interval_quality</span> <span class="ow">in</span> <span class="p">(</span><span class="n">diminished_abbreviation</span><span class="p">,</span> <span class="n">augmented_abbreviation</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">interval_quality</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval_quality</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                           public methods                               #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+<div class="viewcode-block" id="WesternPitchInterval.inverse"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.WesternPitchInterval.inverse">[docs]</a>    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">inverse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mutate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WesternPitchInterval</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Makes falling interval to rising and vice versa.</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo import music_parameters</span>
+<span class="sd">        &gt;&gt;&gt; music_parameters.WesternPitchInterval(&#39;m3&#39;).inverse()</span>
+<span class="sd">        WesternPitchInterval(&#39;m-3&#39;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_interval_falling</span> <span class="o">=</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_interval_falling</span>
+        <span class="k">return</span> <span class="bp">self</span></div></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.music_parameters.pitch_intervals</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Levin Eric Zimmermann.
+    </div>
+  </body>
+</html>

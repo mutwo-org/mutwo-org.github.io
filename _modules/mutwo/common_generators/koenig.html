@@ -1,0 +1,197 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mutwo.common_generators.koenig &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.common_generators.koenig</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mutwo.common_generators.koenig</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Algorithms which are related to German-Dutch composer G. M. Koenig.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>  <span class="c1"># type: ignore</span>
+<span class="kn">import</span> <span class="nn">ranges</span>  <span class="c1"># type: ignore</span>
+
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">common_utilities</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_events</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Tendency&quot;</span><span class="p">,)</span>
+
+
+<div class="viewcode-block" id="Tendency"><a class="viewcode-back" href="../../../api/mutwo.common_generators.html#mutwo.common_generators.Tendency">[docs]</a><span class="k">class</span> <span class="nc">Tendency</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Tendency offers an interface for dynamically changing minima / maxima areas.</span>
+
+<span class="sd">    :param minima_curve: The curve which describes the smallest allowed value over the</span>
+<span class="sd">        time axis.</span>
+<span class="sd">    :type minima_curve: core_events.Envelope</span>
+<span class="sd">    :param maxima_curve: The curve which describes the biggest allowed value over the</span>
+<span class="sd">        time axis.</span>
+<span class="sd">    :type maxima_curve: core_events.Envelope</span>
+<span class="sd">    :param random_seed: The random seed which shall be set.</span>
+<span class="sd">    :type random_seed: int</span>
+
+<span class="sd">    The class is based on Gottfried Michael Koenigs algorithm of &quot;Tendenz-Masken&quot; in</span>
+<span class="sd">    his program &quot;Projekt 2&quot; where those minima / maxima areas represent probability</span>
+<span class="sd">    fields.</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; import core_events</span>
+<span class="sd">    &gt;&gt;&gt; from mutwo.generators import koenig</span>
+<span class="sd">    &gt;&gt;&gt; minima_curve = core_events.Envelope.from_points((0, 0), (1, 1), (2, 0))</span>
+<span class="sd">    &gt;&gt;&gt; maxima_curve = core_events.Envelope.from_points((0, 1), (1, 2), (2, 3))</span>
+<span class="sd">    &gt;&gt;&gt; my_tendency = koenig.Tendency(minima_curve, maxima_curve)</span>
+<span class="sd">    &gt;&gt;&gt; my_tendency.value_at(0.5)</span>
+<span class="sd">    0.6456692551041303</span>
+<span class="sd">    &gt;&gt;&gt; my_tendency.value_at(0.5)</span>
+<span class="sd">    0.9549270045140213</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">minima_curve</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Envelope</span><span class="p">,</span>
+        <span class="n">maxima_curve</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Envelope</span><span class="p">,</span>
+        <span class="n">random_seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_curves_are_valid</span><span class="p">(</span><span class="n">minima_curve</span><span class="p">,</span> <span class="n">maxima_curve</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_minima_curve</span> <span class="o">=</span> <span class="n">minima_curve</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_maxima_curve</span> <span class="o">=</span> <span class="n">maxima_curve</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_random</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">random_seed</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">minima_curve</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">maxima_curve</span><span class="si">}</span><span class="s2">)&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_assert_curves_are_valid</span><span class="p">(</span>
+        <span class="n">minima_curve</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Envelope</span><span class="p">,</span> <span class="n">maxima_curve</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Envelope</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Helper method that asserts the curves are a valid min/max pair.&quot;&quot;&quot;</span>
+
+        <span class="c1"># make sure both curves have equal duration</span>
+        <span class="k">if</span> <span class="n">minima_curve</span><span class="o">.</span><span class="n">duration</span> <span class="o">!=</span> <span class="n">maxima_curve</span><span class="o">.</span><span class="n">duration</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">common_utilities</span><span class="o">.</span><span class="n">UnequalEnvelopeDurationError</span><span class="p">(</span>
+                <span class="n">minima_curve</span><span class="p">,</span> <span class="n">maxima_curve</span>
+            <span class="p">)</span>
+
+        <span class="c1"># It would be better if we could compare all local extrema.</span>
+        <span class="c1"># But there is no public function in core_events.Envelope yet.</span>
+        <span class="c1"># Even if there would be a function to find local extrema it</span>
+        <span class="c1"># is uncertain if this would be faster.</span>
+        <span class="c1"># We want to make sure that at any time point minima_curve</span>
+        <span class="c1"># &lt; maxima_curve.</span>
+        <span class="n">point_to_compare_tuple</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">minima_curve</span><span class="o">.</span><span class="n">absolute_time_tuple</span>
+            <span class="o">+</span> <span class="n">maxima_curve</span><span class="o">.</span><span class="n">absolute_time_tuple</span>
+            <span class="o">+</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">minima_curve</span><span class="o">.</span><span class="n">duration</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">time</span> <span class="ow">in</span> <span class="n">point_to_compare_tuple</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">minima_curve</span><span class="o">.</span><span class="n">value_at</span><span class="p">(</span><span class="n">time</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">maxima_curve</span><span class="o">.</span><span class="n">value_at</span><span class="p">(</span><span class="n">time</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">common_utilities</span><span class="o">.</span><span class="n">InvalidMinimaCurveAndMaximaCurveCombination</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;At time &#39;</span><span class="si">{</span><span class="n">time</span><span class="si">}</span><span class="s2">&#39; &#39;minima_curve&#39; isn&#39;t smaller &quot;</span>
+                    <span class="s2">&quot;than &#39;maxima_curve&#39;!&quot;</span>
+                <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">minima_curve</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Envelope</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_minima_curve</span>
+
+    <span class="nd">@minima_curve</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">minima_curve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minima_curve</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Envelope</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Envelope</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_curves_are_valid</span><span class="p">(</span><span class="n">minima_curve</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxima_curve</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_minima_curve</span> <span class="o">=</span> <span class="n">minima_curve</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">maxima_curve</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Envelope</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_maxima_curve</span>
+
+    <span class="nd">@maxima_curve</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">maxima_curve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maxima_curve</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Envelope</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Envelope</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_curves_are_valid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">minima_curve</span><span class="p">,</span> <span class="n">maxima_curve</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_maxima_curve</span> <span class="o">=</span> <span class="n">maxima_curve</span>
+
+<div class="viewcode-block" id="Tendency.range_at"><a class="viewcode-back" href="../../../api/mutwo.common_generators.html#mutwo.common_generators.Tendency.range_at">[docs]</a>    <span class="k">def</span> <span class="nf">range_at</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ranges</span><span class="o">.</span><span class="n">Range</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get minima / maxima range at requested time.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">ranges</span><span class="o">.</span><span class="n">Range</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">minima_curve</span><span class="o">.</span><span class="n">value_at</span><span class="p">(</span><span class="n">time</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxima_curve</span><span class="o">.</span><span class="n">value_at</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Tendency.value_at"><a class="viewcode-back" href="../../../api/mutwo.common_generators.html#mutwo.common_generators.Tendency.value_at">[docs]</a>    <span class="k">def</span> <span class="nf">value_at</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get value at requested time.&quot;&quot;&quot;</span>
+        <span class="n">range_at_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">range_at</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">range_at_time</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">range_at_time</span><span class="o">.</span><span class="n">end</span><span class="p">)</span></div></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.common_generators.koenig</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Levin Eric Zimmermann.
+    </div>
+  </body>
+</html>

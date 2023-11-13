@@ -1,0 +1,294 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mutwo.common_generators.lehmer &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.common_generators.lehmer</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mutwo.common_generators.lehmer</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Algorithms which are related to US mathematician D.H. Lehmer.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">abc</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">common_utilities</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Backtracking&quot;</span><span class="p">,</span> <span class="s2">&quot;IndexBasedBacktracking&quot;</span><span class="p">)</span>
+
+<span class="n">Solution</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+<span class="n">ElementList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="Backtracking"><a class="viewcode-back" href="../../../api/mutwo.common_generators.html#mutwo.common_generators.Backtracking">[docs]</a><span class="k">class</span> <span class="nc">Backtracking</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Abstract base class to implement a backtracking algorithm</span>
+
+<span class="sd">    By inheriting from this class, various backtracking algorithms</span>
+<span class="sd">    can be implemented. In order to do so the user has to override</span>
+<span class="sd">    a set of abstract methods. The abstract methods include:</span>
+
+<span class="sd">        - :abstractmethod:`Backtracking.is_valid`</span>
+<span class="sd">        - :abstractmethod:`Backtracking.solution_count`</span>
+<span class="sd">        - :abstractmethod:`Backtracking.append_new_element`</span>
+<span class="sd">        - :abstractmethod:`Backtracking.update_last_element`</span>
+<span class="sd">        - :abstractmethod:`Backtracking.can_last_element_be_updated`</span>
+
+<span class="sd">    Furthermore it may be helpful to override the following method</span>
+<span class="sd">    (even though there is a valid working implementation):</span>
+
+<span class="sd">        - :method:`Backtracking.element_list_to_solution`</span>
+
+<span class="sd">    Please see the methods documentation for more details.</span>
+
+<span class="sd">    The implementation of this backtracking algorithm makes a distinction</span>
+<span class="sd">    between an element list and a solution. A solution is created by an</span>
+<span class="sd">    element list. A solution is the output a user wants to get, but</span>
+<span class="sd">    an element list is an object which is used internally in order to</span>
+<span class="sd">    solve the problem. When implementing a backtracking algorithm by</span>
+<span class="sd">    using this interface the user doesn&#39;t have to make the distinction</span>
+<span class="sd">    between both (and in this case treat both in the same way).</span>
+
+<span class="sd">    The most common use case for this distinction is by having a set of</span>
+<span class="sd">    items which can appear in the solution and a list of indices which</span>
+<span class="sd">    item of set shall be used. In this  case the element_list is actually</span>
+<span class="sd">    a list of indices. This use case is implemented in the</span>
+<span class="sd">    :class:`IndexBasedBacktracking` class.</span>
+
+<span class="sd">    `Bitner and Reingold [2] credit Derrick H. Lehmer with first using the</span>
+<span class="sd">    term &#39;backtrack&#39; in the 1950s.</span>
+<span class="sd">    &lt;https://www.chessprogramming.org/Backtracking&gt;`_.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">solution_count</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return expected solution size&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Backtracking.is_valid"><a class="viewcode-back" href="../../../api/mutwo.common_generators.html#mutwo.common_generators.Backtracking.is_valid">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">is_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element_list</span><span class="p">:</span> <span class="n">ElementList</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Checks if an element list provides an acceptable solution.</span>
+
+<span class="sd">        :return: `True` if the solution is acceptable and `False` if</span>
+<span class="sd">            the solution is rejected.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="Backtracking.append_new_element"><a class="viewcode-back" href="../../../api/mutwo.common_generators.html#mutwo.common_generators.Backtracking.append_new_element">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">append_new_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element_list</span><span class="p">:</span> <span class="n">ElementList</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Append new element to element list.</span>
+
+<span class="sd">        :param element_list: The element list to which a new</span>
+<span class="sd">            element shall be appended.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="Backtracking.update_last_element"><a class="viewcode-back" href="../../../api/mutwo.common_generators.html#mutwo.common_generators.Backtracking.update_last_element">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">update_last_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element_list</span><span class="p">:</span> <span class="n">ElementList</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Increments value of the last element in an element_list.</span>
+
+<span class="sd">        :param element_list: The element list which last value shall</span>
+<span class="sd">            be updated.</span>
+
+<span class="sd">        This function should raise an Exception in case the last</span>
+<span class="sd">        element can&#39;t be updated.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="Backtracking.can_last_element_be_updated"><a class="viewcode-back" href="../../../api/mutwo.common_generators.html#mutwo.common_generators.Backtracking.can_last_element_be_updated">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">can_last_element_be_updated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element_list</span><span class="p">:</span> <span class="n">ElementList</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Checks if the last element of the list can be incremented.</span>
+
+<span class="sd">        :param element_list: The element list which last value shall</span>
+<span class="sd">            be checked.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="Backtracking.element_list_to_solution"><a class="viewcode-back" href="../../../api/mutwo.common_generators.html#mutwo.common_generators.Backtracking.element_list_to_solution">[docs]</a>    <span class="k">def</span> <span class="nf">element_list_to_solution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element_list</span><span class="p">:</span> <span class="n">ElementList</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Solution</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Converts an element list to the final solution</span>
+
+<span class="sd">        :param element_list: The element list to be converted.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">element_list</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Backtracking.solve"><a class="viewcode-back" href="../../../api/mutwo.common_generators.html#mutwo.common_generators.Backtracking.solve">[docs]</a>    <span class="k">def</span> <span class="nf">solve</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">return_element_list</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">Solution</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Solution</span><span class="p">,</span> <span class="n">ElementList</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;Apply backtracking algorithm.</span>
+
+<span class="sd">        :param return_element_list: If set to `True` the function</span>
+<span class="sd">            will not only return the solution, but also the element</span>
+<span class="sd">            list.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">element_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_valid</span><span class="p">(</span><span class="n">element_list</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">element_list</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">solution_count</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">append_new_element</span><span class="p">(</span><span class="n">element_list</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">can_last_element_be_updated</span><span class="p">(</span><span class="n">element_list</span><span class="p">):</span>
+                    <span class="n">element_list</span> <span class="o">=</span> <span class="n">element_list</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">element_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="n">common_utilities</span><span class="o">.</span><span class="n">NoSolutionFoundError</span><span class="p">()</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">update_last_element</span><span class="p">(</span><span class="n">element_list</span><span class="p">)</span>
+
+        <span class="n">solution</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_list_to_solution</span><span class="p">(</span><span class="n">element_list</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">return_element_list</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">solution</span><span class="p">,</span> <span class="n">element_list</span>
+        <span class="k">return</span> <span class="n">solution</span></div></div>
+
+
+<div class="viewcode-block" id="IndexBasedBacktracking"><a class="viewcode-back" href="../../../api/mutwo.common_generators.html#mutwo.common_generators.IndexBasedBacktracking">[docs]</a><span class="k">class</span> <span class="nc">IndexBasedBacktracking</span><span class="p">(</span><span class="n">Backtracking</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Abstract base class for index based backtracking algorithms</span>
+
+<span class="sd">    This class implements concrete solutions for the following methods</span>
+<span class="sd">    which are inherited from the parent class :class:`Backtracking`:</span>
+
+<span class="sd">        - :abstractmethod:`Backtracking.append_new_element`</span>
+<span class="sd">        - :abstractmethod:`Backtracking.update_last_element`</span>
+<span class="sd">        - :abstractmethod:`Backtracking.can_last_element_be_updated`</span>
+
+<span class="sd">    The following methods still have to be implemented:</span>
+
+<span class="sd">        - :abstractmethod:`Backtracking.is_valid`</span>
+<span class="sd">        - :abstractmethod:`Backtracking.solution_count`</span>
+
+<span class="sd">    (Please consult for more information the documentation</span>
+<span class="sd">    of :class:`Backtracking`).</span>
+
+<span class="sd">    Furthermore the class adds new abstract methods to be implemented</span>
+<span class="sd">    by child classes:</span>
+
+<span class="sd">        - :abstractmethod:`IndexBasedBacktracking.element_index_to_item_sequence`</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; import itertools</span>
+<span class="sd">    &gt;&gt;&gt; from mutwo import common_generators</span>
+<span class="sd">    &gt;&gt;&gt; class QueenProblem8(common_generators.IndexBasedBacktracking):</span>
+<span class="sd">            point_list = list(itertools.combinations_with_replacement(range(queen_count), 2))</span>
+<span class="sd">            point_list.extend(</span>
+<span class="sd">                [tuple(reversed(point)) for point in point_list if len(set(point)) == 2]</span>
+<span class="sd">            )</span>
+<span class="sd">            def element_index_to_item_sequence(self, element_index, element_list):</span>
+<span class="sd">                return self.point_list</span>
+<span class="sd">            @property</span>
+<span class="sd">            def solution_count(self):</span>
+<span class="sd">                # 8 queens problem!</span>
+<span class="sd">                return 8</span>
+<span class="sd">            def is_valid(self, element_list):</span>
+<span class="sd">                solution = self.element_list_to_solution(element_list)</span>
+<span class="sd">                for queen0, queen1 in itertools.combinations(solution, 2):</span>
+<span class="sd">                    # x != x, y != y</span>
+<span class="sd">                    is_valid = all(value0 != value1 for value0, value1 in zip(queen0, queen1))</span>
+<span class="sd">                    difference_x, difference_y = (value0 - value1 for value0, value1 in zip(queen0, queen1))</span>
+<span class="sd">                    is_valid = is_valid and (difference_x != difference_y)</span>
+<span class="sd">                    if not is_valid: return False</span>
+<span class="sd">                return True</span>
+<span class="sd">    &gt;&gt;&gt; queen_problem_8 = QueenProblem8()</span>
+<span class="sd">    &gt;&gt;&gt; queen_problem_8.solve()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="IndexBasedBacktracking.element_index_to_item_sequence"><a class="viewcode-back" href="../../../api/mutwo.common_generators.html#mutwo.common_generators.IndexBasedBacktracking.element_index_to_item_sequence">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">element_index_to_item_sequence</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">element_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">element_list</span><span class="p">:</span> <span class="n">ElementList</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Get a sequence of items to choose from for a specific element</span>
+
+<span class="sd">        :param element_index: The index of the element for which a sequence</span>
+<span class="sd">            of solutions shall be returned.</span>
+<span class="sd">        :param element_list: The current element list</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="IndexBasedBacktracking.append_new_element"><a class="viewcode-back" href="../../../api/mutwo.common_generators.html#mutwo.common_generators.IndexBasedBacktracking.append_new_element">[docs]</a>    <span class="k">def</span> <span class="nf">append_new_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element_list</span><span class="p">:</span> <span class="n">ElementList</span><span class="p">):</span>
+        <span class="n">element_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="IndexBasedBacktracking.update_last_element"><a class="viewcode-back" href="../../../api/mutwo.common_generators.html#mutwo.common_generators.IndexBasedBacktracking.update_last_element">[docs]</a>    <span class="k">def</span> <span class="nf">update_last_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element_list</span><span class="p">:</span> <span class="n">ElementList</span><span class="p">):</span>
+        <span class="n">element_list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span></div>
+
+<div class="viewcode-block" id="IndexBasedBacktracking.can_last_element_be_updated"><a class="viewcode-back" href="../../../api/mutwo.common_generators.html#mutwo.common_generators.IndexBasedBacktracking.can_last_element_be_updated">[docs]</a>    <span class="k">def</span> <span class="nf">can_last_element_be_updated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element_list</span><span class="p">:</span> <span class="n">ElementList</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="n">max_index</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">element_index_to_item_sequence</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">element_list</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">element_list</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">element_list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="n">max_index</span></div>
+
+<div class="viewcode-block" id="IndexBasedBacktracking.element_list_to_solution"><a class="viewcode-back" href="../../../api/mutwo.common_generators.html#mutwo.common_generators.IndexBasedBacktracking.element_list_to_solution">[docs]</a>    <span class="k">def</span> <span class="nf">element_list_to_solution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element_list</span><span class="p">:</span> <span class="n">ElementList</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Solution</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">element_index_to_item_sequence</span><span class="p">(</span><span class="n">element_index</span><span class="p">,</span> <span class="n">element_list</span><span class="p">)[</span><span class="n">element</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">element_index</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">element_list</span><span class="p">)</span>
+        <span class="p">)</span></div></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.common_generators.lehmer</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Levin Eric Zimmermann.
+    </div>
+  </body>
+</html>

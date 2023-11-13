@@ -1,0 +1,12 @@
+div.body h1 { font-size: 1.75em; }
+div.body h2 { font-size: 1.5em; }
+div.body h3 { font-size: 1.2em; }
+div.body h4 { font-size: 1.1em; }
+div.body h5 { font-size: 1em; }
+div.body h6 { font-size: 0.9em }
+
+table.align-default {
+    margin-left: 0px;
+    margin-right: auto;
+}
+

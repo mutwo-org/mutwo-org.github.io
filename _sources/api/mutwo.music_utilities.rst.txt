@@ -1,0 +1,46 @@
+
+.. currentmodule:: mutwo.music_utilities
+
+mutwo.music_utilities
+=====================
+
+.. contents:: Table of content
+   :depth: 3
+
+.. automodule:: mutwo.music_utilities
+   :members:
+
+
+.. list-table::
+   :align: center
+   :width: 95%
+   :header-rows: 1
+
+   * - Object
+     - Documentation
+   * - :class:`mutwo.music_utilities.DuplicatePlayingIndicatorConverterMappingWarning`
+     - 
+   * - :class:`mutwo.music_utilities.UnsortedIntervalTupleError`
+     - 
+   * - :class:`mutwo.music_utilities.NotInstalledError`
+     - 
+
+
+
+
+.. autoclass:: mutwo.music_utilities.DuplicatePlayingIndicatorConverterMappingWarning
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_utilities.UnsortedIntervalTupleError
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_utilities.NotInstalledError
+
+        .. autoclasstoc::
+    
+
+
