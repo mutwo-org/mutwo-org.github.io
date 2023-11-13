@@ -95,6 +95,7 @@ EOF
   mutwo-csound    = import (sources.mutwo-nix.outPath + "/mutwo.csound/default.nix") {};
   mutwo-ekmelily  = import (sources.mutwo-nix.outPath + "/mutwo.ekmelily/default.nix") {};
   mutwo-abjad     = import (sources.mutwo-nix.outPath + "/mutwo.abjad/default.nix") {};
+  mutwo-reaper    = import (sources.mutwo-nix.outPath + "/mutwo.reaper/default.nix") {};
 
   mypython = pkgs.python310.buildEnv.override {
     extraLibs = with pkgs.python310Packages; [
@@ -107,6 +108,7 @@ EOF
       mutwo-ekmelily
       mutwo-csound
       mutwo-abjad
+      mutwo-reaper
 
       # mutwo module extra dependencies
       pillow
