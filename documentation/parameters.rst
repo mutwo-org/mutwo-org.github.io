@@ -41,9 +41,9 @@ For instance we can say:
 ===== ===== 
 parameter... value..
 ===== =====
-volume amplitude
-pitch frequency
-duration beats
+volume decibel
+pitch hertz
+duration beat_count
 ===== =====
 
 .. csv-table::
@@ -51,9 +51,9 @@ duration beats
    :header: "parameter...", "has value..."
    :widths: 15, 10
 
-   "volume", "amplitude"
-   "pitch", "frequency"
-   "duration", "beats"
+   "volume", "decibel"
+   "pitch", "hertz"
+   "duration", "beat_count"
 
 So volume, pitch or duration can essentially be described by one numerical value.
 Nevertheless this doesn't resonate with how we usually think about these parameters in our daily context:
@@ -69,15 +69,15 @@ Define pitches
 
 Let's illustrate this concept by defining some actual pitches in *mutwo*.
 We start with using the class :class:`~mutwo.music_parameters.DirectPitch`.
-This pitch is directly represented by its :attr:`~mutwo.music_parameters.DirectPitch.frequency` and doesn't utilities any higher abstraction.
+This pitch is directly represented by its :attr:`~mutwo.music_parameters.DirectPitch.hertz` and doesn't utilities any higher abstraction.
 So the following code gives us a pitch with the frequency 440 Hertz.
 
 >>> from mutwo import music_parameters
 >>> p0 = music_parameters.DirectPitch(440)
 
-Let's check its :attr:`~mutwo.music_parameters.DirectPitch.frequency`:
+Let's check its :attr:`~mutwo.music_parameters.DirectPitch.hertz`:
 
->>> p0.frequency
+>>> p0.hertz
 440.0
 
 And now let's create a pitch with the same frequency, but a more abstract nomenclature.
@@ -88,7 +88,7 @@ This :class:`~mutwo.music_parameters.WesternPitch` uses the `pitch class <https:
 (it uses the `scientific pitch notation <https://en.wikipedia.org/wiki/Scientific_pitch_notation>`_).
 When we check its frequency, `it's also 440 <https://en.wikipedia.org/wiki/Piano_key_frequencies>`_:
 
->>> p1.frequency
+>>> p1.hertz
 440.0
 
 We can now compare our two pitches:
@@ -117,7 +117,7 @@ Define tones, chords & rests
 ############################
 
 After understanding *mutwos* basic parameters approach, we can now use parameters in order to actually define some more meaningful events.
-Besides the fundamental classes :class:`~mutwo.core_events.SimpleEvent`, :class:`~mutwo.core_events.SequentialEvent` and :class:`~mutwo.core_events.SimultaneousEvent` of the `mutwo.core package <https://pypi.org/project/mutwo.core/>`_, `mutwo.music <https://pypi.org/project/mutwo.music/>`_ provides the very useful :class:`~mutwo.music_events.NoteLike`.
+Besides the fundamental classes :class:`~mutwo.core_events.SimpleEvent`, :class:`~mutwo.core_events.Consecution` and :class:`~mutwo.core_events.Concurrence` of the `mutwo.core package <https://pypi.org/project/mutwo.core/>`_, `mutwo.music <https://pypi.org/project/mutwo.music/>`_ provides the very useful :class:`~mutwo.music_events.NoteLike`.
 With :class:`~mutwo.music_events.NoteLike` it's easy to represent musical elements as tones, chords or rests.
 :class:`~mutwo.music_events.NoteLike` is a subclass of :class:`~mutwo.core_events.SimpleEvent` and extends it by mapping more parameters to itself.
 Let's say a tone is a pitch with a specific duration and a specific volume and let's try to represent this with :class:`~mutwo.music_events.NoteLike`.

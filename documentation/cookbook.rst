@@ -6,14 +6,12 @@ This is a collection of small How-Tos in the *mutwo* framework.
 Define your events by name
 ##########################
 
-You can use :class:`~mutwo.core_events.TaggedSequentialEvent` or :class:`~mutwo.core_events.TaggedSimultaneousEvent`:
-
 .. code-block:: python
 
    from mutwo import core_events
 
-   e = core_events.SimultaneousEvent(
-       [core_events.TaggedSequentialEvent([], tag="a", core_events.TaggedSimultaneousEvent([], tag="b"]
+   e = core_events.Concurrence(
+       [core_events.Consecution([], tag="a", core_events.Concurrence([], tag="b"]
    )
 
    # We can access events by tags
@@ -75,15 +73,15 @@ Because each :class:`~mutwo.core_events.abc.Event` has its own :class:`~mutwo.co
 
    from mutwo import core_events
 
-   e = core_events.SimultaneousEvent(
+   e = core_events.Concurrence(
        [
-           core_events.SequentialEvent([], tempo_envelope=[[0, 60], [1, 30]]),
-           core_events.SequentialEvent([], tempo_envelope=[[0, 40], [1, 90]]),
+           core_events.Consecution([], tempo_envelope=[[0, 60], [1, 30]]),
+           core_events.Consecution([], tempo_envelope=[[0, 40], [1, 90]]),
        ]
    )
 
 
-Change all pitches / volumes / ... of a :class:`~mutwo.core_events.SequentialEvent` or :class:`~mutwo.core_events.SimultaneousEvent`
+Change all pitches / volumes / ... of a :class:`~mutwo.core_events.Consecution` or :class:`~mutwo.core_events.Concurrence`
 ####################################################################################################################################
 
 You can use :meth:`~mutwo.core_events.abc.Event.set_parameter` or :meth:`~mutwo.core_events.abc.Event.mutate_parameter` to change a parameter of an event and its children:
@@ -94,9 +92,9 @@ You can use :meth:`~mutwo.core_events.abc.Event.set_parameter` or :meth:`~mutwo.
    from mutwo import music_events
    from mutwo import music_parameters
 
-   e = core_events.SimultaneousEvent(
+   e = core_events.Concurrence(
        [
-           core_events.SequentialEvent([music_events.NoteLike('c', 2)]),
+           core_events.Consecution([music_events.NoteLike('c', 2)]),
            music_events.NoteLike('d', 2),
        ]
    )

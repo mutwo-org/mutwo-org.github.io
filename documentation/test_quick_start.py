@@ -7,12 +7,12 @@ rest = music_events.NoteLike([], 1)
 from mutwo import core_events
 from mutwo import music_events
 
-melody = core_events.SequentialEvent([music_events.NoteLike('c', 1), music_events.NoteLike('d', 0.5), music_events.NoteLike('e', 1)])
+melody = core_events.Consecution([music_events.NoteLike('c', 1), music_events.NoteLike('d', 0.5), music_events.NoteLike('e', 1)])
 
 reversed_melody = melody.copy()
 reversed_melody.reverse()
 
-polyphony = core_events.SimultaneousEvent([melody, reversed_melody])
+polyphony = core_events.Concurrence([melody, reversed_melody])
 
 
 from mutwo import midi_converters
@@ -22,7 +22,7 @@ mc.convert(polyphony, 'polyphony.mid')
 
 from mutwo import abjad_converters
 import abjad
-ac = abjad_converters.SequentialEventToAbjadVoice()
+ac = abjad_converters.ConsecutionToAbjadVoice()
 s0 = abjad.Staff([ac.convert(polyphony[0])])
 s1 = abjad.Staff([ac.convert(polyphony[1])])
 score = abjad.Score([s0, s1])

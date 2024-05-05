@@ -34,14 +34,14 @@ Define a melody and a polyphony
    from mutwo import core_events
    from mutwo import music_events
 
-   melody = core_events.SequentialEvent(
+   melody = core_events.Consecution(
        [music_events.NoteLike('c', 1), music_events.NoteLike('d', 0.5), music_events.NoteLike('e', 1)]
    )
 
    reversed_melody = melody.copy()
    reversed_melody.reverse()
 
-   polyphony = core_events.SimultaneousEvent([melody, reversed_melody])
+   polyphony = core_events.Concurrence([melody, reversed_melody])
 
 
 Export the polyphony to a MIDI file
@@ -82,7 +82,7 @@ Export the polyphony to a musical notation
    from mutwo import abjad_converters
    import abjad
 
-   ac = abjad_converters.SequentialEventToAbjadVoice()
+   ac = abjad_converters.ConsecutionToAbjadVoice()
 
    s0 = abjad.Staff([ac.convert(polyphony[0])])
    s1 = abjad.Staff([ac.convert(polyphony[1])])

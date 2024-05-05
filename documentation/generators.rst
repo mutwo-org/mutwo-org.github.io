@@ -21,7 +21,7 @@ We could for instance use :class:`~mutwo.common_generators.ActivityLevel` and :m
     beat_count = (3, 5, 4, 5, 6, 2)
     activity_level = common_generators.ActivityLevel()
 
-    event = core_events.SimultaneousEvent([])
+    event = core_events.Concurrence([])
 
     for pitch_list, bc in (
         (
@@ -39,7 +39,7 @@ We could for instance use :class:`~mutwo.common_generators.ActivityLevel` and :m
             reversed(beat_count),
         ),
     ):
-        s = core_events.SequentialEvent([])
+        s = core_events.Consecution([])
         for b in bc:
             rhythm = common_generators.euclidean(7, b)
             for duration in rhythm:

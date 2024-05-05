@@ -26,7 +26,7 @@ Let's first define a small melody that we export to the MIDI file:
    from mutwo import core_events
    from mutwo import music_events
 
-   melody = core_events.SequentialEvent(
+   melody = core_events.Consecution(
        [
            music_events.NoteLike('c', 0.25),
            music_events.NoteLike('e', 0.5),
