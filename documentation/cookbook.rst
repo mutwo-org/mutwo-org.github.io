@@ -53,13 +53,13 @@ you can specify how much the pitch should derive in cents from the original freq
 Set and apply tempo of your event
 #################################
 
-All events have a :attr:`~mutwo.core_events.abc.Event.tempo_envelope` attribute, which can be set in order to change the tempo of your event:
+All events have a :attr:`~mutwo.core_events.abc.Event.tempo` attribute, which can be set in order to change the tempo of your event:
 
 .. code-block:: python
 
    from mutwo import core_events
 
-   e = core_events.SimpleEvent(duration=1, tempo_envelope=[[0, 60], [1, 30]])
+   e = core_events.Chronon(duration=1, tempo=[[0, 60], [1, 30]])
 
    # Apply tempo envelope on event:
    e.metrize()
@@ -75,8 +75,8 @@ Because each :class:`~mutwo.core_events.abc.Event` has its own :class:`~mutwo.co
 
    e = core_events.Concurrence(
        [
-           core_events.Consecution([], tempo_envelope=[[0, 60], [1, 30]]),
-           core_events.Consecution([], tempo_envelope=[[0, 40], [1, 90]]),
+           core_events.Consecution([], tempo=[[0, 60], [1, 30]]),
+           core_events.Consecution([], tempo=[[0, 40], [1, 90]]),
        ]
    )
 

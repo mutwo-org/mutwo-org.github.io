@@ -17,7 +17,7 @@ Then our abstract event could become a musical composition.
 
 This missing content is described as **parameters** in *mutwo*.
 **Parameters** are object which are mapped to events.
-When we think of a tone, we could interpret this as a :class:`~mutwo.core_events.SimpleEvent` which - besides its information about its duration - also hosts data about...
+When we think of a tone, we could interpret this as a :class:`~mutwo.core_events.Chronon` which - besides its information about its duration - also hosts data about...
 
 * ...its pitch
 * ...its dynamic
@@ -117,9 +117,9 @@ Define tones, chords & rests
 ############################
 
 After understanding *mutwos* basic parameters approach, we can now use parameters in order to actually define some more meaningful events.
-Besides the fundamental classes :class:`~mutwo.core_events.SimpleEvent`, :class:`~mutwo.core_events.Consecution` and :class:`~mutwo.core_events.Concurrence` of the `mutwo.core package <https://pypi.org/project/mutwo.core/>`_, `mutwo.music <https://pypi.org/project/mutwo.music/>`_ provides the very useful :class:`~mutwo.music_events.NoteLike`.
+Besides the fundamental classes :class:`~mutwo.core_events.Chronon`, :class:`~mutwo.core_events.Consecution` and :class:`~mutwo.core_events.Concurrence` of the `mutwo.core package <https://pypi.org/project/mutwo.core/>`_, `mutwo.music <https://pypi.org/project/mutwo.music/>`_ provides the very useful :class:`~mutwo.music_events.NoteLike`.
 With :class:`~mutwo.music_events.NoteLike` it's easy to represent musical elements as tones, chords or rests.
-:class:`~mutwo.music_events.NoteLike` is a subclass of :class:`~mutwo.core_events.SimpleEvent` and extends it by mapping more parameters to itself.
+:class:`~mutwo.music_events.NoteLike` is a subclass of :class:`~mutwo.core_events.Chronon` and extends it by mapping more parameters to itself.
 Let's say a tone is a pitch with a specific duration and a specific volume and let's try to represent this with :class:`~mutwo.music_events.NoteLike`.
 We first define our parameters:
 
