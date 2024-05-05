@@ -1,0 +1,146 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mutwo.timeline_utilities.exceptions &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.timeline_utilities.exceptions</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mutwo.timeline_utilities.exceptions</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;EventPlacementRegisterError&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ExceedDurationError&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;EventPlacementNotFoundError&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;TooSmallRangeWarning&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;UnresolvedConflict&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="EventPlacementRegisterError"><a class="viewcode-back" href="../../../api/mutwo.timeline_utilities.html#mutwo.timeline_utilities.EventPlacementRegisterError">[docs]</a><span class="k">class</span> <span class="nc">EventPlacementRegisterError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event_placement_to_register</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="s2">&quot;Problem with EventPlacement on tag_tuple = &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">event_placement_to_register</span><span class="o">.</span><span class="n">tag_tuple</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">message</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ExceedDurationError"><a class="viewcode-back" href="../../../api/mutwo.timeline_utilities.html#mutwo.timeline_utilities.ExceedDurationError">[docs]</a><span class="k">class</span> <span class="nc">ExceedDurationError</span><span class="p">(</span><span class="n">EventPlacementRegisterError</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event_placement_to_register</span><span class="p">,</span> <span class="n">duration</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">event_placement_to_register</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;EventPlacement &#39;</span><span class="si">{</span><span class="n">event_placement_to_register</span><span class="si">}</span><span class="s2"> &quot;</span>
+            <span class="s2">&quot;exceed predefined static duration = &#39;</span><span class="si">{duration}</span><span class="s2">&#39; of &quot;</span>
+            <span class="s2">&quot;TimeLine.&quot;</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="EventPlacementNotFoundError"><a class="viewcode-back" href="../../../api/mutwo.timeline_utilities.html#mutwo.timeline_utilities.EventPlacementNotFoundError">[docs]</a><span class="k">class</span> <span class="nc">EventPlacementNotFoundError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">tag</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">index</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">event_placement</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">event_placement</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Can&#39;t find EventPlacement &#39;</span><span class="si">{</span><span class="n">event_placement</span><span class="si">}</span><span class="s2">&#39; inside TimeLine!&quot;</span>
+        <span class="k">elif</span> <span class="n">tag</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Can&#39;t find EventPlacement with tag = &#39;</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;and index = &#39;</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">&#39; in TimeLine!&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Need to provide either event_placement or tag/index!&quot;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">m</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TooSmallRangeWarning"><a class="viewcode-back" href="../../../api/mutwo.timeline_utilities.html#mutwo.timeline_utilities.TooSmallRangeWarning">[docs]</a><span class="k">class</span> <span class="nc">TooSmallRangeWarning</span><span class="p">(</span><span class="ne">Warning</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event_placement</span><span class="p">,</span> <span class="n">time_range</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Found too small difference in time range &#39;</span><span class="si">{</span><span class="n">time_range</span><span class="si">}</span><span class="s2">&#39; of &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">event_placement</span><span class="si">}</span><span class="s2">&#39;. Auto set to only one value. Increase &quot;</span>
+            <span class="s2">&quot;&#39;mutwo.core_parameters.configurations.ROUND_DURATION_TO_N_DIGITS&#39;&quot;</span>
+            <span class="s2">&quot; if you need higher precision.&quot;</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="UnresolvedConflict"><a class="viewcode-back" href="../../../api/mutwo.timeline_utilities.html#mutwo.timeline_utilities.UnresolvedConflict">[docs]</a><span class="k">class</span> <span class="nc">UnresolvedConflict</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conflict</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Can&#39;t resolve conflict &#39;</span><span class="si">{</span><span class="n">conflict</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.timeline_utilities.exceptions</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Levin Eric Zimmermann.
+    </div>
+  </body>
+</html>

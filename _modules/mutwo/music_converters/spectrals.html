@@ -1,0 +1,176 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mutwo.music_converters.spectrals &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.music_converters.spectrals</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mutwo.music_converters.spectrals</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_converters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_parameters</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;TwoPitchesToCommonHarmonicTuple&quot;</span><span class="p">,)</span>
+
+
+<div class="viewcode-block" id="TwoPitchesToCommonHarmonicTuple"><a class="viewcode-back" href="../../../api/mutwo.music_converters.html#mutwo.music_converters.TwoPitchesToCommonHarmonicTuple">[docs]</a><span class="k">class</span> <span class="nc">TwoPitchesToCommonHarmonicTuple</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Converter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Find the common harmonics between two pitches.</span>
+
+<span class="sd">    :param tonality: ``True`` for finding common harmonics, ``False`` for finding</span>
+<span class="sd">        common subharmonics and ``None`` for finding common pitches between the</span>
+<span class="sd">        harmonics of the first pitch and the subharmonics of the second pitch.</span>
+<span class="sd">    :type tonality: typing.Optional[bool]</span>
+<span class="sd">    :param lowest_partial: The lowest partial to get investigated. Shouldn&#39;t be smaller</span>
+<span class="sd">        than 1.</span>
+<span class="sd">    :type lowest_partial: int</span>
+<span class="sd">    :param highest_partial: The highest partial to get investigated. Shouldn&#39;t be bigger</span>
+<span class="sd">        than 1.</span>
+<span class="sd">    :type highest_partial: int</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">tonality</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span> <span class="n">lowest_partial</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">highest_partial</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tonality_per_pitch_tuple</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">(</span><span class="n">tonality</span><span class="p">,</span> <span class="n">tonality</span><span class="p">)</span> <span class="k">if</span> <span class="n">tonality</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tonality_to_partial_tuple_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">tonality</span><span class="p">:</span> <span class="n">TwoPitchesToCommonHarmonicTuple</span><span class="o">.</span><span class="n">_make_partials</span><span class="p">(</span>
+                <span class="n">lowest_partial</span><span class="p">,</span> <span class="n">highest_partial</span><span class="p">,</span> <span class="n">tonality</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">tonality</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="p">}</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_make_partials</span><span class="p">(</span>
+        <span class="n">lowest_partial</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">highest_partial</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">tonality</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">JustIntonationPitch</span><span class="p">],</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="n">partial_tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">partial_index</span><span class="p">,</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">JustIntonationPitch</span><span class="p">(</span><span class="n">partial_index</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">partial_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">lowest_partial</span><span class="p">,</span> <span class="n">highest_partial</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">tonality</span><span class="p">:</span>
+            <span class="p">[</span><span class="n">partial</span><span class="o">.</span><span class="n">inverse</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">partial</span> <span class="ow">in</span> <span class="n">partial_tuple</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">partial_tuple</span>
+
+<div class="viewcode-block" id="TwoPitchesToCommonHarmonicTuple.convert"><a class="viewcode-back" href="../../../api/mutwo.music_converters.html#mutwo.music_converters.TwoPitchesToCommonHarmonicTuple.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">pitch_pair_to_examine</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span>
+            <span class="n">music_parameters</span><span class="o">.</span><span class="n">JustIntonationPitch</span><span class="p">,</span>
+            <span class="n">music_parameters</span><span class="o">.</span><span class="n">JustIntonationPitch</span><span class="p">,</span>
+        <span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">CommonHarmonic</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="n">partials0</span><span class="p">,</span> <span class="n">partials1</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="nb">tuple</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">partial_index</span><span class="p">,</span> <span class="n">partial</span> <span class="o">+</span> <span class="n">pitch</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">partial_index</span><span class="p">,</span> <span class="n">partial</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tonality_to_partial_tuple_dict</span><span class="p">[</span>
+                    <span class="n">tonality</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">pitch</span><span class="p">,</span> <span class="n">tonality</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                <span class="n">pitch_pair_to_examine</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tonality_per_pitch_tuple</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">partial_index_for_partials1</span><span class="p">,</span> <span class="n">partials1</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">partials1</span><span class="p">)</span>
+
+        <span class="n">common_harmonic_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">partial_index_for_first_pitch</span><span class="p">,</span> <span class="n">partial</span> <span class="ow">in</span> <span class="n">partials0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">partial</span> <span class="ow">in</span> <span class="n">partials1</span><span class="p">:</span>
+                <span class="n">partial_index_for_second_pitch</span> <span class="o">=</span> <span class="n">partial_index_for_partials1</span><span class="p">[</span>
+                    <span class="n">partials1</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">partial</span><span class="p">)</span>
+                <span class="p">]</span>
+                <span class="n">common_harmonic</span> <span class="o">=</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">CommonHarmonic</span><span class="p">(</span>
+                    <span class="nb">tuple</span><span class="p">(</span>
+                        <span class="n">music_parameters</span><span class="o">.</span><span class="n">Partial</span><span class="p">(</span><span class="n">partial_index</span><span class="p">,</span> <span class="n">tonality</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">partial_index</span><span class="p">,</span> <span class="n">tonality</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                            <span class="p">(</span>
+                                <span class="n">partial_index_for_first_pitch</span><span class="p">,</span>
+                                <span class="n">partial_index_for_second_pitch</span><span class="p">,</span>
+                            <span class="p">),</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_tonality_per_pitch_tuple</span><span class="p">,</span>
+                        <span class="p">)</span>
+                    <span class="p">),</span>
+                    <span class="n">partial</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">common_harmonic_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">common_harmonic</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">common_harmonic_list</span><span class="p">)</span></div></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.music_converters.spectrals</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Levin Eric Zimmermann.
+    </div>
+  </body>
+</html>

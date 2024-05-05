@@ -1,0 +1,213 @@
+
+.. currentmodule:: mutwo.music_converters
+
+mutwo.music_converters
+======================
+
+.. contents:: Table of content
+   :depth: 3
+
+.. automodule:: mutwo.music_converters
+   :members:
+
+
+.. list-table::
+   :align: center
+   :width: 95%
+   :header-rows: 1
+
+   * - Object
+     - Documentation
+   * - :class:`mutwo.music_converters.GraceNotesConverter`
+     - Apply grace notes and after grace notes on :class:`core_events.abc.Event`.
+   * - :class:`mutwo.music_converters.RhythmicalStrataToIndispensability`
+     - Builds metrical indispensability for a rhythmical strata.
+   * - :class:`mutwo.music_converters.ChrononToPitchList`
+     - 
+   * - :class:`mutwo.music_converters.ChrononToVolume`
+     - 
+   * - :class:`mutwo.music_converters.ChrononToLyric`
+     - 
+   * - :class:`mutwo.music_converters.ChrononToInstrumentList`
+     - 
+   * - :class:`mutwo.music_converters.ChrononToPlayingIndicatorCollection`
+     - 
+   * - :class:`mutwo.music_converters.ChrononToNotationIndicatorCollection`
+     - 
+   * - :class:`mutwo.music_converters.ChrononToGraceNoteConsecution`
+     - 
+   * - :class:`mutwo.music_converters.ChrononToAfterGraceNoteConsecution`
+     - 
+   * - :class:`mutwo.music_converters.MutwoParameterDictToPitchList`
+     - 
+   * - :class:`mutwo.music_converters.MutwoParameterDictToVolume`
+     - 
+   * - :class:`mutwo.music_converters.MutwoParameterDictToInstrumentList`
+     - 
+   * - :class:`mutwo.music_converters.MutwoParameterDictToPlayingIndicatorCollection`
+     - 
+   * - :class:`mutwo.music_converters.MutwoParameterDictToNotationIndicatorCollection`
+     - 
+   * - :class:`mutwo.music_converters.MutwoParameterDictToGraceNoteConsecution`
+     - 
+   * - :class:`mutwo.music_converters.MutwoParameterDictToAfterGraceNoteConsecution`
+     - 
+   * - :class:`mutwo.music_converters.MutwoParameterDictToNoteLike`
+     - Convert a dict of mutwo parameters to a :class:`mutwo.music_events.NoteLike`
+   * - :class:`mutwo.music_converters.PlayingIndicatorConverter`
+     - Abstract base class to apply :class:`~mutwo.music_parameters.abc.PlayingIndicator` on a :class:`~mutwo.core_events.Chronon`.
+   * - :class:`mutwo.music_converters.ArpeggioConverter`
+     - Apply arpeggio on :class:`~mutwo.core_events.Chronon`.
+   * - :class:`mutwo.music_converters.StacattoConverter`
+     - Apply staccato on :class:`~mutwo.core_events.Chronon`.
+   * - :class:`mutwo.music_converters.ArticulationConverter`
+     - Apply articulation on :class:`~mutwo.core_events.Chronon`.
+   * - :class:`mutwo.music_converters.TrillConverter`
+     - Apply trill on :class:`~mutwo.core_events.Chronon`.
+   * - :class:`mutwo.music_converters.OptionalConverter`
+     - Apply optional on :class:`~mutwo.core_events.Chronon`.
+   * - :class:`mutwo.music_converters.PlayingIndicatorsConverter`
+     - Apply :class:`mutwo.music_parameters.abc.PlayingIndicator` on any :class:`~mutwo.core_events.abc.Event`.
+   * - :class:`mutwo.music_converters.TwoPitchesToCommonHarmonicTuple`
+     - Find the common harmonics between two pitches.
+
+
+
+
+.. autoclass:: mutwo.music_converters.GraceNotesConverter
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_converters.RhythmicalStrataToIndispensability
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_converters.ChrononToPitchList
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_converters.ChrononToVolume
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_converters.ChrononToLyric
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_converters.ChrononToInstrumentList
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_converters.ChrononToPlayingIndicatorCollection
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_converters.ChrononToNotationIndicatorCollection
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_converters.ChrononToGraceNoteConsecution
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_converters.ChrononToAfterGraceNoteConsecution
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_converters.MutwoParameterDictToPitchList
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_converters.MutwoParameterDictToVolume
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_converters.MutwoParameterDictToInstrumentList
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_converters.MutwoParameterDictToPlayingIndicatorCollection
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_converters.MutwoParameterDictToNotationIndicatorCollection
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_converters.MutwoParameterDictToGraceNoteConsecution
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_converters.MutwoParameterDictToAfterGraceNoteConsecution
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_converters.MutwoParameterDictToNoteLike
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_converters.PlayingIndicatorConverter
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_converters.ArpeggioConverter
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_converters.StacattoConverter
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_converters.ArticulationConverter
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_converters.TrillConverter
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_converters.OptionalConverter
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_converters.PlayingIndicatorsConverter
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_converters.TwoPitchesToCommonHarmonicTuple
+
+        .. autoclasstoc::
+    
+
+
+mutwo.music_converters.configurations
+-------------------------------------
+
+.. automodule:: mutwo.music_converters.configurations
+   :members:
+

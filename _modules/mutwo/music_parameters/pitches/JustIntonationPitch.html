@@ -1,0 +1,1280 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mutwo.music_parameters.pitches.JustIntonationPitch &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css" />
+    
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.music_parameters.pitches.JustIntonationPitch</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mutwo.music_parameters.pitches.JustIntonationPitch</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">primepi</span>
+<span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">prime</span>
+<span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">primerange</span>
+<span class="kn">from</span> <span class="nn">sympy.ntheory</span> <span class="kn">import</span> <span class="n">factorint</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">quicktions</span> <span class="k">as</span> <span class="nn">fractions</span>  <span class="c1"># type: ignore</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">fractions</span>  <span class="c1"># type: ignore</span>
+
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_constants</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_utilities</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_parameters</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;JustIntonationPitch&quot;</span><span class="p">,)</span>
+
+<span class="n">ConcertPitch</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">]</span>
+<span class="n">PitchClassOrPitchClassName</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="JustIntonationPitch"><a class="viewcode-back" href="../../../../api/mutwo.music_parameters.html#mutwo.music_parameters.JustIntonationPitch">[docs]</a><span class="nd">@functools</span><span class="o">.</span><span class="n">total_ordering</span>
+<span class="k">class</span> <span class="nc">JustIntonationPitch</span><span class="p">(</span>
+    <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">,</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PitchInterval</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Pitch that is defined by a frequency ratio and a reference pitch.</span>
+
+<span class="sd">    :param ratio_or_exponent_tuple: The frequency ratio of the ``JustIntonationPitch``.</span>
+<span class="sd">        This can either be a string that indicates the frequency ratio (for</span>
+<span class="sd">        instance: &quot;1/1&quot;, &quot;3/2&quot;, &quot;9/2&quot;, etc.), or a ``fractions.Fraction``</span>
+<span class="sd">        object that indicates the frequency ratio (for instance:</span>
+<span class="sd">        ``fractions.Fraction(3, 2)``, ``fractions.Fraction(7, 4)``) or</span>
+<span class="sd">        a sequence of integer that represents the :attr:``exponent_tuple``</span>
+<span class="sd">        of the respective prime numbers of the decomposed frequency ratio. The prime</span>
+<span class="sd">        numbers are rising and start with 2. Therefore the tuple ``(2, 0, -1)``</span>
+<span class="sd">        would return the frequency ratio ``4/5`` because</span>
+<span class="sd">        ``(2 ** 2) * (3 ** 0) * (5 ** -1) = 4/5``.</span>
+<span class="sd">    :param concert_pitch: The reference pitch of the tuning system (the pitch for a</span>
+<span class="sd">        frequency ratio of 1/1). Can either be another ``Pitch`` object or any number</span>
+<span class="sd">        to indicate a particular frequency in Hertz.</span>
+
+<span class="sd">    The resulting frequency is calculated by multiplying the frequency ratio</span>
+<span class="sd">    with the respective reference pitch.</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import music_parameters</span>
+<span class="sd">    &gt;&gt;&gt; # 3 different variations of initialising the same pitch</span>
+<span class="sd">    &gt;&gt;&gt; music_parameters.JustIntonationPitch(&#39;3/2&#39;)</span>
+<span class="sd">    JustIntonationPitch(&#39;3/2&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; import fractions</span>
+<span class="sd">    &gt;&gt;&gt; music_parameters.JustIntonationPitch(fractions.Fraction(3, 2))</span>
+<span class="sd">    JustIntonationPitch(&#39;3/2&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; music_parameters.JustIntonationPitch((-1, 1))</span>
+<span class="sd">    JustIntonationPitch(&#39;3/2&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; # using a different concert pitch</span>
+<span class="sd">    &gt;&gt;&gt; music_parameters.JustIntonationPitch(&#39;7/5&#39;, concert_pitch=432)</span>
+<span class="sd">    JustIntonationPitch(&#39;7/5&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ratio_or_exponent_tuple</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span>
+            <span class="nb">str</span><span class="p">,</span> <span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;1/1&quot;</span><span class="p">,</span>
+        <span class="n">concert_pitch</span><span class="p">:</span> <span class="n">ConcertPitch</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">get_cls_logger</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">concert_pitch</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">concert_pitch</span> <span class="o">=</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_CONCERT_PITCH</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">exponent_tuple</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ratio_or_fractions_argument_to_exponent_tuple</span><span class="p">(</span>
+            <span class="n">ratio_or_exponent_tuple</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">concert_pitch</span> <span class="o">=</span> <span class="n">concert_pitch</span>  <span class="c1"># type: ignore</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                      static private methods                            #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_adjust_exponent_lengths</span><span class="p">(</span>
+        <span class="n">exponent_tuple0</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">exponent_tuple1</span><span class="p">:</span> <span class="nb">tuple</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Adjust two exponent_tuple, e.g. make their length equal.</span>
+
+<span class="sd">        The length of the longer JustIntonationPitch is the reference.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            * exponent_tuple0: first exponent_tuple to adjust</span>
+<span class="sd">            * exponent_tuple1: second exponent_tuple to adjust</span>
+<span class="sd">        &gt;&gt;&gt; v0 = (1, 0, -1)</span>
+<span class="sd">        &gt;&gt;&gt; v1 = (1,)</span>
+<span class="sd">        &gt;&gt;&gt; v0_adjusted, v1_adjusted = JustIntonationPitch._adjust_exponent_lengths(v0, v1)</span>
+<span class="sd">        &gt;&gt;&gt; v0_adjusted</span>
+<span class="sd">        (1, 0, -1)</span>
+<span class="sd">        &gt;&gt;&gt; v1_adjusted</span>
+<span class="sd">        (1, 0, 0)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">length0</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">exponent_tuple0</span><span class="p">)</span>
+        <span class="n">length1</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">exponent_tuple1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">length0</span> <span class="o">&gt;</span> <span class="n">length1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">exponent_tuple0</span><span class="p">,</span> <span class="n">exponent_tuple1</span> <span class="o">+</span> <span class="p">(</span><span class="mi">0</span><span class="p">,)</span> <span class="o">*</span> <span class="p">(</span><span class="n">length0</span> <span class="o">-</span> <span class="n">length1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">exponent_tuple0</span> <span class="o">+</span> <span class="p">(</span><span class="mi">0</span><span class="p">,)</span> <span class="o">*</span> <span class="p">(</span><span class="n">length1</span> <span class="o">-</span> <span class="n">length0</span><span class="p">),</span> <span class="n">exponent_tuple1</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_adjust_ratio</span><span class="p">(</span><span class="n">ratio</span><span class="p">:</span> <span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">,</span> <span class="n">border</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">:</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Multiply or divide a fractions.Fraction - Object with the border,</span>
+
+<span class="sd">        until it is equal or bigger than 1 and smaller than border.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            * ratio: The Ratio, which shall be adjusted</span>
+<span class="sd">            * border</span>
+<span class="sd">        &gt;&gt;&gt; ratio0 = fractions.Fraction(1, 3)</span>
+<span class="sd">        &gt;&gt;&gt; ratio1 = fractions.Fraction(8, 3)</span>
+<span class="sd">        &gt;&gt;&gt; border = 2</span>
+<span class="sd">        &gt;&gt;&gt; JustIntonationPitch._adjust_ratio(ratio0, border)</span>
+<span class="sd">        Fraction(4, 3)</span>
+<span class="sd">        &gt;&gt;&gt; JustIntonationPitch._adjust_ratio(ratio1, border)</span>
+<span class="sd">        Fraction(4, 3)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">border</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">while</span> <span class="n">ratio</span> <span class="o">&gt;=</span> <span class="n">border</span><span class="p">:</span>
+                <span class="n">ratio</span> <span class="o">/=</span> <span class="n">border</span>
+            <span class="k">while</span> <span class="n">ratio</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">ratio</span> <span class="o">*=</span> <span class="n">border</span>
+        <span class="k">return</span> <span class="n">ratio</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_adjust_exponent_tuple</span><span class="p">(</span>
+        <span class="n">exponent_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">primes</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">border</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Adjust a exponent_tuple and its primes depending on the border.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            * exponent_tuple: The exponent_tuple, which shall be adjusted</span>
+<span class="sd">            * primes: Its corresponding primes</span>
+<span class="sd">            * border</span>
+<span class="sd">        &gt;&gt;&gt; exponent_tuple0 = (1,)</span>
+<span class="sd">        &gt;&gt;&gt; primes0 = (3,)</span>
+<span class="sd">        &gt;&gt;&gt; border = 2</span>
+<span class="sd">        &gt;&gt;&gt; JustIntonationPitch._adjust_exponent_tuple(exponent_tuple0, primes0, border)</span>
+<span class="sd">        ((-1, 1), (2, 3))</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># TODO(DOCSTRING) Make proper description what actually happens</span>
+
+        <span class="k">if</span> <span class="n">exponent_tuple</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">border</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">multiplied</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span>
+                    <span class="n">operator</span><span class="o">.</span><span class="n">mul</span><span class="p">,</span> <span class="p">(</span><span class="n">p</span><span class="o">**</span><span class="n">e</span> <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">primes</span><span class="p">,</span> <span class="n">exponent_tuple</span><span class="p">))</span>
+                <span class="p">)</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">border</span> <span class="o">/</span> <span class="n">multiplied</span><span class="p">,</span> <span class="n">border</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">res</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">res</span> <span class="o">-=</span> <span class="mi">1</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+                <span class="n">primes</span> <span class="o">=</span> <span class="p">(</span><span class="n">border</span><span class="p">,)</span> <span class="o">+</span> <span class="n">primes</span>
+                <span class="n">exponent_tuple</span> <span class="o">=</span> <span class="p">(</span><span class="n">res</span><span class="p">,)</span> <span class="o">+</span> <span class="n">exponent_tuple</span>
+            <span class="k">return</span> <span class="n">exponent_tuple</span><span class="p">,</span> <span class="n">primes</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mi">1</span><span class="p">,),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_discard_nulls</span><span class="p">(</span><span class="n">iterable</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Discard all zeros after the last not 0 - element of an arbitary iterable.</span>
+
+<span class="sd">        Return a tuple.</span>
+<span class="sd">        Arguments:</span>
+<span class="sd">            * iterable: the iterable, whose 0 - elements shall</span>
+<span class="sd">              be discarded</span>
+
+<span class="sd">        &gt;&gt;&gt; tuple0 = (1, 0, 2, 3, 0, 0, 0)</span>
+<span class="sd">        &gt;&gt;&gt; ls = [1, 3, 5, 0, 0, 0, 2, 0]</span>
+<span class="sd">        &gt;&gt;&gt; JustIntonationPitch._discard_nulls(tuple0)</span>
+<span class="sd">        (1, 0, 2, 3)</span>
+<span class="sd">        &gt;&gt;&gt; JustIntonationPitch._discard_nulls(ls)</span>
+<span class="sd">        (1, 3, 5, 0, 0, 0, 2)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">iterable</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">iterable</span><span class="p">)</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">iterable</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">c</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">c</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">iterable</span><span class="p">[:</span><span class="o">-</span><span class="n">c</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">iterable</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_exponent_tuple_to_pair</span><span class="p">(</span><span class="n">exponent_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">primes</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Transform a JustIntonationPitch to a (numerator, denominator) - pair.</span>
+
+<span class="sd">        Arguments are:</span>
+<span class="sd">            * JustIntonationPitch -&gt; The exponent_tuple of prime numbers</span>
+<span class="sd">            * primes -&gt; the referring prime numbers</span>
+<span class="sd">        &gt;&gt;&gt; myJustIntonationPitch0 = (1, 0, -1)</span>
+<span class="sd">        &gt;&gt;&gt; myJustIntonationPitch1 = (0, 2, 0)</span>
+<span class="sd">        &gt;&gt;&gt; myVal0 = (2, 3, 5)</span>
+<span class="sd">        &gt;&gt;&gt; myVal1 = (3, 5, 7)</span>
+<span class="sd">        &gt;&gt;&gt; JustIntonationPitch._exponent_tuple_to_pair(myJustIntonationPitch0, myVal0)</span>
+<span class="sd">        (2, 5)</span>
+<span class="sd">        &gt;&gt;&gt; JustIntonationPitch._exponent_tuple_to_pair(myJustIntonationPitch0, myVal1)</span>
+<span class="sd">        (3, 7)</span>
+<span class="sd">        &gt;&gt;&gt; JustIntonationPitch._exponent_tuple_to_pair(myJustIntonationPitch1, myVal1)</span>
+<span class="sd">        (25, 1)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">numerator</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">denominator</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">number</span><span class="p">,</span> <span class="n">exponent</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">primes</span><span class="p">,</span> <span class="n">exponent_tuple</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">exponent</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">numerator</span> <span class="o">*=</span> <span class="nb">pow</span><span class="p">(</span><span class="n">number</span><span class="p">,</span> <span class="n">exponent</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">exponent</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">denominator</span> <span class="o">*=</span> <span class="nb">pow</span><span class="p">(</span><span class="n">number</span><span class="p">,</span> <span class="o">-</span><span class="n">exponent</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">numerator</span><span class="p">,</span> <span class="n">denominator</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_exponent_tuple_to_ratio</span><span class="p">(</span>
+        <span class="n">exponent_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">primes</span><span class="p">:</span> <span class="nb">tuple</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">:</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Transform a JustIntonationPitch to a fractions.Fraction - Object</span>
+
+<span class="sd">        (if installed to a quicktions.fractions.Fraction - Object,</span>
+<span class="sd">        otherwise to a fractions.fractions.Fraction - Object).</span>
+
+<span class="sd">        Arguments are:</span>
+<span class="sd">            * JustIntonationPitch -&gt; The exponent_tuple of prime numbers</span>
+<span class="sd">            * primes -&gt; the referring prime numbers for the underlying</span>
+<span class="sd">                      ._exponent_tuple - Argument (see JustIntonationPitch._exponent_tuple).</span>
+<span class="sd">        &gt;&gt;&gt; exponent_tuple = (1, 0, -1)</span>
+<span class="sd">        &gt;&gt;&gt; prime_tuple = (2, 3, 5)</span>
+<span class="sd">        &gt;&gt;&gt; JustIntonationPitch._exponent_tuple_to_ratio(exponent_tuple, prime_tuple)</span>
+<span class="sd">        Fraction(2, 5)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">numerator</span><span class="p">,</span> <span class="n">denominator</span> <span class="o">=</span> <span class="n">JustIntonationPitch</span><span class="o">.</span><span class="n">_exponent_tuple_to_pair</span><span class="p">(</span>
+            <span class="n">exponent_tuple</span><span class="p">,</span> <span class="n">primes</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">JustIntonationPitch</span><span class="o">.</span><span class="n">_adjust_ratio</span><span class="p">(</span>
+            <span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">(</span><span class="n">numerator</span><span class="p">,</span> <span class="n">denominator</span><span class="p">),</span> <span class="mi">1</span>
+        <span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_exponent_tuple_to_float</span><span class="p">(</span><span class="n">exponent_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">primes</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Transform a JustIntonationPitch to a float.</span>
+
+<span class="sd">        Arguments are:</span>
+<span class="sd">            * JustIntonationPitch -&gt; The exponent_tuple of prime numbers</span>
+<span class="sd">            * primes -&gt; the referring prime numbers for the underlying</span>
+<span class="sd">                      ._exponent_tuple - Argument (see JustIntonationPitch._exponent_tuple).</span>
+<span class="sd">            * primes-shift -&gt; how many prime numbers shall be skipped</span>
+<span class="sd">                            (see JustIntonationPitch.primes_shift)</span>
+
+<span class="sd">        &gt;&gt;&gt; myJustIntonationPitch0 = (1, 0, -1)</span>
+<span class="sd">        &gt;&gt;&gt; myJustIntonationPitch1 = (0, 2, 0)</span>
+<span class="sd">        &gt;&gt;&gt; myPrimes = (2, 3, 5)</span>
+<span class="sd">        &gt;&gt;&gt; JustIntonationPitch._exponent_tuple_to_float(myJustIntonationPitch0, myPrimes)</span>
+<span class="sd">        0.4</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">numerator</span><span class="p">,</span> <span class="n">denominator</span> <span class="o">=</span> <span class="n">JustIntonationPitch</span><span class="o">.</span><span class="n">_exponent_tuple_to_pair</span><span class="p">(</span>
+            <span class="n">exponent_tuple</span><span class="p">,</span> <span class="n">primes</span>
+        <span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">numerator</span> <span class="o">/</span> <span class="n">denominator</span>
+        <span class="k">except</span> <span class="ne">OverflowError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">numerator</span> <span class="o">//</span> <span class="n">denominator</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_ratio_to_exponent_tuple</span><span class="p">(</span><span class="n">ratio</span><span class="p">:</span> <span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Transform a fractions.Fraction - Object to a vector of exponent_tuple.</span>
+
+<span class="sd">        :param ratio: The fractions.Fraction, which shall be transformed</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; try:</span>
+<span class="sd">        ...     import quicktions as fractions</span>
+<span class="sd">        ... except ImportError:</span>
+<span class="sd">        ...     import fractions</span>
+<span class="sd">        &gt;&gt;&gt; my_ratio = fractions.Fraction(3, 2)</span>
+<span class="sd">        &gt;&gt;&gt; JustIntonationPitch._ratio_to_exponent_tuple(my_ratio)</span>
+<span class="sd">        (-1, 1)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">factorised_numerator</span> <span class="o">=</span> <span class="n">factorint</span><span class="p">(</span><span class="n">ratio</span><span class="o">.</span><span class="n">numerator</span><span class="p">)</span>
+        <span class="n">factorised_denominator</span> <span class="o">=</span> <span class="n">factorint</span><span class="p">(</span><span class="n">ratio</span><span class="o">.</span><span class="n">denominator</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">biggest_prime</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span>
+                <span class="nb">tuple</span><span class="p">(</span><span class="n">factorised_numerator</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+                <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">factorised_denominator</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">biggest_prime</span> <span class="o">=</span> <span class="mi">2</span>
+
+        <span class="n">exponent_tuple</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">primepi</span><span class="p">(</span><span class="n">biggest_prime</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">prime</span><span class="p">,</span> <span class="n">factor</span> <span class="ow">in</span> <span class="n">factorised_numerator</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">prime</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">exponent_tuple</span><span class="p">[</span><span class="n">primepi</span><span class="p">(</span><span class="n">prime</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">factor</span>
+
+        <span class="k">for</span> <span class="n">prime</span><span class="p">,</span> <span class="n">factor</span> <span class="ow">in</span> <span class="n">factorised_denominator</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">prime</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">exponent_tuple</span><span class="p">[</span><span class="n">primepi</span><span class="p">(</span><span class="n">prime</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-=</span> <span class="n">factor</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">exponent_tuple</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_indigestibility</span><span class="p">(</span><span class="n">num</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Calculate _indigestibility of a number</span>
+
+<span class="sd">        The implementation follows Clarence Barlows definition</span>
+<span class="sd">        given in &#39;The Ratio Book&#39; (1992).</span>
+<span class="sd">        Arguments:</span>
+<span class="sd">            * num -&gt; integer, whose _indigestibility value shall be calculated</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; JustIntonationPitch._indigestibility(1)</span>
+<span class="sd">        0</span>
+<span class="sd">        &gt;&gt;&gt; JustIntonationPitch._indigestibility(2)</span>
+<span class="sd">        1.0</span>
+<span class="sd">        &gt;&gt;&gt; JustIntonationPitch._indigestibility(3)</span>
+<span class="sd">        2.6666666666666665</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">decomposed</span> <span class="o">=</span> <span class="n">factorint</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">multiple</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">JustIntonationPitch</span><span class="o">.</span><span class="n">_indigestibility_of_factorised</span><span class="p">(</span><span class="n">decomposed</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_indigestibility_of_factorised</span><span class="p">(</span><span class="n">decomposed</span><span class="p">):</span>
+        <span class="n">decomposed</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">(</span><span class="n">decomposed</span><span class="p">)</span>
+        <span class="n">decomposed</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">decomposed</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="n">decomposed</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">summed</span> <span class="o">=</span> <span class="p">((</span><span class="n">power</span> <span class="o">*</span> <span class="nb">pow</span><span class="p">(</span><span class="n">prime</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="o">/</span> <span class="n">prime</span> <span class="k">for</span> <span class="n">power</span><span class="p">,</span> <span class="n">prime</span> <span class="ow">in</span> <span class="n">decomposed</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">sum</span><span class="p">(</span><span class="n">summed</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_accidentals</span><span class="p">(</span><span class="n">n_accidentals</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">n_accidentals</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;s&quot;</span> <span class="o">*</span> <span class="n">n_accidentals</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;f&quot;</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">n_accidentals</span><span class="p">)</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                            private methods                             #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="k">def</span> <span class="nf">_count_accidentals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">accidentals</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="n">accidental_counter</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">({</span><span class="s2">&quot;f&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span>
+        <span class="n">accidental_counter</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">accidentals</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">accidental</span> <span class="ow">in</span> <span class="n">accidentals</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">accidental</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;f&quot;</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Found unknown accidental &#39;</span><span class="si">{</span><span class="n">accidental</span><span class="si">}</span><span class="s2">&#39; which will be ignored&quot;</span><span class="p">,</span>
+                    <span class="ne">RuntimeWarning</span><span class="p">,</span>
+                <span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">accidental_counter</span><span class="p">[</span><span class="s2">&quot;s&quot;</span><span class="p">])</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">accidental_counter</span><span class="p">[</span><span class="s2">&quot;f&quot;</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">_ratio_or_fractions_argument_to_exponent_tuple</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ratio_or_exponent_tuple</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span>
+            <span class="nb">str</span><span class="p">,</span> <span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
+        <span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ratio_or_exponent_tuple</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">numerator</span><span class="p">,</span> <span class="n">denominator</span> <span class="o">=</span> <span class="n">ratio_or_exponent_tuple</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+            <span class="n">exponent_tuple</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ratio_to_exponent_tuple</span><span class="p">(</span>
+                <span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">numerator</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">denominator</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ratio_or_exponent_tuple</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Iterable</span><span class="p">):</span>
+            <span class="n">exponent_tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">ratio_or_exponent_tuple</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ratio_or_exponent_tuple</span><span class="p">,</span> <span class="s2">&quot;numerator&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span>
+            <span class="n">ratio_or_exponent_tuple</span><span class="p">,</span> <span class="s2">&quot;denominator&quot;</span>
+        <span class="p">):</span>
+            <span class="n">exponent_tuple</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ratio_to_exponent_tuple</span><span class="p">(</span>
+                <span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">(</span>
+                    <span class="n">ratio_or_exponent_tuple</span><span class="o">.</span><span class="n">numerator</span><span class="p">,</span>
+                    <span class="n">ratio_or_exponent_tuple</span><span class="o">.</span><span class="n">denominator</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Unknown type &#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">ratio_or_exponent_tuple</span><span class="p">)</span><span class="si">}</span><span class="s2">&#39; of object &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">ratio_or_exponent_tuple</span><span class="si">}</span><span class="s2">&#39; for &#39;ratio_or_exponent_tuple&#39; &quot;</span>
+                <span class="s2">&quot;argument.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">exponent_tuple</span>
+
+    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">_math</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">JustIntonationPitch</span><span class="p">,</span> <span class="n">operation</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JustIntonationPitch</span><span class="p">:</span>
+        <span class="n">exponent_tuple0</span><span class="p">,</span> <span class="n">exponent_tuple1</span> <span class="o">=</span> <span class="n">JustIntonationPitch</span><span class="o">.</span><span class="n">_adjust_exponent_lengths</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">exponent_tuple</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">exponent_tuple</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exponent_tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="n">operation</span><span class="p">(</span><span class="n">exponent0</span><span class="p">,</span> <span class="n">exponent1</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">exponent0</span><span class="p">,</span> <span class="n">exponent1</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">exponent_tuple0</span><span class="p">,</span> <span class="n">exponent_tuple1</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                            magic methods                               #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">match</span> <span class="n">other</span><span class="p">:</span>
+            <span class="k">case</span> <span class="n">JustIntonationPitch</span><span class="p">():</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">exponent_tuple</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">exponent_tuple</span>
+            <span class="k">case</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PitchInterval</span><span class="p">():</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">interval</span>
+            <span class="k">case</span> <span class="k">_</span><span class="p">:</span>  <span class="c1"># pitch test</span>
+                <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">match</span> <span class="n">other</span><span class="p">:</span>
+            <span class="k">case</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PitchInterval</span><span class="p">():</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval</span> <span class="o">&lt;</span> <span class="n">other</span><span class="o">.</span><span class="n">interval</span>
+            <span class="k">case</span> <span class="k">_</span><span class="p">:</span>  <span class="c1"># pitch test</span>
+                <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__lt__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__float__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return the float of a JustIntonationPitch - object.</span>
+
+<span class="sd">        These are the same:</span>
+<span class="sd">            float(myJustIntonationPitch.ratio) == float(myJustIntonationPitch).</span>
+<span class="sd">        Note the difference that the second version might be slightly</span>
+<span class="sd">        more performant.</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch0 = JustIntonationPitch((-1, 1))</span>
+<span class="sd">        &gt;&gt;&gt; float(just_intonation_pitch0)</span>
+<span class="sd">        1.5</span>
+<span class="sd">        &gt;&gt;&gt; float(just_intonation_pitch0.ratio)</span>
+<span class="sd">        1.5</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exponent_tuple_to_float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exponent_tuple</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">prime_tuple</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">ratio</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ratio</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ratio</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">ratio</span> <span class="o">+=</span> <span class="s2">&quot;/1&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(&#39;</span><span class="si">{</span><span class="n">ratio</span><span class="si">}</span><span class="s2">&#39;)&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__abs__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">numerator</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">denominator</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">exponent_tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="o">-</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exponent_tuple</span><span class="p">))</span>
+            <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="n">exponent_tuple</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">concert_pitch</span><span class="p">)</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                            properties                                  #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">exponent_tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exponent_tuple</span>
+
+    <span class="nd">@exponent_tuple</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">exponent_tuple</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">exponent_tuple</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exponent_tuple</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_discard_nulls</span><span class="p">(</span><span class="n">exponent_tuple</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">prime_tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return ascending list of primes, until the highest contained Prime.</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch0 = JustIntonationPitch((0, 1, 2))</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch0.prime_tuple</span>
+<span class="sd">        (2, 3, 5)</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch1 = JustIntonationPitch((0, -1, 0, 0, 1), 1)</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch1.prime_tuple</span>
+<span class="sd">        (2, 3, 5, 7, 11)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">primerange</span><span class="p">(</span><span class="n">prime</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exponent_tuple</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">occupied_primes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return all occurring prime numbers of a JustIntonationPitch object.&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="n">prime</span>
+            <span class="k">for</span> <span class="n">prime</span><span class="p">,</span> <span class="n">exponent</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prime_tuple</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">exponent_tuple</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">exponent</span> <span class="o">!=</span> <span class="mi">0</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">concert_pitch</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_concert_pitch</span>
+
+    <span class="nd">@concert_pitch</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">concert_pitch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">concert_pitch</span><span class="p">:</span> <span class="n">ConcertPitch</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">concert_pitch</span><span class="p">,</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">):</span>
+            <span class="n">concert_pitch</span> <span class="o">=</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">DirectPitch</span><span class="p">(</span><span class="n">concert_pitch</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_concert_pitch</span> <span class="o">=</span> <span class="n">concert_pitch</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">frequency</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ratio</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">concert_pitch</span><span class="o">.</span><span class="n">frequency</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return the JustIntonationPitch transformed to a Ratio.</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch = JustIntonationPitch((0, 0, 1,))</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch.ratio</span>
+<span class="sd">        Fraction(5, 1)</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch = JustIntonationPitch(&quot;3/2&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch.ratio</span>
+<span class="sd">        Fraction(3, 2)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">JustIntonationPitch</span><span class="o">.</span><span class="n">_exponent_tuple_to_ratio</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">exponent_tuple</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">prime_tuple</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">numerator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return the numerator of a JustIntonationPitch - object.</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch0 = JustIntonationPitch((0, -1,))</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch0.numerator</span>
+<span class="sd">        1</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">numerator</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">number</span><span class="p">,</span> <span class="n">exponent</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prime_tuple</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">exponent_tuple</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">exponent</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">numerator</span> <span class="o">*=</span> <span class="nb">pow</span><span class="p">(</span><span class="n">number</span><span class="p">,</span> <span class="n">exponent</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">numerator</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">denominator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return the denominator of :class:`JustIntonationPitch`.</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch0 = JustIntonationPitch((0, 1,))</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch0.denominator</span>
+<span class="sd">        1</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">denominator</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">number</span><span class="p">,</span> <span class="n">exponent</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prime_tuple</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">exponent_tuple</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">exponent</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">denominator</span> <span class="o">*=</span> <span class="nb">pow</span><span class="p">(</span><span class="n">number</span><span class="p">,</span> <span class="o">-</span><span class="n">exponent</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">denominator</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">interval</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ratio_to_cents</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ratio</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">factorised</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return factorised / decomposed version of itsef.</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch0 = JustIntonationPitch((-2, 0, 1))</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch0.factorised</span>
+<span class="sd">        (2, 2, 5)</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch1 = JustIntonationPitch(&quot;7/6&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch1.factorised</span>
+<span class="sd">        (2, 3, 7)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">exponent_tuple</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exponent_tuple</span>
+        <span class="n">prime_tuple</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prime_tuple</span>
+        <span class="n">exponent_tuple_adjusted</span><span class="p">,</span> <span class="n">prime_tuple_adjusted</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span>
+            <span class="bp">self</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">_adjust_exponent_tuple</span><span class="p">(</span><span class="n">exponent_tuple</span><span class="p">,</span> <span class="n">prime_tuple</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">decomposed</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">[</span><span class="n">prime</span><span class="p">]</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">exponent</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">prime</span><span class="p">,</span> <span class="n">exponent</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">prime_tuple_adjusted</span><span class="p">,</span> <span class="n">exponent_tuple_adjusted</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">functools</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">add</span><span class="p">,</span> <span class="n">decomposed</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">factorised_numerator_and_denominator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+        <span class="n">exponent_tuple</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exponent_tuple</span>
+        <span class="n">prime_tuple</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prime_tuple</span>
+        <span class="n">exponent_tuple_adjusted</span><span class="p">,</span> <span class="n">prime_tuple_adjusted</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span>
+            <span class="bp">self</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">_adjust_exponent_tuple</span><span class="p">(</span><span class="n">exponent_tuple</span><span class="p">,</span> <span class="n">prime_tuple</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">numerator_denominator</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">[[[]],</span> <span class="p">[[]]]</span>
+        <span class="k">for</span> <span class="n">prime</span><span class="p">,</span> <span class="n">exponent</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">prime_tuple_adjusted</span><span class="p">,</span> <span class="n">exponent_tuple_adjusted</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">exponent</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">numerator_denominator</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">prime</span><span class="p">]</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">exponent</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="n">functools</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">add</span><span class="p">,</span> <span class="n">decomposed</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">decomposed</span> <span class="ow">in</span> <span class="n">numerator_denominator</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">octave</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interval</span> <span class="o">//</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">OCTAVE_IN_CENTS</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">helmholtz_ellis_just_intonation_notation_commas</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">CommaCompound</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Commas of JustIntonationPitch.&quot;&quot;&quot;</span>
+
+        <span class="n">prime_to_exponent_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">prime</span><span class="p">:</span> <span class="n">exponent</span>
+            <span class="k">for</span> <span class="n">prime</span><span class="p">,</span> <span class="n">exponent</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prime_tuple</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">exponent_tuple</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">exponent</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">prime</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">CommaCompound</span><span class="p">(</span>
+            <span class="n">prime_to_exponent_dict</span><span class="p">,</span>
+            <span class="n">music_parameters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_PRIME_TO_COMMA_DICT</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">closest_pythagorean_interval</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JustIntonationPitch</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">helmholtz_ellis_just_intonation_notation_commas</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">closest_pythagorean_interval</span> <span class="o">=</span> <span class="bp">self</span> <span class="o">-</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span>
+                <span class="n">functools</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span>
+                    <span class="n">operator</span><span class="o">.</span><span class="n">mul</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">helmholtz_ellis_just_intonation_notation_commas</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">closest_pythagorean_interval</span><span class="o">.</span><span class="n">normalize</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">closest_pythagorean_interval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">mutate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+
+        <span class="k">return</span> <span class="n">closest_pythagorean_interval</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">cent_deviation_from_closest_western_pitch_class</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">deviation_by_helmholtz_ellis_just_intonation_notation_commas</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">JustIntonationPitch</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">helmholtz_ellis_just_intonation_notation_commas</span><span class="o">.</span><span class="n">ratio</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">interval</span>
+        <span class="p">)</span>
+        <span class="n">closest_pythagorean_interval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">closest_pythagorean_interval</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">closest_pythagorean_interval</span><span class="o">.</span><span class="n">exponent_tuple</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">pythagorean_deviation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">closest_pythagorean_interval</span><span class="o">.</span><span class="n">exponent_tuple</span><span class="p">[</span>
+                <span class="mi">1</span>
+            <span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">JustIntonationPitch</span><span class="p">(</span><span class="s2">&quot;3/2&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">interval</span> <span class="o">-</span> <span class="mi">700</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pythagorean_deviation</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">deviation_by_helmholtz_ellis_just_intonation_notation_commas</span>
+            <span class="o">+</span> <span class="n">pythagorean_deviation</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">blueprint</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">ignore</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,)</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="n">blueprint</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">factorised</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">factorised_numerator_and_denominator</span><span class="p">:</span>
+            <span class="n">factorised</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">fac</span> <span class="k">for</span> <span class="n">fac</span> <span class="ow">in</span> <span class="n">factorised</span> <span class="k">if</span> <span class="n">fac</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ignore</span><span class="p">)</span>
+            <span class="n">counter</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">(</span><span class="n">factorised</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">counter</span><span class="p">:</span>
+                <span class="n">maxima</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">counter</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+                <span class="n">blueprint</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">counter</span><span class="p">[</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">maxima</span><span class="p">)))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">blueprint</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([]))</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">blueprint</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tonality</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return the tonality (bool) of a JustIntonationPitch - object.</span>
+
+<span class="sd">        The tonality of a JustIntonationPitch   - may be True (otonality) if</span>
+<span class="sd">        the exponent of the highest occurring prime number is a</span>
+<span class="sd">        positive number and False if the exponent is a</span>
+<span class="sd">        negative number (utonality).</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo import music_parameters</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch0 = music_parameters.JustIntonationPitch((-2, 1))</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch0.tonality</span>
+<span class="sd">        True</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch1 = music_parameters.JustIntonationPitch((-2, -1))</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch1.tonality</span>
+<span class="sd">        False</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch2 = music_parameters.JustIntonationPitch([])</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch2.tonality</span>
+<span class="sd">        True</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">exponent_tuple</span><span class="p">:</span>
+            <span class="n">maxima</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exponent_tuple</span><span class="p">)</span>
+            <span class="n">minima</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exponent_tuple</span><span class="p">)</span>
+            <span class="n">test</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">maxima</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">minima</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="n">minima</span> <span class="o">&lt;</span> <span class="mi">0</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">exponent_tuple</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">minima</span><span class="p">)</span>
+                <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">exponent_tuple</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">maxima</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">test</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">harmonic</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return the nth - harmonic / subharmonic the pitch may represent.</span>
+
+<span class="sd">        :return: May be positive for harmonic and negative for</span>
+<span class="sd">            subharmonic pitches. If the return - value is 0,</span>
+<span class="sd">            the interval may occur neither between the first harmonic</span>
+<span class="sd">            and any other pitch of the harmonic scale nor</span>
+<span class="sd">            between the first subharmonic in the and any other</span>
+<span class="sd">            pitch of the subharmonic scale.</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch0 = JustIntonationPitch((-1, 1))</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch0.ratio</span>
+<span class="sd">        Fraction(3, 2)</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch0.harmonic</span>
+<span class="sd">        3</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch1 = JustIntonationPitch((1, -1))</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch1.harmonic</span>
+<span class="sd">        -3</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">ratio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ratio</span>
+
+        <span class="k">if</span> <span class="n">ratio</span><span class="o">.</span><span class="n">denominator</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ratio</span><span class="o">.</span><span class="n">numerator</span>
+        <span class="k">elif</span> <span class="n">ratio</span><span class="o">.</span><span class="n">numerator</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="o">-</span><span class="n">ratio</span><span class="o">.</span><span class="n">denominator</span>
+        <span class="k">elif</span> <span class="n">ratio</span> <span class="o">==</span> <span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">primes_for_numerator_and_denominator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">factorint</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">multiple</span><span class="o">=</span><span class="kc">True</span><span class="p">))))</span>
+            <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numerator</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">denominator</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">harmonicity_wilson</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="n">decomposed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">factorised</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">decomposed</span><span class="p">)))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">harmonicity_vogel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="n">decomposed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">factorised</span>
+        <span class="n">decomposed_filtered</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">decomposed</span><span class="p">))</span>
+        <span class="n">am_2</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">decomposed</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">decomposed_filtered</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">decomposed_filtered</span><span class="p">)</span> <span class="o">+</span> <span class="n">am_2</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">harmonicity_euler</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return the &#39;gradus suavitatis&#39; of euler.</span>
+
+<span class="sd">        A higher number means a less consonant interval /</span>
+<span class="sd">        a more complicated harmony.</span>
+<span class="sd">        euler(1/1) is definied as 1.</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch0 = JustIntonationPitch((-1, 1))</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch1 = JustIntonationPitch()</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch2 = JustIntonationPitch((-2, 0, 1))</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch3 = JustIntonationPitch((-3, 0, -1))</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch0.harmonicity_euler</span>
+<span class="sd">        4</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch1.harmonicity_euler</span>
+<span class="sd">        1</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch2.harmonicity_euler</span>
+<span class="sd">        7</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch3.harmonicity_euler</span>
+<span class="sd">        8</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">decomposed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">factorised</span>
+        <span class="k">return</span> <span class="mi">1</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">decomposed</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">harmonicity_barlow</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate the barlow-harmonicity of an interval.</span>
+
+<span class="sd">        This implementation follows Clarence Barlows definition, given</span>
+<span class="sd">        in &#39;The Ratio Book&#39; (1992).</span>
+
+<span class="sd">        A higher number means a more harmonic interval / a less</span>
+<span class="sd">        complex harmony.</span>
+
+<span class="sd">        barlow(1/1) is definied as infinite.</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch0 = JustIntonationPitch((-1, 1))</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch1 = JustIntonationPitch()</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch2 = JustIntonationPitch((-2, 0, 1))</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch3 = JustIntonationPitch((-3, 0, -1))</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch0.harmonicity_barlow</span>
+<span class="sd">        0.27272727272727276</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch1.harmonicity_barlow # 1/1 is infinite harmonic</span>
+<span class="sd">        inf</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch2.harmonicity_barlow</span>
+<span class="sd">        0.11904761904761904</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch3.harmonicity_barlow</span>
+<span class="sd">        -0.10638297872340426</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">sign</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)[</span><span class="n">x</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">numerator_denominator_decomposed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">factorised_numerator_and_denominator</span>
+        <span class="n">indigestibility_numerator</span> <span class="o">=</span> <span class="n">JustIntonationPitch</span><span class="o">.</span><span class="n">_indigestibility_of_factorised</span><span class="p">(</span>
+            <span class="n">numerator_denominator_decomposed</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">indigestibility_denominator</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">JustIntonationPitch</span><span class="o">.</span><span class="n">_indigestibility_of_factorised</span><span class="p">(</span>
+                <span class="n">numerator_denominator_decomposed</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">indigestibility_numerator</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">indigestibility_denominator</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">sign</span><span class="p">(</span><span class="n">indigestibility_numerator</span> <span class="o">-</span> <span class="n">indigestibility_denominator</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+            <span class="n">indigestibility_numerator</span> <span class="o">+</span> <span class="n">indigestibility_denominator</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">harmonicity_simplified_barlow</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate a simplified barlow-harmonicity of an interval.</span>
+
+<span class="sd">        This implementation follows Clarence Barlows definition, given</span>
+<span class="sd">        in &#39;The Ratio Book&#39; (1992), with the difference that</span>
+<span class="sd">        only positive numbers are returned and that (1/1) is</span>
+<span class="sd">        defined as 1 instead of infinite.</span>
+
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch0 = JustIntonationPitch((-1, 1))</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch1 = JustIntonationPitch()</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch2 = JustIntonationPitch((-2, 0, 1))</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch3 = JustIntonationPitch((-3, 0, -1))</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch0.harmonicity_simplified_barlow</span>
+<span class="sd">        0.27272727272727276</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch1.harmonicity_simplified_barlow # 1/1 is not infinite but 1</span>
+<span class="sd">        1</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch2.harmonicity_simplified_barlow</span>
+<span class="sd">        0.11904761904761904</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch3.harmonicity_simplified_barlow # positive return value</span>
+<span class="sd">        0.10638297872340426</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">barlow</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">harmonicity_barlow</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">barlow</span> <span class="o">==</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">barlow</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">harmonicity_tenney</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate Tenneys harmonic distance of an interval</span>
+
+<span class="sd">        A higher number</span>
+<span class="sd">        means a more consonant interval / a less</span>
+<span class="sd">        complicated harmony.</span>
+
+<span class="sd">        tenney(1/1) is definied as 0.</span>
+
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch0 = JustIntonationPitch((0, 1,))</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch1 = JustIntonationPitch()</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch2 = JustIntonationPitch((0, 0, 1,))</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch3 = JustIntonationPitch((0, 0, -1,))</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch0.harmonicity_tenney</span>
+<span class="sd">        1.5849625007211563</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch1.harmonicity_tenney</span>
+<span class="sd">        0.0</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch2.harmonicity_tenney</span>
+<span class="sd">        2.321928094887362</span>
+<span class="sd">        &gt;&gt;&gt; just_intonation_pitch3.harmonicity_tenney</span>
+<span class="sd">        2.321928094887362</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">ratio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ratio</span>
+        <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">ratio</span><span class="o">.</span><span class="n">numerator</span> <span class="o">*</span> <span class="n">ratio</span><span class="o">.</span><span class="n">denominator</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                            public methods                              #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+<div class="viewcode-block" id="JustIntonationPitch.get_closest_pythagorean_pitch_name"><a class="viewcode-back" href="../../../../api/mutwo.music_parameters.html#mutwo.music_parameters.JustIntonationPitch.get_closest_pythagorean_pitch_name">[docs]</a>    <span class="k">def</span> <span class="nf">get_closest_pythagorean_pitch_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reference</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+
+        <span class="c1"># TODO(for future usage: type reference as typing.Literal[] instead of str)</span>
+
+        <span class="c1"># TODO(split method, make it more readable)</span>
+
+        <span class="c1"># TODO(Add documentation)</span>
+
+        <span class="n">diatonic_pitch_name</span><span class="p">,</span> <span class="n">accidentals</span> <span class="o">=</span> <span class="n">reference</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">reference</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">n_accidentals_in_reference</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count_accidentals</span><span class="p">(</span><span class="n">accidentals</span><span class="p">)</span>
+        <span class="n">position_of_diatonic_pitch_in_cycle_of_fifths</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">DIATONIC_PITCH_NAME_CYCLE_OF_FIFTH_TUPLE</span><span class="o">.</span><span class="n">index</span><span class="p">(</span>
+                <span class="n">diatonic_pitch_name</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">closest_pythagorean_interval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">closest_pythagorean_interval</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">n_fifths</span> <span class="o">=</span> <span class="n">closest_pythagorean_interval</span><span class="o">.</span><span class="n">exponent_tuple</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="c1"># for 1/1</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="n">n_fifths</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># 1. Find new diatonic pitch name</span>
+        <span class="n">n_steps_in_diatonic_pitch_name</span> <span class="o">=</span> <span class="n">n_fifths</span> <span class="o">%</span> <span class="mi">7</span>
+        <span class="n">nth_diatonic_pitch</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">position_of_diatonic_pitch_in_cycle_of_fifths</span>
+            <span class="o">+</span> <span class="n">n_steps_in_diatonic_pitch_name</span>
+        <span class="p">)</span> <span class="o">%</span> <span class="mi">7</span>
+        <span class="n">new_diatonic_pitch</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">DIATONIC_PITCH_NAME_CYCLE_OF_FIFTH_TUPLE</span><span class="p">[</span>
+                <span class="n">nth_diatonic_pitch</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="c1"># 2. Find new accidentals</span>
+        <span class="n">n_accidentals_in_closest_pythagorean_pitch</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">(</span><span class="n">position_of_diatonic_pitch_in_cycle_of_fifths</span> <span class="o">+</span> <span class="n">n_fifths</span><span class="p">)</span> <span class="o">//</span> <span class="mi">7</span>
+        <span class="p">)</span> <span class="o">+</span> <span class="n">n_accidentals_in_reference</span>
+        <span class="n">new_accidentals</span> <span class="o">=</span> <span class="n">JustIntonationPitch</span><span class="o">.</span><span class="n">_get_accidentals</span><span class="p">(</span>
+            <span class="n">n_accidentals_in_closest_pythagorean_pitch</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">new_diatonic_pitch</span><span class="p">,</span> <span class="n">new_accidentals</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="JustIntonationPitch.get_pitch_interval"><a class="viewcode-back" href="../../../../api/mutwo.music_parameters.html#mutwo.music_parameters.JustIntonationPitch.get_pitch_interval">[docs]</a>    <span class="k">def</span> <span class="nf">get_pitch_interval</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">pitch_to_compare</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PitchInterval</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pitch_to_compare</span><span class="p">,</span> <span class="n">JustIntonationPitch</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">pitch_to_compare</span> <span class="o">-</span> <span class="bp">self</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get_pitch_interval</span><span class="p">(</span><span class="n">pitch_to_compare</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="JustIntonationPitch.register"><a class="viewcode-back" href="../../../../api/mutwo.music_parameters.html#mutwo.music_parameters.JustIntonationPitch.register">[docs]</a>    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">octave</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JustIntonationPitch</span><span class="p">:</span>  <span class="c1"># type: ignore</span>
+        <span class="sd">&quot;&quot;&quot;Move :class:`JustIntonationPitch` to the given octave.</span>
+
+<span class="sd">        :param octave: 0 for the octave from 1/1 to 2/1, negative values for octaves</span>
+<span class="sd">            below 1/1 and positive values for octaves above 2/1.</span>
+<span class="sd">        :type octave: int</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo.music_parameters import pitches</span>
+<span class="sd">        &gt;&gt;&gt; p = pitches.JustIntonationPitch(&#39;3/2&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; p.register(1)</span>
+<span class="sd">        JustIntonationPitch(&#39;3/1&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; p</span>
+<span class="sd">        JustIntonationPitch(&#39;3/1&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; p.register(-1)</span>
+<span class="sd">        JustIntonationPitch(&#39;3/4&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; p</span>
+<span class="sd">        JustIntonationPitch(&#39;3/4&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; p.register(0)</span>
+<span class="sd">        JustIntonationPitch(&#39;3/2&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; p</span>
+<span class="sd">        JustIntonationPitch(&#39;3/2&#39;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">normalized_just_intonation_pitch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">mutate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+        <span class="n">factor</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">**</span> <span class="nb">abs</span><span class="p">(</span><span class="n">octave</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">octave</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">added</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">factor</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">added</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">(</span><span class="n">factor</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exponent_tuple</span> <span class="o">=</span> <span class="p">(</span><span class="n">normalized_just_intonation_pitch</span> <span class="o">+</span> <span class="n">added</span><span class="p">)</span><span class="o">.</span><span class="n">exponent_tuple</span>  <span class="c1"># type: ignore</span></div>
+
+<div class="viewcode-block" id="JustIntonationPitch.move_to_closest_register"><a class="viewcode-back" href="../../../../api/mutwo.music_parameters.html#mutwo.music_parameters.JustIntonationPitch.move_to_closest_register">[docs]</a>    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">move_to_closest_register</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">reference</span><span class="p">:</span> <span class="n">JustIntonationPitch</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JustIntonationPitch</span><span class="p">:</span>
+        <span class="n">reference_register</span> <span class="o">=</span> <span class="n">reference</span><span class="o">.</span><span class="n">octave</span>
+
+        <span class="n">best</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">adaption</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="n">candidate</span><span class="p">:</span> <span class="n">JustIntonationPitch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">reference_register</span> <span class="o">+</span> <span class="n">adaption</span><span class="p">,</span> <span class="n">mutate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+            <span class="n">difference</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">((</span><span class="n">candidate</span> <span class="o">-</span> <span class="n">reference</span><span class="p">)</span><span class="o">.</span><span class="n">interval</span><span class="p">)</span>
+            <span class="n">set_best</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">best</span> <span class="ow">and</span> <span class="n">difference</span> <span class="o">&gt;</span> <span class="n">best</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">set_best</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="k">if</span> <span class="n">set_best</span><span class="p">:</span>
+                <span class="n">best</span> <span class="o">=</span> <span class="p">(</span><span class="n">candidate</span><span class="p">,</span> <span class="n">difference</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">best</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">exponent_tuple</span> <span class="o">=</span> <span class="n">best</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">exponent_tuple</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Couldn&#39;t find closest register of &#39;</span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">&#39; to &#39;</span><span class="si">{</span><span class="n">reference</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>
+            <span class="p">)</span></div>
+
+<div class="viewcode-block" id="JustIntonationPitch.normalize"><a class="viewcode-back" href="../../../../api/mutwo.music_parameters.html#mutwo.music_parameters.JustIntonationPitch.normalize">[docs]</a>    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prime</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JustIntonationPitch</span><span class="p">:</span>  <span class="c1"># type: ignore</span>
+        <span class="sd">&quot;&quot;&quot;Normalize :class:`JustIntonationPitch`.</span>
+
+<span class="sd">        :param prime: The normalization period (2 for octave,</span>
+<span class="sd">            3 for twelfth, ...). Default to 2.</span>
+<span class="sd">        :type prime: int</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo.music_parameters import pitches</span>
+<span class="sd">        &gt;&gt;&gt; p = pitches.JustIntonationPitch(&#39;12/2&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; p.normalize()</span>
+<span class="sd">        JustIntonationPitch(&#39;3/2&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; p</span>
+<span class="sd">        JustIntonationPitch(&#39;3/2&#39;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ratio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ratio</span>
+        <span class="n">adjusted</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_adjust_ratio</span><span class="p">(</span><span class="n">ratio</span><span class="p">,</span> <span class="n">prime</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exponent_tuple</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ratio_or_fractions_argument_to_exponent_tuple</span><span class="p">(</span>
+            <span class="n">adjusted</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="JustIntonationPitch.inverse"><a class="viewcode-back" href="../../../../api/mutwo.music_parameters.html#mutwo.music_parameters.JustIntonationPitch.inverse">[docs]</a>    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">inverse</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">JustIntonationPitch</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JustIntonationPitch</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Inverse current pitch on given axis.</span>
+
+<span class="sd">        :param axis: The :class:`JustIntonationPitch` from which the</span>
+<span class="sd">            pitch shall be inversed.</span>
+<span class="sd">        :type axis: JustIntonationPitch, optional</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo.music_parameters import pitches</span>
+<span class="sd">        &gt;&gt;&gt; p = pitches.JustIntonationPitch(&#39;3/2&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; p.inverse()</span>
+<span class="sd">        JustIntonationPitch(&#39;2/3&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; p</span>
+<span class="sd">        JustIntonationPitch(&#39;2/3&#39;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">axis</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">exponent_tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="o">-</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">exponent_tuple</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">distance</span> <span class="o">=</span> <span class="bp">self</span> <span class="o">-</span> <span class="n">axis</span>
+            <span class="n">exponent_tuple</span> <span class="o">=</span> <span class="p">(</span><span class="n">axis</span> <span class="o">-</span> <span class="n">distance</span><span class="p">)</span><span class="o">.</span><span class="n">exponent_tuple</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exponent_tuple</span> <span class="o">=</span> <span class="n">exponent_tuple</span></div>
+
+<div class="viewcode-block" id="JustIntonationPitch.add"><a class="viewcode-back" href="../../../../api/mutwo.music_parameters.html#mutwo.music_parameters.JustIntonationPitch.add">[docs]</a>    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">pitch_interval</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PitchInterval</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JustIntonationPitch</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Add :class:`JustIntonationPitch` to current pitch.</span>
+
+<span class="sd">        :param other: The :class:`JustIntonationPitch` to add to</span>
+<span class="sd">            the current pitch.</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo.music_parameters import pitches</span>
+<span class="sd">        &gt;&gt;&gt; p = pitches.JustIntonationPitch(&#39;3/2&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; p.add(pitches.JustIntonationPitch(&#39;3/2&#39;))</span>
+<span class="sd">        JustIntonationPitch(&#39;9/4&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; p</span>
+<span class="sd">        JustIntonationPitch(&#39;9/4&#39;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pitch_interval</span><span class="p">,</span> <span class="n">JustIntonationPitch</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_math</span><span class="p">(</span><span class="n">pitch_interval</span><span class="p">,</span> <span class="n">operator</span><span class="o">.</span><span class="n">add</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">exponent_tuple</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ratio_to_exponent_tuple</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ratio</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">cents_to_ratio</span><span class="p">(</span><span class="n">pitch_interval</span><span class="o">.</span><span class="n">interval</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="JustIntonationPitch.subtract"><a class="viewcode-back" href="../../../../api/mutwo.music_parameters.html#mutwo.music_parameters.JustIntonationPitch.subtract">[docs]</a>    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">subtract</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">pitch_interval</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PitchInterval</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JustIntonationPitch</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Subtract :class:`JustIntonationPitch` from current pitch.</span>
+
+<span class="sd">        :param other: The :class:`JustIntonationPitch` to subtract from</span>
+<span class="sd">            the current pitch.</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo import music_parameters</span>
+<span class="sd">        &gt;&gt;&gt; p = music_parameters.JustIntonationPitch(&#39;9/4&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; p.subtract(music_parameters.JustIntonationPitch(&#39;3/2&#39;))</span>
+<span class="sd">        JustIntonationPitch(&#39;3/2&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; p</span>
+<span class="sd">        JustIntonationPitch(&#39;3/2&#39;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pitch_interval</span><span class="p">,</span> <span class="n">JustIntonationPitch</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_math</span><span class="p">(</span><span class="n">pitch_interval</span><span class="p">,</span> <span class="n">operator</span><span class="o">.</span><span class="n">sub</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">exponent_tuple</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ratio_to_exponent_tuple</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ratio</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">cents_to_ratio</span><span class="p">(</span><span class="n">pitch_interval</span><span class="o">.</span><span class="n">interval</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="JustIntonationPitch.intersection"><a class="viewcode-back" href="../../../../api/mutwo.music_parameters.html#mutwo.music_parameters.JustIntonationPitch.intersection">[docs]</a>    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">intersection</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">JustIntonationPitch</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JustIntonationPitch</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Make intersection with other :class:`JustIntonationPitch`.</span>
+
+<span class="sd">        :param other: The :class:`JustIntonationPitch` to build the</span>
+<span class="sd">            intersection with.</span>
+<span class="sd">        :param strict: If set to ``True`` only exponent_tuple are included</span>
+<span class="sd">            into the intersection if their value is equal. If set to</span>
+<span class="sd">            ``False`` the method will also include exponent_tuple if both</span>
+<span class="sd">            pitches own them on the same axis but with different values</span>
+<span class="sd">            (the method will take the smaller exponent).</span>
+<span class="sd">        :type strict: bool</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo import music_parameters</span>
+<span class="sd">        &gt;&gt;&gt; p0 = music_parameters.JustIntonationPitch(&#39;5/3&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; p0.intersection(music_parameters.JustIntonationPitch(&#39;7/6&#39;))</span>
+<span class="sd">        JustIntonationPitch(&#39;1/3&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; p0</span>
+<span class="sd">        JustIntonationPitch(&#39;1/3&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; p1 = music_parameters.JustIntonationPitch(&#39;9/7&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; p1.intersection(music_parameters.JustIntonationPitch(&#39;3/2&#39;))</span>
+<span class="sd">        JustIntonationPitch(&#39;3/1&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; p1</span>
+<span class="sd">        JustIntonationPitch(&#39;3/1&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; p2 = music_parameters.JustIntonationPitch(&#39;9/7&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; p2.intersection(music_parameters.JustIntonationPitch(&#39;3/2&#39;), strict=True)</span>
+<span class="sd">        JustIntonationPitch(&#39;1/1&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; p2</span>
+<span class="sd">        JustIntonationPitch(&#39;1/1&#39;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">is_negative</span><span class="p">(</span><span class="n">number</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">number</span> <span class="o">&lt;</span> <span class="mi">0</span>
+
+        <span class="k">def</span> <span class="nf">intersect_exponent_tuple</span><span class="p">(</span><span class="n">exponent_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+            <span class="n">intersected_exponent</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="k">if</span> <span class="n">strict</span><span class="p">:</span>
+                <span class="n">test_for_valid_strict_mode</span> <span class="o">=</span> <span class="n">exponent_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">exponent_tuple</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">test_for_valid_strict_mode</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="k">if</span> <span class="mi">0</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">exponent_tuple</span> <span class="ow">and</span> <span class="n">test_for_valid_strict_mode</span><span class="p">:</span>
+                <span class="n">are_negative</span> <span class="o">=</span> <span class="p">(</span><span class="n">is_negative</span><span class="p">(</span><span class="n">exponent</span><span class="p">)</span> <span class="k">for</span> <span class="n">exponent</span> <span class="ow">in</span> <span class="n">exponent_tuple</span><span class="p">)</span>
+                <span class="n">all_are_negative</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span><span class="n">are_negative</span><span class="p">)</span>
+                <span class="n">all_are_positive</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span><span class="ow">not</span> <span class="n">boolean</span> <span class="k">for</span> <span class="n">boolean</span> <span class="ow">in</span> <span class="n">are_negative</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">all_are_negative</span><span class="p">:</span>
+                    <span class="n">intersected_exponent</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">exponent_tuple</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">all_are_positive</span><span class="p">:</span>
+                    <span class="n">intersected_exponent</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">exponent_tuple</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">intersected_exponent</span>
+
+        <span class="n">intersected_exponent_tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="nb">map</span><span class="p">(</span>
+                <span class="n">intersect_exponent_tuple</span><span class="p">,</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exponent_tuple</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">exponent_tuple</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exponent_tuple</span> <span class="o">=</span> <span class="n">intersected_exponent_tuple</span></div></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.music_parameters.pitches.JustIntonationPitch</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Levin Eric Zimmermann.
+    </div>
+  </body>
+</html>

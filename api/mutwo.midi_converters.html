@@ -1,0 +1,1054 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>mutwo.midi_converters &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+    
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="mutwo.midi_version" href="mutwo.midi_version.html" />
+    <link rel="prev" title="mutwo.ekmelily_version" href="mutwo.ekmelily_version.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mutwo.midi_version.html" title="mutwo.midi_version"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="mutwo.ekmelily_version.html" title="mutwo.ekmelily_version"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="api_documentation.html" accesskey="U">mutwo API documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.midi_converters</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="mutwo-midi-converters">
+<h1><a class="toc-backref" href="#id1" role="doc-backlink">mutwo.midi_converters</a><a class="headerlink" href="#mutwo-midi-converters" title="Permalink to this heading">¶</a></h1>
+<nav class="contents" id="table-of-content">
+<p class="topic-title">Table of content</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#mutwo-midi-converters" id="id1">mutwo.midi_converters</a></p>
+<ul>
+<li><p><a class="reference internal" href="#module-mutwo.midi_converters.configurations" id="id2">mutwo.midi_converters.configurations</a></p></li>
+<li><p><a class="reference internal" href="#module-mutwo.midi_converters.constants" id="id3">mutwo.midi_converters.constants</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<span class="target" id="module-mutwo.midi_converters"></span><table class="docutils align-center" style="width: 95%">
+<thead>
+<tr class="row-odd"><th class="head"><p>Object</p></th>
+<th class="head"><p>Documentation</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.midi_converters.PitchBendingNumberToPitchInterval" title="mutwo.midi_converters.PitchBendingNumberToPitchInterval"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.midi_converters.PitchBendingNumberToPitchInterval</span></code></a></p></td>
+<td><p>Convert midi pitch bend number to <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.PitchInterval" title="mutwo.music_parameters.abc.PitchInterval"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.abc.PitchInterval</span></code></a>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.midi_converters.PitchBendingNumberToDirectPitchInterval" title="mutwo.midi_converters.PitchBendingNumberToDirectPitchInterval"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.midi_converters.PitchBendingNumberToDirectPitchInterval</span></code></a></p></td>
+<td><p>Convert midi pitch bend number to <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.DirectPitchInterval" title="mutwo.music_parameters.DirectPitchInterval"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.DirectPitchInterval</span></code></a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.midi_converters.MidiPitchToMutwoPitch" title="mutwo.midi_converters.MidiPitchToMutwoPitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.midi_converters.MidiPitchToMutwoPitch</span></code></a></p></td>
+<td><p>Convert midi pitch to <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Pitch" title="mutwo.music_parameters.abc.Pitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.abc.Pitch</span></code></a>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.midi_converters.MidiPitchToDirectPitch" title="mutwo.midi_converters.MidiPitchToDirectPitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.midi_converters.MidiPitchToDirectPitch</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.midi_converters.MidiPitchToMutwoMidiPitch" title="mutwo.midi_converters.MidiPitchToMutwoMidiPitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.midi_converters.MidiPitchToMutwoMidiPitch</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.midi_converters.MidiVelocityToMutwoVolume" title="mutwo.midi_converters.MidiVelocityToMutwoVolume"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.midi_converters.MidiVelocityToMutwoVolume</span></code></a></p></td>
+<td><p>Convert midi velocity (integer) to <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Volume" title="mutwo.music_parameters.abc.Volume"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.abc.Volume</span></code></a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.midi_converters.MidiVelocityToWesternVolume" title="mutwo.midi_converters.MidiVelocityToWesternVolume"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.midi_converters.MidiVelocityToWesternVolume</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.midi_converters.MidiFileToEvent" title="mutwo.midi_converters.MidiFileToEvent"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.midi_converters.MidiFileToEvent</span></code></a></p></td>
+<td><p>Convert a midi file to a mutwo event.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.midi_converters.ChrononToControlMessageTuple" title="mutwo.midi_converters.ChrononToControlMessageTuple"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.midi_converters.ChrononToControlMessageTuple</span></code></a></p></td>
+<td><p>Convert <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_events.Chronon</span></code></a> to a tuple of control messages</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.midi_converters.CentDeviationToPitchBendingNumber" title="mutwo.midi_converters.CentDeviationToPitchBendingNumber"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.midi_converters.CentDeviationToPitchBendingNumber</span></code></a></p></td>
+<td><p>Convert cent deviation to midi pitch bend number.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.midi_converters.MutwoPitchToMidiPitch" title="mutwo.midi_converters.MutwoPitchToMidiPitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.midi_converters.MutwoPitchToMidiPitch</span></code></a></p></td>
+<td><p>Convert mutwo pitch to midi pitch number and midi pitch bend number.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.midi_converters.EventToMidiFile" title="mutwo.midi_converters.EventToMidiFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.midi_converters.EventToMidiFile</span></code></a></p></td>
+<td><p>Class for rendering standard midi files (SMF) from mutwo data.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.midi_converters.PitchBendingNumberToPitchInterval">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PitchBendingNumberToPitchInterval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maximum_pitch_bend_deviation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/midi_converters/backends.html#PitchBendingNumberToPitchInterval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.midi_converters.PitchBendingNumberToPitchInterval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></p>
+<p>Convert midi pitch bend number to <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.PitchInterval" title="mutwo.music_parameters.abc.PitchInterval"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.abc.PitchInterval</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>maximum_pitch_bend_deviation</strong> (<em>int</em>) – sets the maximum pitch bending range in cents.
+This value depends on the particular used software synthesizer and its settings,
+because it is up to the respective synthesizer how to interpret the pitch
+bending messages. By default mutwo sets the value to 200 cents which
+seems to be the most common interpretation among different manufacturers.</p>
+</dd>
+</dl>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(pitch_bending_number_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.midi_converters.PitchBendingNumberToPitchInterval.convert">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pitch_bending_number_to_convert</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/midi_converters/backends.html#PitchBendingNumberToPitchInterval.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.midi_converters.PitchBendingNumberToPitchInterval.convert" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pitch_bending_number_to_convert</strong> (<em>int</em>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.PitchInterval" title="mutwo.music_parameters.abc.PitchInterval"><em>PitchInterval</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.midi_converters.PitchBendingNumberToDirectPitchInterval">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PitchBendingNumberToDirectPitchInterval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maximum_pitch_bend_deviation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/midi_converters/backends.html#PitchBendingNumberToDirectPitchInterval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.midi_converters.PitchBendingNumberToDirectPitchInterval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mutwo.midi_converters.PitchBendingNumberToPitchInterval" title="mutwo.midi_converters.backends.PitchBendingNumberToPitchInterval"><code class="xref py py-class docutils literal notranslate"><span class="pre">PitchBendingNumberToPitchInterval</span></code></a></p>
+<p>Convert midi pitch bend number to <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.DirectPitchInterval" title="mutwo.music_parameters.DirectPitchInterval"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.DirectPitchInterval</span></code></a>.</p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(pitch_bending_number_to_convert)</p></td>
+<td><p>Convert pitch bending number to <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.DirectPitchInterval" title="mutwo.music_parameters.DirectPitchInterval"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.DirectPitchInterval</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="#mutwo.midi_converters.PitchBendingNumberToPitchInterval" title="mutwo.midi_converters.backends.PitchBendingNumberToPitchInterval"><code class="xref py py-class docutils literal notranslate"><span class="pre">PitchBendingNumberToPitchInterval</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(pitch_bending_number_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>maximum_pitch_bend_deviation</strong> (<em>Optional</em><em>[</em><em>float</em><em>]</em>) – </p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.midi_converters.PitchBendingNumberToDirectPitchInterval.convert">
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pitch_bending_number_to_convert</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/midi_converters/backends.html#PitchBendingNumberToDirectPitchInterval.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.midi_converters.PitchBendingNumberToDirectPitchInterval.convert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert pitch bending number to <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.DirectPitchInterval" title="mutwo.music_parameters.DirectPitchInterval"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.DirectPitchInterval</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pitch_bending_number_to_convert</strong> (<em>midi_converters.constants.PitchBend</em>) – The pitch bending number
+which shall be converted.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.DirectPitchInterval" title="mutwo.music_parameters.pitch_intervals.DirectPitchInterval"><em>DirectPitchInterval</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.midi_converters.MidiPitchToMutwoPitch">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MidiPitchToMutwoPitch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pitch_bending_number_to_pitch_interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">PitchBendingNumberToDirectPitchInterval()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/midi_converters/backends.html#MidiPitchToMutwoPitch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.midi_converters.MidiPitchToMutwoPitch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></p>
+<p>Convert midi pitch to <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Pitch" title="mutwo.music_parameters.abc.Pitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.abc.Pitch</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pitch_bending_number_to_pitch_interval</strong> (<em>Callable</em><em>[</em><em>[</em><em>midi_converters.constants.PitchBend</em><em>]</em><em>, </em><a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.PitchInterval" title="mutwo.music_parameters.abc.PitchInterval"><em>music_parameters.abc.PitchInterval</em></a><em>]</em>) – A callable object which
+transforms a pitch bending number (integer) to a
+<a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.PitchInterval" title="mutwo.music_parameters.abc.PitchInterval"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.abc.PitchInterval</span></code></a>. Default to
+<a class="reference internal" href="#mutwo.midi_converters.PitchBendingNumberToDirectPitchInterval" title="mutwo.midi_converters.PitchBendingNumberToDirectPitchInterval"><code class="xref py py-class docutils literal notranslate"><span class="pre">PitchBendingNumberToDirectPitchInterval</span></code></a>.</p>
+</dd>
+</dl>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(midi_pitch_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.midi_converters.MidiPitchToMutwoPitch.convert">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">midi_pitch_to_convert</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/midi_converters/backends.html#MidiPitchToMutwoPitch.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.midi_converters.MidiPitchToMutwoPitch.convert" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>midi_pitch_to_convert</strong> (<em>tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Pitch" title="mutwo.music_parameters.abc.Pitch"><em>Pitch</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.midi_converters.MidiPitchToDirectPitch">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MidiPitchToDirectPitch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pitch_bending_number_to_pitch_interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">PitchBendingNumberToDirectPitchInterval()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/midi_converters/backends.html#MidiPitchToDirectPitch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.midi_converters.MidiPitchToDirectPitch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mutwo.midi_converters.MidiPitchToMutwoPitch" title="mutwo.midi_converters.backends.MidiPitchToMutwoPitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">MidiPitchToMutwoPitch</span></code></a></p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(midi_pitch_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="#mutwo.midi_converters.MidiPitchToMutwoPitch" title="mutwo.midi_converters.backends.MidiPitchToMutwoPitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">MidiPitchToMutwoPitch</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(midi_pitch_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pitch_bending_number_to_pitch_interval</strong> (<em>Callable</em><em>[</em><em>[</em><em>int</em><em>]</em><em>, </em><a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.PitchInterval" title="mutwo.music_parameters.abc.PitchInterval"><em>PitchInterval</em></a><em>]</em>) – </p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.midi_converters.MidiPitchToDirectPitch.convert">
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">midi_pitch_to_convert</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/midi_converters/backends.html#MidiPitchToDirectPitch.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.midi_converters.MidiPitchToDirectPitch.convert" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>midi_pitch_to_convert</strong> (<em>tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.DirectPitch" title="mutwo.music_parameters.pitches.DirectPitch.DirectPitch"><em>DirectPitch</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.midi_converters.MidiPitchToMutwoMidiPitch">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MidiPitchToMutwoMidiPitch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pitch_bending_number_to_pitch_interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">PitchBendingNumberToDirectPitchInterval()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/midi_converters/backends.html#MidiPitchToMutwoMidiPitch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.midi_converters.MidiPitchToMutwoMidiPitch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mutwo.midi_converters.MidiPitchToMutwoPitch" title="mutwo.midi_converters.backends.MidiPitchToMutwoPitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">MidiPitchToMutwoPitch</span></code></a></p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(midi_pitch_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="#mutwo.midi_converters.MidiPitchToMutwoPitch" title="mutwo.midi_converters.backends.MidiPitchToMutwoPitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">MidiPitchToMutwoPitch</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(midi_pitch_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pitch_bending_number_to_pitch_interval</strong> (<em>Callable</em><em>[</em><em>[</em><em>int</em><em>]</em><em>, </em><a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.PitchInterval" title="mutwo.music_parameters.abc.PitchInterval"><em>PitchInterval</em></a><em>]</em>) – </p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.midi_converters.MidiPitchToMutwoMidiPitch.convert">
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">midi_pitch_to_convert</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/midi_converters/backends.html#MidiPitchToMutwoMidiPitch.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.midi_converters.MidiPitchToMutwoMidiPitch.convert" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>midi_pitch_to_convert</strong> (<em>tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.MidiPitch" title="mutwo.music_parameters.pitches.MidiPitch.MidiPitch"><em>MidiPitch</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.midi_converters.MidiVelocityToMutwoVolume">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MidiVelocityToMutwoVolume</span></span><a class="reference internal" href="../_modules/mutwo/midi_converters/backends.html#MidiVelocityToMutwoVolume"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.midi_converters.MidiVelocityToMutwoVolume" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></p>
+<p>Convert midi velocity (integer) to <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Volume" title="mutwo.music_parameters.abc.Volume"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.abc.Volume</span></code></a>.</p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(midi_velocity)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.midi_converters.MidiVelocityToMutwoVolume.convert">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">midi_velocity</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/midi_converters/backends.html#MidiVelocityToMutwoVolume.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.midi_converters.MidiVelocityToMutwoVolume.convert" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>midi_velocity</strong> (<em>int</em>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Volume" title="mutwo.music_parameters.abc.Volume"><em>Volume</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.midi_converters.MidiVelocityToWesternVolume">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MidiVelocityToWesternVolume</span></span><a class="reference internal" href="../_modules/mutwo/midi_converters/backends.html#MidiVelocityToWesternVolume"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.midi_converters.MidiVelocityToWesternVolume" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mutwo.midi_converters.MidiVelocityToMutwoVolume" title="mutwo.midi_converters.backends.MidiVelocityToMutwoVolume"><code class="xref py py-class docutils literal notranslate"><span class="pre">MidiVelocityToMutwoVolume</span></code></a></p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(midi_velocity_to_convert)</p></td>
+<td><p>Convert midi velocity to <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.WesternVolume" title="mutwo.music_parameters.WesternVolume"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.WesternVolume</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="#mutwo.midi_converters.MidiVelocityToMutwoVolume" title="mutwo.midi_converters.backends.MidiVelocityToMutwoVolume"><code class="xref py py-class docutils literal notranslate"><span class="pre">MidiVelocityToMutwoVolume</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(midi_velocity)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.midi_converters.MidiVelocityToWesternVolume.convert">
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">midi_velocity_to_convert</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/midi_converters/backends.html#MidiVelocityToWesternVolume.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.midi_converters.MidiVelocityToWesternVolume.convert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert midi velocity to <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.WesternVolume" title="mutwo.music_parameters.WesternVolume"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.WesternVolume</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>midi_velocity_to_convert</strong> (<em>midi_converters.constants.MidiVelocity</em>) – The velocity which shall be converted.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Volume" title="mutwo.music_parameters.abc.Volume"><em>Volume</em></a></p>
+</dd>
+</dl>
+<p><strong>Example:</strong></p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">midi_converters</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">midi_converters</span><span class="o">.</span><span class="n">MidiVelocityToWesternVolume</span><span class="p">()</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="mi">127</span><span class="p">)</span>
+<span class="go">WesternVolume(fffff)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">midi_converters</span><span class="o">.</span><span class="n">MidiVelocityToWesternVolume</span><span class="p">()</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="go">WesternVolume(ppppp)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.midi_converters.MidiFileToEvent">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MidiFileToEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mutwo_parameter_dict_to_chronon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">MutwoParameterDictToNoteLike()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">midi_pitch_to_mutwo_pitch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">MidiPitchToMutwoMidiPitch()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">midi_velocity_to_mutwo_volume</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">MidiVelocityToWesternVolume()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/midi_converters/backends.html#MidiFileToEvent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.midi_converters.MidiFileToEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></p>
+<p>Convert a midi file to a mutwo event.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mutwo_parameter_tuple_to_chronon</strong> (<em>Callable</em><em>[</em><em>[</em><em>tuple</em><em>[</em><em>core_parameters.abc.Duration.Type</em><em>, </em><a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Pitch" title="mutwo.music_parameters.abc.Pitch"><em>music_parameters.abc.Pitch</em></a><em>, </em><a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Volume" title="mutwo.music_parameters.abc.Volume"><em>music_parameters.abc.Volume</em></a><em>]</em><em>]</em><em>, </em><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><em>core_events.Chronon</em></a><em>]</em>) – <p>A callable which converts a
+tuple of mutwo parameters (duration, pitch list, volume) to a
+<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_events.Chronon</span></code></a>. In default state mutwo</p>
+<blockquote>
+<div><p>generates a <a class="reference internal" href="mutwo.music_events.html#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_events.NoteLike</span></code></a>.</p>
+</div></blockquote>
+</p></li>
+<li><p><strong>midi_pitch_to_mutwo_pitch</strong> (<em>Callable</em><em>[</em><em>[</em><em>midi_converters.constants.MidiPitch</em><em>]</em><em>, </em><a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Pitch" title="mutwo.music_parameters.abc.Pitch"><em>music_parameters.abc.Pitch</em></a><em>]</em>) – Callable object which converts
+midi pitch (integer) to a <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Pitch" title="mutwo.music_parameters.abc.Pitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.abc.Pitch</span></code></a>.
+Default to <a class="reference internal" href="#mutwo.midi_converters.MidiPitchToMutwoMidiPitch" title="mutwo.midi_converters.MidiPitchToMutwoMidiPitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">MidiPitchToMutwoMidiPitch</span></code></a>.</p></li>
+<li><p><strong>midi_velocity_to_mutwo_volume</strong> (<em>Callable</em><em>[</em><em>[</em><em>midi_converters.constants.MidiVelocity</em><em>]</em><em>, </em><a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Volume" title="mutwo.music_parameters.abc.Volume"><em>music_parameters.abc.Volume</em></a><em>]</em>) – Callable object which converts
+midi velocity (integer) to a <code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.abc.Voume</span></code>.
+Default to <code class="xref py py-class docutils literal notranslate"><span class="pre">MidiPitchToWesternVolume</span></code>.</p></li>
+<li><p><strong>mutwo_parameter_dict_to_chronon</strong> (<em>Callable</em><em>[</em><em>[</em><em>dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em><em>]</em><em>, </em><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.basic.Chronon"><em>Chronon</em></a><em>]</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Warning:</strong></p>
+<p>This is an unstable early version of the converter.
+Expect bugs when using it!</p>
+<p><strong>Disclaimer:</strong></p>
+<p>This conversion is incomplete: Not all information from a
+midi file will be used. In its current state the converter
+only takes into account midi notes (pitch, velocity and duration)
+and ignores all other midi messages.</p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(midi_file_path_or_mido_midi_file)</p></td>
+<td><p>Convert midi file to mutwo event.</p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.midi_converters.MidiFileToEvent.convert">
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">midi_file_path_or_mido_midi_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/midi_converters/backends.html#MidiFileToEvent.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.midi_converters.MidiFileToEvent.convert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert midi file to mutwo event.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>midi_file_path_or_mido_midi_file</strong> (<em>str</em><em> | </em><em>mido.MidiFile</em>) – The midi file which shall
+be converted. Can either be a file path or a <code class="xref py py-class docutils literal notranslate"><span class="pre">MidiFile</span></code>
+object from the <a class="reference external" href="https://github.com/mido/mido">mido</a> package.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Event" title="mutwo.core_events.abc.Event"><em>Event</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.midi_converters.ChrononToControlMessageTuple">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ChrononToControlMessageTuple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attribute_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exception_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/midi_converters/frontends.html#ChrononToControlMessageTuple"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.midi_converters.ChrononToControlMessageTuple" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.ChrononToAttribute" title="mutwo.core_converters.parsers.ChrononToAttribute"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChrononToAttribute</span></code></a></p>
+<p>Convert <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_events.Chronon</span></code></a> to a tuple of control messages</p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.ChrononToAttribute" title="mutwo.core_converters.parsers.ChrononToAttribute"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChrononToAttribute</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(chronon_to_convert)</p></td>
+<td><p>Extract from a <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_events.Chronon</span></code></a> an attribute.</p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>attribute_name</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – </p></li>
+<li><p><strong>exception_value</strong> (<em>tuple</em><em>[</em><em>mido.messages.messages.Message</em><em>, </em><em>...</em><em>]</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.midi_converters.CentDeviationToPitchBendingNumber">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CentDeviationToPitchBendingNumber</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maximum_pitch_bend_deviation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/midi_converters/frontends.html#CentDeviationToPitchBendingNumber"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.midi_converters.CentDeviationToPitchBendingNumber" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></p>
+<p>Convert cent deviation to midi pitch bend number.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>maximum_pitch_bend_deviation</strong> (<em>int</em>) – sets the maximum pitch bending range in cents.
+This value depends on the particular used software synthesizer and its settings,
+because it is up to the respective synthesizer how to interpret the pitch
+bending messages. By default mutwo sets the value to 200 cents which
+seems to be the most common interpretation among different manufacturers.</p>
+</dd>
+</dl>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(cent_deviation)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.midi_converters.CentDeviationToPitchBendingNumber.convert">
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cent_deviation</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/midi_converters/frontends.html#CentDeviationToPitchBendingNumber.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.midi_converters.CentDeviationToPitchBendingNumber.convert" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>cent_deviation</strong> (<em>float</em><em> | </em><em>fractions.Fraction</em><em> | </em><em>int</em><em> | </em><em>quicktions.Fraction</em>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.midi_converters.MutwoPitchToMidiPitch">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MutwoPitchToMidiPitch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cent_deviation_to_pitch_bending_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">CentDeviationToPitchBendingNumber()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/midi_converters/frontends.html#MutwoPitchToMidiPitch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.midi_converters.MutwoPitchToMidiPitch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></p>
+<p>Convert mutwo pitch to midi pitch number and midi pitch bend number.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>maximum_pitch_bend_deviation</strong> (<em>int</em>) – sets the maximum pitch bending range in cents.
+This value depends on the particular used software synthesizer and its settings,
+because it is up to the respective synthesizer how to interpret the pitch
+bending messages. By default mutwo sets the value to 200 cents which
+seems to be the most common interpretation among different manufacturers.</p></li>
+<li><p><strong>cent_deviation_to_pitch_bending_number</strong> (<a class="reference internal" href="#mutwo.midi_converters.CentDeviationToPitchBendingNumber" title="mutwo.midi_converters.frontends.CentDeviationToPitchBendingNumber"><em>CentDeviationToPitchBendingNumber</em></a>) – </p></li>
+</ul>
+</dd>
+</dl>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(mutwo_pitch_to_convert[, midi_note])</p></td>
+<td><p>Find midi note and pitch bending for given mutwo pitch</p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.midi_converters.MutwoPitchToMidiPitch.convert">
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mutwo_pitch_to_convert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">midi_note</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/midi_converters/frontends.html#MutwoPitchToMidiPitch.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.midi_converters.MutwoPitchToMidiPitch.convert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find midi note and pitch bending for given mutwo pitch</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mutwo_pitch_to_convert</strong> (<a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Pitch" title="mutwo.music_parameters.abc.Pitch"><em>music_parameters.abc.Pitch</em></a>) – The mutwo pitch which shall be converted.</p></li>
+<li><p><strong>midi_note</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – Can be set to a midi note value if one wants to force
+the converter to calculate the pitch bending deviation for the passed
+midi note. If this argument is <code class="docutils literal notranslate"><span class="pre">None</span></code> the converter will simply use
+the closest midi pitch number to the passed mutwo pitch. Default to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple[int, int]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.midi_converters.EventToMidiFile">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EventToMidiFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chronon_to_pitch_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">ChrononToPitchList()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chronon_to_volume</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">ChrononToVolume()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chronon_to_control_message_tuple</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">ChrononToControlMessageTuple()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">midi_file_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">available_midi_channel_tuple</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distribute_midi_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">midi_channel_count_per_track</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutwo_pitch_to_midi_pitch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">MutwoPitchToMidiPitch()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ticks_per_beat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tempo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/midi_converters/frontends.html#EventToMidiFile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.midi_converters.EventToMidiFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></p>
+<p>Class for rendering standard midi files (SMF) from mutwo data.</p>
+<p>Mutwo offers a wide range of options how the respective midi file shall
+be rendered and how mutwo data shall be translated. This is necessary due
+to the limited and not always unambiguous nature of musical encodings in
+midi files. In this way the user can tweak the conversion routine to her
+or his individual needs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>chronon_to_pitch_list</strong> (<em>Callable</em><em>[
+</em><em>[</em><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><em>core_events.Chronon</em></a><em>]</em><em>, </em><em>tuple</em><em>[</em><a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Pitch" title="mutwo.music_parameters.abc.Pitch"><em>music_parameters.abc.Pitch</em></a><em>, </em><em>...</em><em>]</em><em>]</em>) – Function to extract from a
+<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_events.Chronon</span></code></a> a tuple that contains pitch objects
+(objects that inherit from <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Pitch" title="mutwo.music_parameters.abc.Pitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.abc.Pitch</span></code></a>).
+By default it asks the Event for its <code class="xref py py-attr docutils literal notranslate"><span class="pre">pitch_list</span></code> attribute
+(because by default <a class="reference internal" href="mutwo.music_events.html#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_events.NoteLike</span></code></a> objects are expected).
+When using different Event classes than <code class="docutils literal notranslate"><span class="pre">NoteLike</span></code> with a different name for
+their pitch property, this argument should be overridden. If the function call
+raises an <code class="xref py py-obj docutils literal notranslate"><span class="pre">AttributeError</span></code> (e.g. if no pitch can be extracted),
+mutwo will interpret the event as a rest.</p></li>
+<li><p><strong>chronon_to_volume</strong> (<em>Callable</em><em>[
+</em><em>[</em><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><em>core_events.Chronon</em></a><em>]</em><em>, </em><a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Volume" title="mutwo.music_parameters.abc.Volume"><em>music_parameters.abc.Volume</em></a><em>]</em>) – Function to extract the volume from a
+<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_events.Chronon</span></code></a> in the purpose of generating midi notes.
+The function should return an object that inhertis from
+<a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Volume" title="mutwo.music_parameters.abc.Volume"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.abc.Volume</span></code></a>. By default it asks the Event for
+its <code class="xref py py-attr docutils literal notranslate"><span class="pre">volume</span></code> attribute (because by default
+<a class="reference internal" href="mutwo.music_events.html#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_events.NoteLike</span></code></a> objects are expected).
+When using different Event classes than <code class="docutils literal notranslate"><span class="pre">NoteLike</span></code> with a
+different name for their volume property, this argument should be overridden.
+If the function call raises an <code class="xref py py-obj docutils literal notranslate"><span class="pre">AttributeError</span></code> (e.g. if no volume can be
+extracted), mutwo will interpret the event as a rest.</p></li>
+<li><p><strong>chronon_to_control_message_tuple</strong> (<em>Callable</em><em>[
+</em><em>[</em><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><em>core_events.Chronon</em></a><em>]</em><em>, </em><em>tuple</em><em>[</em><em>mido.Message</em><em>, </em><em>...</em><em>]</em><em>]</em>) – Function to generate midi control messages
+from a chronon. By default no control messages are generated. If the
+function call raises an AttributeError (e.g. if an expected control value isn’t
+available) mutwo will interpret the event as a rest.</p></li>
+<li><p><strong>midi_file_type</strong> (<em>int</em>) – Can either be 0 (for one-track midi files) or 1 (for
+synchronous multi-track midi files). Mutwo doesn’t offer support for generating
+type 2 midi files (midi files with asynchronous tracks).</p></li>
+<li><p><strong>available_midi_channel_tuple</strong> (<em>tuple</em><em>[</em><em>int</em><em>, </em><em>...</em><em>]</em>) – tuple containing integer where each integer
+represents the number of the used midi channel. Integer can range from 0 to 15.
+Higher numbers of available_midi_channel_tuple (like all 16) are recommended when
+rendering microtonal music. It shall be remarked that midi-channel 9 (or midi
+channel 10 when starting to count from 1) is often ignored by several software
+synthesizer, because this channel is reserved for percussion instruments.</p></li>
+<li><p><strong>distribute_midi_channels</strong> (<em>bool</em>) – This parameter is only relevant if more than one
+<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a> is passed to the convert method.
+If set to <code class="docutils literal notranslate"><span class="pre">True</span></code> each <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a>
+only makes use of exactly n_midi_channel (see next parameter).
+If set to <code class="docutils literal notranslate"><span class="pre">False</span></code> each converted <code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code> is allowed to make use of all
+available channels. If set to <code class="docutils literal notranslate"><span class="pre">True</span></code> and the amount of necessary MidiTracks is
+higher than the amount of available channels, mutwo will silently cycle through
+the list of available midi channel.</p></li>
+<li><p><strong>midi_channel_count_per_track</strong> (<em>int</em>) – This parameter is only relevant for
+distribute_midi_channels == True. It sets how many midi channels are assigned
+to one Consecution. If microtonal chords shall be played by
+one Consecution (via pitch bending messages) a higher number than 1 is
+recommended. Defaults to 1.</p></li>
+<li><p><strong>mutwo_pitch_to_midi_pitch</strong> (<a class="reference internal" href="#mutwo.midi_converters.MutwoPitchToMidiPitch" title="mutwo.midi_converters.MutwoPitchToMidiPitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoPitchToMidiPitch</span></code></a>) – class to convert from mutwo pitches
+to midi pitches. Default to <a class="reference internal" href="#mutwo.midi_converters.MutwoPitchToMidiPitch" title="mutwo.midi_converters.MutwoPitchToMidiPitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoPitchToMidiPitch</span></code></a>.</p></li>
+<li><p><strong>ticks_per_beat</strong> (<em>int</em>) – Sets the timing precision of the midi file. From the mido
+documentation: “Typical values range from 96 to 480 but some use even more
+ticks per beat”.</p></li>
+<li><p><strong>instrument_name</strong> (<em>str</em>) – Sets the midi instrument of all channels.</p></li>
+<li><p><strong>tempo</strong> (<a class="reference internal" href="mutwo.core_parameters.html#mutwo.core_parameters.abc.Tempo" title="mutwo.core_parameters.abc.Tempo"><em>core_parameters.abc.Tempo</em></a>) – All Midi files should specify their tempo. The default
+value of mutwo is 120 BPM (this is also the value that is assumed by any
+midi-file-reading-software if no tempo has been specified). Tempo changes
+are supported (and will be written to the resulting midi file).</p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Example</strong>:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">midi_converters</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_parameters</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># midi file converter that assign a middle c to all events</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">midi_converter</span> <span class="o">=</span> <span class="n">midi_converters</span><span class="o">.</span><span class="n">EventToMidiFile</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">chronon_to_pitch_list</span><span class="o">=</span><span class="k">lambda</span> <span class="n">event</span><span class="p">:</span> <span class="p">(</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">WesternPitch</span><span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">),)</span>
+<span class="gp">... </span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt><strong>Disclaimer</strong>:</dt><dd><p>The current implementation doesn’t support time-signatures (the written time
+signature is always 4/4 for now).</p>
+</dd>
+</dl>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(event_to_convert[, path])</p></td>
+<td><p>Render a Midi file to the converters path attribute from the given event.</p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.midi_converters.EventToMidiFile.convert">
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_to_convert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/midi_converters/frontends.html#EventToMidiFile.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.midi_converters.EventToMidiFile.convert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Render a Midi file to the converters path attribute from the given event.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>event_to_convert</strong> (<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><em>core_events.Chronon</em></a><em> | </em><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><em>core_events.Consecution</em></a><em>[</em><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><em>core_events.Chronon</em></a><em>] </em><em>| </em><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Concurrence" title="mutwo.core_events.Concurrence"><em>core_events.Concurrence</em></a><em>[</em><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><em>core_events.Consecution</em></a><em>[</em><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><em>core_events.Chronon</em></a><em>]</em><em>]</em>) – The given event that shall be translated
+to a Midi file.</p></li>
+<li><p><strong>path</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – If this is a string the method will write a midi
+file to the given path. The typical file type extension ‘.mid’
+is recommended, but not mandatory. If set to <cite>None</cite> the
+method won’t write a midi file to the disk, but it will simply
+return a <code class="xref py py-class docutils literal notranslate"><span class="pre">mido.MidiFile</span></code> object. Default to <cite>None</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>MidiFile</em></p>
+</dd>
+</dl>
+<p>The following example generates a midi file that contains a simple ascending
+pentatonic scale:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_events</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_events</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_parameters</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">midi_converters</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ascending_scale</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span>
+<span class="gp">... </span>        <span class="n">music_events</span><span class="o">.</span><span class="n">NoteLike</span><span class="p">(</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">WesternPitch</span><span class="p">(</span><span class="n">pitch</span><span class="p">),</span> <span class="n">duration</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">volume</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="k">for</span> <span class="n">pitch</span> <span class="ow">in</span> <span class="s1">&#39;c d e g a&#39;</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="p">]</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">midi_converter</span> <span class="o">=</span> <span class="n">midi_converters</span><span class="o">.</span><span class="n">EventToMidiFile</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">available_midi_channel_tuple</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,)</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># &#39;.convert&#39; creates a file, but also returns the</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># respective &#39;mido.MidiFile&#39; object</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">midifile</span> <span class="o">=</span> <span class="n">midi_converter</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">ascending_scale</span><span class="p">,</span> <span class="s1">&#39;ascending_scale.mid&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Disclaimer:</strong> when passing nested structures, make sure that the
+nested object matches the expected type. Unlike other mutwo
+converter classes (like <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.TempoConverter" title="mutwo.core_converters.TempoConverter"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_converters.TempoConverter</span></code></a>)
+<a class="reference internal" href="#mutwo.midi_converters.EventToMidiFile" title="mutwo.midi_converters.EventToMidiFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventToMidiFile</span></code></a> can’t convert infinitely nested structures
+(due to the particular way how Midi files are defined). The deepest potential
+structure is a <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Concurrence" title="mutwo.core_events.Concurrence"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_events.Concurrence</span></code></a> (representing
+the complete MidiFile) that contains <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_events.Consecution</span></code></a>
+(where each <code class="docutils literal notranslate"><span class="pre">Consecution</span></code> represents one MidiTrack) that contains
+<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_events.Chronon</span></code></a> (where each <code class="docutils literal notranslate"><span class="pre">Chronon</span></code>
+represents one midi note). If only one <code class="docutils literal notranslate"><span class="pre">Consecution</span></code> is send,
+this <code class="docutils literal notranslate"><span class="pre">Consecution</span></code> will be read as one MidiTrack in a MidiFile.
+If only one <code class="docutils literal notranslate"><span class="pre">Chronon</span></code> get passed, this <code class="docutils literal notranslate"><span class="pre">Chronon</span></code> will be
+interpreted as one MidiEvent (note_on and note_off) inside one
+MidiTrack inside one MidiFile.</p>
+</dd></dl>
+
+</dd></dl>
+
+<section id="module-mutwo.midi_converters.configurations">
+<span id="mutwo-midi-converters-configurations"></span><h2><a class="toc-backref" href="#id2" role="doc-backlink">mutwo.midi_converters.configurations</a><a class="headerlink" href="#module-mutwo.midi_converters.configurations" title="Permalink to this heading">¶</a></h2>
+<p>Configure the midi converters behaviour</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="mutwo.midi_converters.configurations.DEFAULT_AVAILABLE_MIDI_CHANNEL_TUPLE">
+<span class="sig-name descname"><span class="pre">DEFAULT_AVAILABLE_MIDI_CHANNEL_TUPLE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(0,</span> <span class="pre">1,</span> <span class="pre">2,</span> <span class="pre">3,</span> <span class="pre">4,</span> <span class="pre">5,</span> <span class="pre">6,</span> <span class="pre">7,</span> <span class="pre">8,</span> <span class="pre">9,</span> <span class="pre">10,</span> <span class="pre">11,</span> <span class="pre">12,</span> <span class="pre">13,</span> <span class="pre">14,</span> <span class="pre">15)</span></em><a class="headerlink" href="#mutwo.midi_converters.configurations.DEFAULT_AVAILABLE_MIDI_CHANNEL_TUPLE" title="Permalink to this definition">¶</a></dt>
+<dd><p>default value for <code class="docutils literal notranslate"><span class="pre">available_midi_channel_tuple</span></code> in <cite>mutwo.midi_converters.EventToMidiFile</cite></p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mutwo.midi_converters.configurations.DEFAULT_CONTROL_MESSAGE_TUPLE_ATTRIBUTE_NAME">
+<span class="sig-name descname"><span class="pre">DEFAULT_CONTROL_MESSAGE_TUPLE_ATTRIBUTE_NAME</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'control_message_tuple'</span></em><a class="headerlink" href="#mutwo.midi_converters.configurations.DEFAULT_CONTROL_MESSAGE_TUPLE_ATTRIBUTE_NAME" title="Permalink to this definition">¶</a></dt>
+<dd><p>The expected attribute name of a <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_events.Chronon</span></code></a> for control messages.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mutwo.midi_converters.configurations.DEFAULT_MAXIMUM_PITCH_BEND_DEVIATION_IN_CENTS">
+<span class="sig-name descname"><span class="pre">DEFAULT_MAXIMUM_PITCH_BEND_DEVIATION_IN_CENTS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">200</span></em><a class="headerlink" href="#mutwo.midi_converters.configurations.DEFAULT_MAXIMUM_PITCH_BEND_DEVIATION_IN_CENTS" title="Permalink to this definition">¶</a></dt>
+<dd><p>default value for <code class="docutils literal notranslate"><span class="pre">maximum_pitch_bend_deviation_in_cents</span></code> in <cite>mutwo.midi_converters.EventToMidiFile</cite></p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mutwo.midi_converters.configurations.DEFAULT_MIDI_CHANNEL_COUNT_PER_TRACK">
+<span class="sig-name descname"><span class="pre">DEFAULT_MIDI_CHANNEL_COUNT_PER_TRACK</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#mutwo.midi_converters.configurations.DEFAULT_MIDI_CHANNEL_COUNT_PER_TRACK" title="Permalink to this definition">¶</a></dt>
+<dd><p>default value for <code class="docutils literal notranslate"><span class="pre">midi_channel_count_per_track</span></code> in <cite>mutwo.midi_converters.EventToMidiFile</cite></p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mutwo.midi_converters.configurations.DEFAULT_MIDI_FILE_TYPE">
+<span class="sig-name descname"><span class="pre">DEFAULT_MIDI_FILE_TYPE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#mutwo.midi_converters.configurations.DEFAULT_MIDI_FILE_TYPE" title="Permalink to this definition">¶</a></dt>
+<dd><p>default value for <code class="docutils literal notranslate"><span class="pre">midi_file_type</span></code> in <cite>mutwo.midi_converters.EventToMidiFile</cite></p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mutwo.midi_converters.configurations.DEFAULT_MIDI_INSTRUMENT_NAME">
+<span class="sig-name descname"><span class="pre">DEFAULT_MIDI_INSTRUMENT_NAME</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Acoustic</span> <span class="pre">Grand</span> <span class="pre">Piano'</span></em><a class="headerlink" href="#mutwo.midi_converters.configurations.DEFAULT_MIDI_INSTRUMENT_NAME" title="Permalink to this definition">¶</a></dt>
+<dd><p>default value for <code class="docutils literal notranslate"><span class="pre">midi_instrument_name</span></code> in <cite>mutwo.midi_converters.EventToMidiFile</cite></p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mutwo.midi_converters.configurations.DEFAULT_TEMPO">
+<span class="sig-name descname"><span class="pre">DEFAULT_TEMPO</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="mutwo.core_parameters.html#mutwo.core_parameters.abc.Tempo" title="mutwo.core_parameters.abc.Tempo"><span class="pre">Tempo</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">DirectTempo(120.0)</span></em><a class="headerlink" href="#mutwo.midi_converters.configurations.DEFAULT_TEMPO" title="Permalink to this definition">¶</a></dt>
+<dd><p>default value for <code class="docutils literal notranslate"><span class="pre">tempo</span></code> in <cite>mutwo.midi_converters.EventToMidiFile</cite></p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mutwo.midi_converters.configurations.DEFAULT_TICKS_PER_BEAT">
+<span class="sig-name descname"><span class="pre">DEFAULT_TICKS_PER_BEAT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">480</span></em><a class="headerlink" href="#mutwo.midi_converters.configurations.DEFAULT_TICKS_PER_BEAT" title="Permalink to this definition">¶</a></dt>
+<dd><p>default value for <code class="docutils literal notranslate"><span class="pre">ticks_per_beat</span></code> in <cite>mutwo.midi_converters.EventToMidiFile</cite></p>
+</dd></dl>
+
+</section>
+<section id="module-mutwo.midi_converters.constants">
+<span id="mutwo-midi-converters-constants"></span><h2><a class="toc-backref" href="#id3" role="doc-backlink">mutwo.midi_converters.constants</a><a class="headerlink" href="#module-mutwo.midi_converters.constants" title="Permalink to this heading">¶</a></h2>
+<p>Values that are defined by the midi file standard.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mutwo.midi_converters.constants.MidiNote">
+<span class="sig-name descname"><span class="pre">MidiNote</span></span><a class="headerlink" href="#mutwo.midi_converters.constants.MidiNote" title="Permalink to this definition">¶</a></dt>
+<dd><p>MidiNote type alias</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mutwo.midi_converters.constants.MidiPitch">
+<span class="sig-name descname"><span class="pre">MidiPitch</span></span><a class="headerlink" href="#mutwo.midi_converters.constants.MidiPitch" title="Permalink to this definition">¶</a></dt>
+<dd><p>MidiPitch type alias</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mutwo.midi_converters.constants.MidiVelocity">
+<span class="sig-name descname"><span class="pre">MidiVelocity</span></span><a class="headerlink" href="#mutwo.midi_converters.constants.MidiVelocity" title="Permalink to this definition">¶</a></dt>
+<dd><p>MidiVelocity type alias</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mutwo.midi_converters.constants.PitchBend">
+<span class="sig-name descname"><span class="pre">PitchBend</span></span><a class="headerlink" href="#mutwo.midi_converters.constants.PitchBend" title="Permalink to this definition">¶</a></dt>
+<dd><p>PitchBend type alias</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mutwo.midi_converters.constants.ALLOWED_MIDI_CHANNEL_TUPLE">
+<span class="sig-name descname"><span class="pre">ALLOWED_MIDI_CHANNEL_TUPLE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(0,</span> <span class="pre">1,</span> <span class="pre">2,</span> <span class="pre">3,</span> <span class="pre">4,</span> <span class="pre">5,</span> <span class="pre">6,</span> <span class="pre">7,</span> <span class="pre">8,</span> <span class="pre">9,</span> <span class="pre">10,</span> <span class="pre">11,</span> <span class="pre">12,</span> <span class="pre">13,</span> <span class="pre">14,</span> <span class="pre">15)</span></em><a class="headerlink" href="#mutwo.midi_converters.constants.ALLOWED_MIDI_CHANNEL_TUPLE" title="Permalink to this definition">¶</a></dt>
+<dd><p>midi channels that are allowed (following the standard
+midi file definition).</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mutwo.midi_converters.constants.MAXIMUM_PITCH_BEND">
+<span class="sig-name descname"><span class="pre">MAXIMUM_PITCH_BEND</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16382</span></em><a class="headerlink" href="#mutwo.midi_converters.constants.MAXIMUM_PITCH_BEND" title="Permalink to this definition">¶</a></dt>
+<dd><p>the highest allowed value for midi pitch bend</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mutwo.midi_converters.constants.MIDI_TEMPO_FACTOR">
+<span class="sig-name descname"><span class="pre">MIDI_TEMPO_FACTOR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1000000</span></em><a class="headerlink" href="#mutwo.midi_converters.constants.MIDI_TEMPO_FACTOR" title="Permalink to this definition">¶</a></dt>
+<dd><p>factor to multiply beats-in-seconds to get
+beats-in-microseconds (which is the tempo unit for midi)</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mutwo.midi_converters.constants.NEUTRAL_PITCH_BEND">
+<span class="sig-name descname"><span class="pre">NEUTRAL_PITCH_BEND</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8191</span></em><a class="headerlink" href="#mutwo.midi_converters.constants.NEUTRAL_PITCH_BEND" title="Permalink to this definition">¶</a></dt>
+<dd><p>the value for midi pitch bend when the resulting pitch
+doesn’t change</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mutwo.midi_version.html" title="mutwo.midi_version"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="mutwo.ekmelily_version.html" title="mutwo.ekmelily_version"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="api_documentation.html" >mutwo API documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.midi_converters</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2024, mutwo authors.
+    </div>
+  </body>
+</html>

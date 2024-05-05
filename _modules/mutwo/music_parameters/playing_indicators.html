@@ -1,0 +1,354 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mutwo.music_parameters.playing_indicators &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.music_parameters.playing_indicators</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mutwo.music_parameters.playing_indicators</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Define playing indicators for chronons.</span>
+
+<span class="sd">This submodules provides several classes to add specific musical</span>
+<span class="sd">playing techniques to :class:`mutwo.events.basic.SimpleEvent` objects.</span>
+<span class="sd">They mostly derive from traditional Western playing techniques and their</span>
+<span class="sd">notation. Unlike indicators of the :mod:`mutwo.music_parameters.notation_indicators`</span>
+<span class="sd">module, playing indicators have an effect on the played music and aren&#39;t</span>
+<span class="sd">merely specifications of representation. The proper way to handle</span>
+<span class="sd">playing  indicators should be via a :class:`PlayingIndicatorCollection`</span>
+<span class="sd">object that should be attached to the respective :class:`SimpleEvent`.</span>
+<span class="sd">The collection contains all possible playing indicators which are defined</span>
+<span class="sd">in this module. :class:`mutwo.events.music.NoteLike` contain by default</span>
+<span class="sd">a playing indicator collection.</span>
+
+<span class="sd">There are basically two different types of playing indicators:</span>
+
+<span class="sd">1, Playing indicators which can only be on or off (for instance</span>
+<span class="sd">``bartok_pizzicato``, ``prall`` or ``laissez_vibrer``). They have</span>
+<span class="sd">a :attr:`is_active` attribute which can either be :obj:`True`</span>
+<span class="sd">or :obj:`False`.</span>
+
+<span class="sd">2. Playing indicators with one or more arguments (for instance</span>
+<span class="sd">:class:`Tremolo` with :attr:`flag_count` or :class:`Arpeggio` with</span>
+<span class="sd">:attr:`direction`). Their :attr:`is_active` attribute can&#39;t be</span>
+<span class="sd">set by the user and get automatically initialised depending on</span>
+<span class="sd">if all necessary attributes are defined (then active) or</span>
+<span class="sd">if any of the necessary attributes is set to :obj:`None` (then</span>
+<span class="sd">not active).</span>
+
+<span class="sd">**Example:**</span>
+
+<span class="sd">Set playing indicators of :class:`NoteLike`:</span>
+
+<span class="sd">&gt;&gt;&gt; from mutwo import music_events</span>
+<span class="sd">&gt;&gt;&gt; my_note = music_events.NoteLike(&#39;c&#39;, 1 / 4, &#39;mf&#39;)</span>
+<span class="sd">&gt;&gt;&gt; my_note.playing_indicator_collection.articulation.name = &quot;.&quot;  # add staccato</span>
+<span class="sd">&gt;&gt;&gt; my_chord = music_events.NoteLike(&#39;c e g&#39;, 1 / 2, &#39;f&#39;)</span>
+<span class="sd">&gt;&gt;&gt; my_chord.playing_indicator_collection.arpeggio.direction= &quot;up&quot;  # add arpeggio</span>
+<span class="sd">&gt;&gt;&gt; my_chord.playing_indicator_collection.laissez_vibrer = True  # and laissez_vibrer</span>
+
+<span class="sd">Attach :class:`PlayingIndicatorCollection` to :class:`SimpleEvent`:</span>
+
+<span class="sd">&gt;&gt;&gt; from mutwo import core_events</span>
+<span class="sd">&gt;&gt;&gt; from mutwo import music_parameters</span>
+<span class="sd">&gt;&gt;&gt; my_chronon = core_events.SimpleEvent(1)</span>
+<span class="sd">&gt;&gt;&gt; my_chronon.playing_indicator_collection = music_parameters.PlayingIndicatorCollection()</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">dataclasses</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_parameters</span>
+
+
+<div class="viewcode-block" id="Tremolo"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.Tremolo">[docs]</a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>
+<span class="k">class</span> <span class="nc">Tremolo</span><span class="p">(</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ImplicitPlayingIndicator</span><span class="p">):</span>
+    <span class="n">flag_count</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="Articulation"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.Articulation">[docs]</a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>
+<span class="k">class</span> <span class="nc">Articulation</span><span class="p">(</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ImplicitPlayingIndicator</span><span class="p">):</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">ARTICULATION_LITERAL</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="Arpeggio"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.Arpeggio">[docs]</a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>
+<span class="k">class</span> <span class="nc">Arpeggio</span><span class="p">(</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ImplicitPlayingIndicator</span><span class="p">):</span>
+    <span class="n">direction</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">DIRECTION_LITERAL</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="Pedal"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.Pedal">[docs]</a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>
+<span class="k">class</span> <span class="nc">Pedal</span><span class="p">(</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ImplicitPlayingIndicator</span><span class="p">):</span>
+    <span class="n">pedal_type</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">PEDAL_TYPE_LITERAL</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">pedal_activity</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="StringContactPoint"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.StringContactPoint">[docs]</a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>
+<span class="k">class</span> <span class="nc">StringContactPoint</span><span class="p">(</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ImplicitPlayingIndicator</span><span class="p">):</span>
+    <span class="n">contact_point</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+        <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">CONTACT_POINT_LITERAL</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="Ornamentation"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.Ornamentation">[docs]</a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>
+<span class="k">class</span> <span class="nc">Ornamentation</span><span class="p">(</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ImplicitPlayingIndicator</span><span class="p">):</span>
+    <span class="n">direction</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">DIRECTION_LITERAL</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">count</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="BendAfter"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.BendAfter">[docs]</a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>
+<span class="k">class</span> <span class="nc">BendAfter</span><span class="p">(</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ImplicitPlayingIndicator</span><span class="p">):</span>
+    <span class="c1"># Content music_parameters</span>
+    <span class="n">bend_amount</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># Presentation music_parameters</span>
+    <span class="n">minimum_length</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">thickness</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span></div>
+
+
+<div class="viewcode-block" id="ArtificalHarmonic"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.ArtificalHarmonic">[docs]</a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>
+<span class="k">class</span> <span class="nc">ArtificalHarmonic</span><span class="p">(</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ImplicitPlayingIndicator</span><span class="p">):</span>
+    <span class="n">semitone_count</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="NaturalHarmonicNodeList"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.NaturalHarmonicNodeList">[docs]</a><span class="k">class</span> <span class="nc">NaturalHarmonicNodeList</span><span class="p">(</span>
+    <span class="nb">list</span><span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">NaturalHarmonic</span><span class="o">.</span><span class="n">Node</span><span class="p">],</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PlayingIndicator</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Assign natural harmonics to your note.</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import music_events, music_parameters</span>
+<span class="sd">    &gt;&gt;&gt; n = music_events.NoteLike(&#39;c&#39;, 4)</span>
+<span class="sd">    &gt;&gt;&gt; n.playing_indicator_collection.natural_harmonic_node_list.is_active</span>
+<span class="sd">    False</span>
+<span class="sd">    &gt;&gt;&gt; n.playing_indicator_collection.natural_harmonic_node_list.append(</span>
+<span class="sd">    ...     music_parameters.NaturalHarmonic(</span>
+<span class="sd">    ...         2,</span>
+<span class="sd">    ...         music_parameters.String(0, music_parameters.WesternPitch(&#39;c&#39;, 3))</span>
+<span class="sd">    ...     ).node_tuple[0]</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; n.playing_indicator_collection.natural_harmonic_node_list.is_active</span>
+<span class="sd">    True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">natural_harmonic_list</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+            <span class="nb">list</span><span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">NaturalHarmonic</span><span class="o">.</span><span class="n">Node</span><span class="p">]</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">harmonic_note_head_style</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">write_string</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">parenthesize_lower_note_head</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">nhn_list</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">natural_harmonic_list</span> <span class="ow">or</span> <span class="p">[])</span>
+        <span class="n">nhn_list</span><span class="o">.</span><span class="n">write_string</span> <span class="o">=</span> <span class="n">write_string</span>
+        <span class="n">nhn_list</span><span class="o">.</span><span class="n">harmonic_note_head_style</span> <span class="o">=</span> <span class="n">harmonic_note_head_style</span>
+        <span class="n">nhn_list</span><span class="o">.</span><span class="n">parenthesize_lower_note_head</span> <span class="o">=</span> <span class="n">parenthesize_lower_note_head</span>
+        <span class="k">return</span> <span class="n">nhn_list</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_active</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Fermata"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.Fermata">[docs]</a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>
+<span class="k">class</span> <span class="nc">Fermata</span><span class="p">(</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ImplicitPlayingIndicator</span><span class="p">):</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+        <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">FERMATA_TYPE_LITERAL</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="Hairpin"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.Hairpin">[docs]</a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>
+<span class="k">class</span> <span class="nc">Hairpin</span><span class="p">(</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ImplicitPlayingIndicator</span><span class="p">):</span>
+    <span class="n">symbol</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">HAIRPIN_SYMBOL_LITERAL</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">niente</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="Trill"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.Trill">[docs]</a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>
+<span class="k">class</span> <span class="nc">Trill</span><span class="p">(</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ImplicitPlayingIndicator</span><span class="p">):</span>
+    <span class="n">pitch</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="WoodwindFingering"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.WoodwindFingering">[docs]</a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>
+<span class="k">class</span> <span class="nc">WoodwindFingering</span><span class="p">(</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ImplicitPlayingIndicator</span><span class="p">):</span>
+    <span class="n">cc</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">left_hand</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">right_hand</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">instrument</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;clarinet&quot;</span></div>
+
+
+<div class="viewcode-block" id="Cue"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.Cue">[docs]</a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>
+<span class="k">class</span> <span class="nc">Cue</span><span class="p">(</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ImplicitPlayingIndicator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Cue for electronics etc.&quot;&quot;&quot;</span>
+
+    <span class="n">index</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="PlayingIndicatorCollection"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.PlayingIndicatorCollection">[docs]</a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<span class="k">class</span> <span class="nc">PlayingIndicatorCollection</span><span class="p">(</span>
+    <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">IndicatorCollection</span><span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PlayingIndicator</span><span class="p">]</span>
+<span class="p">):</span>
+    <span class="c1"># this is kind of redundant, but perhaps still better than without using</span>
+    <span class="c1"># the `dataclasses` module</span>
+    <span class="n">articulation</span><span class="p">:</span> <span class="n">Articulation</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">Articulation</span><span class="p">)</span>
+    <span class="n">artifical_harmonic</span><span class="p">:</span> <span class="n">ArtificalHarmonic</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="n">ArtificalHarmonic</span>
+    <span class="p">)</span>
+    <span class="n">arpeggio</span><span class="p">:</span> <span class="n">Arpeggio</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">Arpeggio</span><span class="p">)</span>
+    <span class="n">bartok_pizzicato</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PlayingIndicator</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ExplicitPlayingIndicator</span>
+    <span class="p">)</span>
+    <span class="n">bend_after</span><span class="p">:</span> <span class="n">BendAfter</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">BendAfter</span><span class="p">)</span>
+    <span class="n">breath_mark</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PlayingIndicator</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ExplicitPlayingIndicator</span>
+    <span class="p">)</span>
+    <span class="n">cue</span><span class="p">:</span> <span class="n">Cue</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">Cue</span><span class="p">)</span>
+    <span class="n">duration_line_dashed</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PlayingIndicator</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ExplicitPlayingIndicator</span>
+    <span class="p">)</span>
+    <span class="n">duration_line_triller</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PlayingIndicator</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ExplicitPlayingIndicator</span>
+    <span class="p">)</span>
+    <span class="n">fermata</span><span class="p">:</span> <span class="n">Fermata</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">Fermata</span><span class="p">)</span>
+    <span class="n">glissando</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PlayingIndicator</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ExplicitPlayingIndicator</span>
+    <span class="p">)</span>
+    <span class="n">hairpin</span><span class="p">:</span> <span class="n">Hairpin</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">Hairpin</span><span class="p">)</span>
+    <span class="n">natural_harmonic_node_list</span><span class="p">:</span> <span class="n">NaturalHarmonicNodeList</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="n">NaturalHarmonicNodeList</span>
+    <span class="p">)</span>
+    <span class="n">laissez_vibrer</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PlayingIndicator</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ExplicitPlayingIndicator</span>
+    <span class="p">)</span>
+    <span class="n">optional</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PlayingIndicator</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ExplicitPlayingIndicator</span>
+    <span class="p">)</span>
+    <span class="n">ornamentation</span><span class="p">:</span> <span class="n">Ornamentation</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">Ornamentation</span><span class="p">)</span>
+    <span class="n">pedal</span><span class="p">:</span> <span class="n">Pedal</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">Pedal</span><span class="p">)</span>
+    <span class="n">prall</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PlayingIndicator</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ExplicitPlayingIndicator</span>
+    <span class="p">)</span>
+    <span class="n">string_contact_point</span><span class="p">:</span> <span class="n">StringContactPoint</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="n">StringContactPoint</span>
+    <span class="p">)</span>
+    <span class="n">tie</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PlayingIndicator</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ExplicitPlayingIndicator</span>
+    <span class="p">)</span>
+    <span class="n">tremolo</span><span class="p">:</span> <span class="n">Tremolo</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">Tremolo</span><span class="p">)</span>
+    <span class="n">trill</span><span class="p">:</span> <span class="n">Trill</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">Trill</span><span class="p">)</span>
+    <span class="n">woodwind_fingering</span><span class="p">:</span> <span class="n">WoodwindFingering</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="n">WoodwindFingering</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Overriding default behaviour to allow syntactic sugar.</span>
+
+<span class="sd">        This method allows syntax like:</span>
+
+<span class="sd">            playing_indicator_collection.tie = True</span>
+
+<span class="sd">        which is the same as</span>
+
+<span class="sd">            playing_indicator_collection.tie.is_active = True</span>
+
+<span class="sd">        Furthermore the methods makes sure that no property</span>
+<span class="sd">        can actually be overridden.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">playing_indicator</span> <span class="o">:=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
+                <span class="n">playing_indicator</span><span class="p">,</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ExplicitPlayingIndicator</span>
+            <span class="p">):</span>
+                <span class="n">playing_indicator</span><span class="o">.</span><span class="n">is_active</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">FrozenInstanceError</span><span class="p">(</span>
+                    <span class="s2">&quot;Can&#39;t override frozen property (playing indicator)&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot; &#39;</span><span class="si">{</span><span class="n">playing_indicator</span><span class="si">}</span><span class="s2">&#39;!&quot;</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">parameter_name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+
+
+<span class="c1"># Dynamically define __all__ in order to catch all PlayingIndicator classes</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+    <span class="n">name</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="nb">globals</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+    <span class="ow">and</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PlayingIndicator</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmro</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+<span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="s2">&quot;PlayingIndicatorCollection&quot;</span><span class="p">,)</span>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.music_parameters.playing_indicators</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Levin Eric Zimmermann.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,185 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Understanding events &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Understanding parameters" href="parameters.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="parameters.html" title="Understanding parameters"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="installation.html" title="Installation"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">mutwo  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Understanding events</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="understanding-events">
+<span id="events-0"></span><h1>Understanding events<a class="headerlink" href="#understanding-events" title="Permalink to this heading">¶</a></h1>
+<p>In <em>mutwo</em> everything is about events.
+So what is an events? This could be a</p>
+<ul class="simple">
+<li><p>tone</p></li>
+<li><p>melody</p></li>
+<li><p>video</p></li>
+<li><p>symphony</p></li>
+<li><p>light show</p></li>
+<li><p>…</p></li>
+</ul>
+<p>so literally anything which happens in time, which starts in a moment and ends some times later.
+<em>mutwo</em> builds on a very generalized model in order to sufficiently represent all those very different manifestations.
+This model uses a tree-like structure, where some events (as a melody) are composed of smaller events (as tones and rests).
+This generalized model only needs three different objects to describe all possible cases:</p>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="api/mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a>: a sequence of events (for instance: a melody)</p></li>
+<li><p><a class="reference internal" href="api/mutwo.core_events.html#mutwo.core_events.Concurrence" title="mutwo.core_events.Concurrence"><code class="xref py py-class docutils literal notranslate"><span class="pre">Concurrence</span></code></a>: a simultaneity of events (for instance: a polyphony)</p></li>
+<li><p><a class="reference internal" href="api/mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">Chronon</span></code></a>: an event without children, the leaf or the node of the tree (for instance: a tone)</p></li>
+</ol>
+<p>Those three objects can be combined to build deeply nested structures.</p>
+<img alt="_images/nested_event.png" src="_images/nested_event.png" />
+<p>The structure of this graph can be created in <em>mutwo</em> with the following code:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Initial import of mutwo package</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_events</span>
+
+<span class="c1"># Definition of event</span>
+<span class="n">event</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="n">core_events</span><span class="o">.</span><span class="n">Concurrence</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">core_events</span><span class="o">.</span><span class="n">Chronon</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+                <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">([</span><span class="n">core_events</span><span class="o">.</span><span class="n">Chronon</span><span class="p">(</span><span class="mi">1</span><span class="p">)]),</span>
+            <span class="p">]</span>
+        <span class="p">),</span>
+        <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">Chronon</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Chronon</span><span class="p">(</span><span class="mi">1</span><span class="p">)]</span>
+        <span class="p">),</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<section id="the-duration-of-an-event">
+<h2>The <a class="reference internal" href="api/mutwo.core_events.html#mutwo.core_events.abc.Event.duration" title="mutwo.core_events.abc.Event.duration"><code class="xref py py-attr docutils literal notranslate"><span class="pre">duration</span></code></a> of an event<a class="headerlink" href="#the-duration-of-an-event" title="Permalink to this heading">¶</a></h2>
+<p>The number <code class="docutils literal notranslate"><span class="pre">1</span></code> inside the <a class="reference internal" href="api/mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">Chronon</span></code></a> defines the duration of the event.
+The durations of <a class="reference internal" href="api/mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a> and <a class="reference internal" href="api/mutwo.core_events.html#mutwo.core_events.Concurrence" title="mutwo.core_events.Concurrence"><code class="xref py py-class docutils literal notranslate"><span class="pre">Concurrence</span></code></a> are dynamically calculated from the duration of their children.
+You can find out an events duration by asking for its <a class="reference internal" href="api/mutwo.core_events.html#mutwo.core_events.abc.Event.duration" title="mutwo.core_events.abc.Event.duration"><code class="xref py py-attr docutils literal notranslate"><span class="pre">duration</span></code></a> attribute:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">event</span><span class="o">.</span><span class="n">duration</span>
+<span class="go">DirectDuration(duration = 3)</span>
+</pre></div>
+</div>
+<p>You can also set the <a class="reference internal" href="api/mutwo.core_events.html#mutwo.core_events.abc.Event.duration" title="mutwo.core_events.abc.Event.duration"><code class="xref py py-attr docutils literal notranslate"><span class="pre">duration</span></code></a> of your events to a new value:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">event</span><span class="o">.</span><span class="n">duration</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">event</span><span class="o">.</span><span class="n">duration</span>
+<span class="go">DirectDuration(duration = 4)</span>
+</pre></div>
+</div>
+</section>
+<section id="children-events">
+<h2>Children events<a class="headerlink" href="#children-events" title="Permalink to this heading">¶</a></h2>
+<p>In order to get, set or delete the children of your event, you can use the standard Python syntax for lists.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Let&#39;s get the first leaf of our event</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">Concurrence([Chronon(duration = DirectDuration(duration = 4/3)), Consecution([Chronon(duration = DirectDuration(duration = 4/3))])])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># We can also get the second leaf of our first leaf</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+<span class="go">Consecution([Chronon(duration = DirectDuration(duration = 4/3))])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Now, let&#39;s replace our first leaf by a much simpler structure</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Chronon</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># And let&#39;s check whether it worked</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">Chronon(duration = DirectDuration(duration = 2))</span>
+</pre></div>
+</div>
+<p>You can also add new events to <a class="reference internal" href="api/mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a> and <a class="reference internal" href="api/mutwo.core_events.html#mutwo.core_events.Concurrence" title="mutwo.core_events.Concurrence"><code class="xref py py-class docutils literal notranslate"><span class="pre">Concurrence</span></code></a> by using the <code class="docutils literal notranslate"><span class="pre">append</span></code> method:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Let&#39;s check the second leaf of our event</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="go">Consecution([Chronon(duration = DirectDuration(duration = 4/3)), Chronon(duration = DirectDuration(duration = 4/3))])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># And let&#39;s add one more Chronon after those two</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">core_events</span><span class="o">.</span><span class="n">Chronon</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="go">Consecution([Chronon(duration = DirectDuration(duration = 4/3)), Chronon(duration = DirectDuration(duration = 4/3)), Chronon(duration = DirectDuration(duration = 1))])</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="parameters.html" title="Understanding parameters"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="installation.html" title="Installation"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">mutwo  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Understanding events</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2024, mutwo authors.
+    </div>
+  </body>
+</html>

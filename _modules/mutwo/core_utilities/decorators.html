@@ -1,0 +1,237 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mutwo.core_utilities.decorators &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.core_utilities.decorators</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mutwo.core_utilities.decorators</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Generic decorators that are used within :mod:`mutwo`.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">types</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;add_copy_option&quot;</span><span class="p">,</span> <span class="s2">&quot;add_tag_to_class&quot;</span><span class="p">,</span> <span class="s2">&quot;compute_lazy&quot;</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_utilities</span>
+
+
+<span class="n">F</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;F&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">])</span>
+
+
+<div class="viewcode-block" id="add_copy_option"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.add_copy_option">[docs]</a><span class="k">def</span> <span class="nf">add_copy_option</span><span class="p">(</span><span class="n">function</span><span class="p">:</span> <span class="n">F</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">F</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;This decorator adds a copy option for object mutating methods.</span>
+
+<span class="sd">    :arg function: The method which shall be adjusted.</span>
+
+<span class="sd">    The &#39;add_copy_option&#39; decorator adds the &#39;mutate&#39; keyword argument</span>
+<span class="sd">    to the decorated method. If &#39;mutate&#39; is set to ``False``, the decorator deep</span>
+<span class="sd">    copies the respective object, then applies the called method on the new</span>
+<span class="sd">    copied object and finally returns the copied object. This can be useful</span>
+<span class="sd">    for methods that by default mutate its object. When adding this method,</span>
+<span class="sd">    it is up to the user whether the original object shall be changed</span>
+<span class="sd">    and returned (for mutate=True) or if a copied version of the object with</span>
+<span class="sd">    the respective mutation shall be returned (for mutate=False).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">mutate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">mutate</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">deep_copied_object</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="n">function</span><span class="p">(</span><span class="n">deep_copied_object</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">deep_copied_object</span>
+
+    <span class="n">wrapped_function</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">F</span><span class="p">,</span> <span class="n">wrapper</span><span class="p">)</span>
+    <span class="n">wrapped_function</span><span class="o">.</span><span class="vm">__annotations__</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;mutate&quot;</span><span class="p">:</span> <span class="nb">bool</span><span class="p">})</span>
+
+    <span class="k">return</span> <span class="n">wrapped_function</span></div>
+
+
+<span class="n">G</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;G&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="add_tag_to_class"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.add_tag_to_class">[docs]</a><span class="k">def</span> <span class="nf">add_tag_to_class</span><span class="p">(</span><span class="n">class_to_decorate</span><span class="p">:</span> <span class="n">G</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">G</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;This decorator adds a &#39;tag&#39; argument to the init method of a class.</span>
+
+<span class="sd">    :arg class_to_decorate: The class which shall be decorated.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">init</span> <span class="o">=</span> <span class="n">class_to_decorate</span><span class="o">.</span><span class="fm">__init__</span>
+
+    <span class="k">def</span> <span class="nf">init_with_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">tag</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tag</span> <span class="o">=</span> <span class="n">tag</span>
+
+    <span class="n">class_to_decorate</span><span class="o">.</span><span class="fm">__init__</span> <span class="o">=</span> <span class="n">init_with_tag</span>
+    <span class="k">return</span> <span class="n">class_to_decorate</span></div>
+
+
+<div class="viewcode-block" id="compute_lazy"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.compute_lazy">[docs]</a><span class="k">def</span> <span class="nf">compute_lazy</span><span class="p">(</span>
+    <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">force_to_compute</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">pickle_module</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">ModuleType</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Cache function output to disk via pickle.</span>
+
+<span class="sd">    :param path: Where to save the computed result.</span>
+<span class="sd">    :type path: str</span>
+<span class="sd">    :param force_to_compute: Set to ``True`` if function has to be re-computed.</span>
+<span class="sd">    :type force_to_compute: bool</span>
+<span class="sd">    :param pickle_module: Depending on the object which should be pickled the</span>
+<span class="sd">        default python pickle module won&#39;t be sufficient. Therefore alternative</span>
+<span class="sd">        third party pickle modules (with the same API) can be used. If no</span>
+<span class="sd">        argument is provided, the function will first try to use any of the</span>
+<span class="sd">        pickle modules given in the</span>
+<span class="sd">        :const:`mutwo.core_utilities.configurations.PICKLE_MODULE_TO_SEARCH_TUPLE`.</span>
+<span class="sd">        If none of the modules could be imported it will fall back to the</span>
+<span class="sd">        buildin pickle module.</span>
+<span class="sd">    :type pickle_module: typing.Optional[types.ModuleType]</span>
+
+<span class="sd">    The decorator will only run the function if its input changes</span>
+<span class="sd">    and otherwise load the return value from the disk.</span>
+
+<span class="sd">    This function is helpful if there is a complex, long-taking calculation,</span>
+<span class="sd">    which should only run once or from time to time if the input changes.</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import core_utilities</span>
+<span class="sd">    &gt;&gt;&gt; @core_utilities.compute_lazy(&quot;magic_output&quot;, False)</span>
+<span class="sd">    ... def my_super_complex_calculation(n_numbers):</span>
+<span class="sd">    ...     return sum(number for number in range(n_numbers))</span>
+<span class="sd">    &gt;&gt;&gt; N_NUMBERS = 10000000</span>
+<span class="sd">    &gt;&gt;&gt; my_super_complex_calculation(N_NUMBERS)</span>
+<span class="sd">    49999995000000</span>
+<span class="sd">    &gt;&gt;&gt; # takes very little time when calling the function the second time</span>
+<span class="sd">    &gt;&gt;&gt; my_super_complex_calculation(N_NUMBERS)</span>
+<span class="sd">    49999995000000</span>
+<span class="sd">    &gt;&gt;&gt; # takes long again, because the input changed</span>
+<span class="sd">    &gt;&gt;&gt; my_super_complex_calculation(N_NUMBERS + 10)</span>
+<span class="sd">    50000095000045</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">pickle_module</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="p">(</span>
+            <span class="n">pickle_module_name</span>
+        <span class="p">)</span> <span class="ow">in</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">PICKLE_MODULE_TO_SEARCH_TUPLE</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">pickle_module</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="n">pickle_module_name</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">break</span>
+
+    <span class="k">if</span> <span class="n">pickle_module</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">pickle_module</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="s2">&quot;pickle&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">function_to_decorate</span><span class="p">:</span> <span class="n">F</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">F</span><span class="p">:</span>
+        <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">function_to_decorate</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
+            <span class="n">has_to_compute</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="n">current_args_and_kwargs</span> <span class="o">=</span> <span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">is_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">is_file</span><span class="p">:</span>
+                <span class="n">has_to_compute</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">function_result</span><span class="p">,</span> <span class="n">previous_args_and_kwargs</span> <span class="o">=</span> <span class="n">pickle_module</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">previous_args_and_kwargs</span> <span class="o">!=</span> <span class="n">current_args_and_kwargs</span><span class="p">:</span>
+                    <span class="n">has_to_compute</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="k">if</span> <span class="n">has_to_compute</span> <span class="ow">or</span> <span class="n">force_to_compute</span><span class="p">:</span>
+                <span class="n">function_result</span> <span class="o">=</span> <span class="n">function_to_decorate</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">pickle_module</span><span class="o">.</span><span class="n">dump</span><span class="p">((</span><span class="n">function_result</span><span class="p">,</span> <span class="n">current_args_and_kwargs</span><span class="p">),</span> <span class="n">f</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">function_result</span>
+
+        <span class="n">wrapped_function</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">F</span><span class="p">,</span> <span class="n">wrapper</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">wrapped_function</span>
+
+    <span class="k">return</span> <span class="n">decorator</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.core_utilities.decorators</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Levin Eric Zimmermann.
+    </div>
+  </body>
+</html>

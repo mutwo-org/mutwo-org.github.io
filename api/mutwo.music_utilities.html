@@ -1,0 +1,438 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>mutwo.music_utilities &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+    
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="mutwo.music_version" href="mutwo.music_version.html" />
+    <link rel="prev" title="mutwo.music_parameters" href="mutwo.music_parameters.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mutwo.music_version.html" title="mutwo.music_version"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="mutwo.music_parameters.html" title="mutwo.music_parameters"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="api_documentation.html" accesskey="U">mutwo API documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.music_utilities</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="mutwo-music-utilities">
+<h1><a class="toc-backref" href="#id1" role="doc-backlink">mutwo.music_utilities</a><a class="headerlink" href="#mutwo-music-utilities" title="Permalink to this heading">¶</a></h1>
+<nav class="contents" id="table-of-content">
+<p class="topic-title">Table of content</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#mutwo-music-utilities" id="id1">mutwo.music_utilities</a></p></li>
+</ul>
+</nav>
+<span class="target" id="module-mutwo.music_utilities"></span><table class="docutils align-center" style="width: 95%">
+<thead>
+<tr class="row-odd"><th class="head"><p>Object</p></th>
+<th class="head"><p>Documentation</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.music_utilities.DuplicatePlayingIndicatorConverterMappingWarning" title="mutwo.music_utilities.DuplicatePlayingIndicatorConverterMappingWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_utilities.DuplicatePlayingIndicatorConverterMappingWarning</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.music_utilities.UnsortedIntervalTupleError" title="mutwo.music_utilities.UnsortedIntervalTupleError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_utilities.UnsortedIntervalTupleError</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.music_utilities.NotInstalledError" title="mutwo.music_utilities.NotInstalledError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_utilities.NotInstalledError</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.music_utilities.IndicatorCollectionParser" title="mutwo.music_utilities.IndicatorCollectionParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_utilities.IndicatorCollectionParser</span></code></a></p></td>
+<td><p>Parse strings to <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.IndicatorCollection" title="mutwo.music_parameters.abc.IndicatorCollection"><code class="xref py py-class docutils literal notranslate"><span class="pre">IndicatorCollection</span></code></a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.music_utilities.linear_space" title="mutwo.music_utilities.linear_space"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_utilities.linear_space</span></code></a></p></td>
+<td><p>Return evenly spaced numbers over a specified interval.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py function">
+<dt class="sig sig-object py" id="mutwo.music_utilities.linear_space">
+<span class="sig-name descname"><span class="pre">linear_space</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/music_utilities/tools.html#linear_space"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.music_utilities.linear_space" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return evenly spaced numbers over a specified interval.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start</strong> (<em>float</em>) – The starting value of the sequence.</p></li>
+<li><p><strong>end</strong> (<em>float</em>) – </p></li>
+<li><p><strong>sample_count</strong> (<em>int</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Generator</em></p>
+</dd>
+</dl>
+<p>:param stop : The end value of the sequence.
+:param sample_count: int, Number of samples to generate.</p>
+<blockquote>
+<div><p>Default is 50. Must be non-negative.</p>
+</div></blockquote>
+<p>This is a simplified version of ‘numpy.linspace’.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.music_utilities.DuplicatePlayingIndicatorConverterMappingWarning">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DuplicatePlayingIndicatorConverterMappingWarning</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">articulation_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">playing_indicator_converter</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/music_utilities/exceptions.html#DuplicatePlayingIndicatorConverterMappingWarning"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.music_utilities.DuplicatePlayingIndicatorConverterMappingWarning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">RuntimeWarning</span></code></p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Data Attributes:</p>
+<details><summary>Inherited from <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseException</span></code></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">args</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<details><summary>Inherited from <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseException</span></code></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">with_traceback</span></code></p></td>
+<td><p>Exception.with_traceback(tb) -- set self.__traceback__ to tb and return self.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>articulation_name</strong> (<em>str</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.music_utilities.UnsortedIntervalTupleError">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">UnsortedIntervalTupleError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interval_tuple</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/music_utilities/exceptions.html#UnsortedIntervalTupleError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.music_utilities.UnsortedIntervalTupleError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Data Attributes:</p>
+<details><summary>Inherited from <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseException</span></code></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">args</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<details><summary>Inherited from <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseException</span></code></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">with_traceback</span></code></p></td>
+<td><p>Exception.with_traceback(tb) -- set self.__traceback__ to tb and return self.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+</dd></dl>
+
+<hr class="docutils" />
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.music_utilities.NotInstalledError">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NotInstalledError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">object_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">package</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/music_utilities/exceptions.html#NotInstalledError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.music_utilities.NotInstalledError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Data Attributes:</p>
+<details><summary>Inherited from <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseException</span></code></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">args</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<details><summary>Inherited from <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseException</span></code></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">with_traceback</span></code></p></td>
+<td><p>Exception.with_traceback(tb) -- set self.__traceback__ to tb and return self.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>object_</strong> (<em>str</em>) – </p></li>
+<li><p><strong>package</strong> (<em>str</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.music_utilities.IndicatorCollectionParser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IndicatorCollectionParser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/music_utilities/indicator_collection_parsers.html#IndicatorCollectionParser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.music_utilities.IndicatorCollectionParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ConfigParser</span></code></p>
+<p>Parse strings to <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.IndicatorCollection" title="mutwo.music_parameters.abc.IndicatorCollection"><code class="xref py py-class docutils literal notranslate"><span class="pre">IndicatorCollection</span></code></a>.</p>
+<p>See <code class="xref py py-class docutils literal notranslate"><span class="pre">configparser.ConfigParser</span></code> for provided arguments.</p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Data Attributes:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">STATEMENT_DELIMITER</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <code class="xref py py-class docutils literal notranslate"><span class="pre">RawConfigParser</span></code></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">SECTCRE</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">OPTCRE</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">OPTCRE_NV</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">NONSPACECRE</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">BOOLEAN_STATES</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">converters</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse</span></code>(s, indicator_collection)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <code class="xref py py-class docutils literal notranslate"><span class="pre">ConfigParser</span></code></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set</span></code>(section, option[, value])</p></td>
+<td><p>Set an option.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_section</span></code>(section)</p></td>
+<td><p>Create a new section in the configuration.</p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <code class="xref py py-class docutils literal notranslate"><span class="pre">RawConfigParser</span></code></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">defaults</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sections</span></code>()</p></td>
+<td><p>Return a list of section names, excluding [DEFAULT]</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_section</span></code>(section)</p></td>
+<td><p>Create a new section in the configuration.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">has_section</span></code>(section)</p></td>
+<td><p>Indicate whether the named section is present in the configuration.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">options</span></code>(section)</p></td>
+<td><p>Return a list of option names for the given section name.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">read</span></code>(filenames[, encoding])</p></td>
+<td><p>Read and parse a filename or an iterable of filenames.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_file</span></code>(f[, source])</p></td>
+<td><p>Like read() but the argument must be a file-like object.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_string</span></code>(string[, source])</p></td>
+<td><p>Read configuration from a given string.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_dict</span></code>(dictionary[, source])</p></td>
+<td><p>Read configuration from a dictionary.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">readfp</span></code>(fp[, filename])</p></td>
+<td><p>Deprecated, use read_file instead.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get</span></code>(section, option, *[, raw, vars, fallback])</p></td>
+<td><p>Get an option value for a given section.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">getint</span></code>(section, option, *[, raw, vars, fallback])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">getfloat</span></code>(section, option, *[, raw, vars, ...])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">getboolean</span></code>(section, option, *[, raw, vars, ...])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">items</span></code>([section, raw, vars])</p></td>
+<td><p>Return a list of (name, value) tuples for each option in a section.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">popitem</span></code>()</p></td>
+<td><p>Remove a section from the parser and return it as a (section_name, section_proxy) tuple.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">optionxform</span></code>(optionstr)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">has_option</span></code>(section, option)</p></td>
+<td><p>Check for the existence of a given option in a given section.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set</span></code>(section, option[, value])</p></td>
+<td><p>Set an option.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code>(fp[, space_around_delimiters])</p></td>
+<td><p>Write an .ini-format representation of the configuration state.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_option</span></code>(section, option)</p></td>
+<td><p>Remove an option.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_section</span></code>(section)</p></td>
+<td><p>Remove a file section.</p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <code class="xref py py-class docutils literal notranslate"><span class="pre">MutableMapping</span></code></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pop</span></code>(k[,d])</p></td>
+<td><p>If key is not found, d is returned if given, otherwise KeyError is raised.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">popitem</span></code>()</p></td>
+<td><p>as a 2-tuple; but raise KeyError if D is empty.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">update</span></code>([E, ]**F)</p></td>
+<td><p>If E present and has a .keys() method, does:     for k in E: D[k] = E[k] If E present and lacks .keys() method, does:     for (k, v) in E: D[k] = v In either case, this is followed by: for k, v in F.items(): D[k] = v</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setdefault</span></code>(k[,d])</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get</span></code>(k[,d])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">keys</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">items</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">values</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.music_utilities.IndicatorCollectionParser.parse">
+<span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indicator_collection</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/music_utilities/indicator_collection_parsers.html#IndicatorCollectionParser.parse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.music_utilities.IndicatorCollectionParser.parse" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>s</strong> (<em>str</em>) – </p></li>
+<li><p><strong>indicator_collection</strong> (<a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.IndicatorCollection" title="mutwo.music_parameters.abc.IndicatorCollection"><em>IndicatorCollection</em></a>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.IndicatorCollection" title="mutwo.music_parameters.abc.IndicatorCollection"><em>IndicatorCollection</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mutwo.music_utilities.IndicatorCollectionParser.STATEMENT_DELIMITER">
+<span class="sig-name descname"><span class="pre">STATEMENT_DELIMITER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">';'</span></em><a class="headerlink" href="#mutwo.music_utilities.IndicatorCollectionParser.STATEMENT_DELIMITER" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mutwo.music_version.html" title="mutwo.music_version"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="mutwo.music_parameters.html" title="mutwo.music_parameters"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="api_documentation.html" >mutwo API documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.music_utilities</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2024, mutwo authors.
+    </div>
+  </body>
+</html>

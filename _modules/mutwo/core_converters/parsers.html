@@ -1,0 +1,334 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mutwo.core_converters.parsers &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.core_converters.parsers</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mutwo.core_converters.parsers</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Standardization for transformations between parameters and chronons</span>
+
+<span class="sd">Adds classes to allow transformations in two directions:</span>
+
+<span class="sd">1. Extract data (e.g. mutwo parameters) from chronons</span>
+<span class="sd">2. Convert data (e.g. mutwo parameters) to chronons</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_constants</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_converters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_events</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_utilities</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;SimpleEventToAttribute&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;MutwoParameterDict&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;MutwoParameterDictToKeywordArgument&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;MutwoParameterDictToDuration&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;MutwoParameterDictToSimpleEvent&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;UnknownObjectToObject&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="SimpleEventToAttribute"><a class="viewcode-back" href="../../../api/mutwo.core_converters.html#mutwo.core_converters.SimpleEventToAttribute">[docs]</a><span class="k">class</span> <span class="nc">SimpleEventToAttribute</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Converter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Extract from a chronon an attribute.</span>
+
+<span class="sd">    :param attribute_name: The name of the attribute which is fetched</span>
+<span class="sd">        from a :class:`mutwo.core_events.SimpleEvent`.</span>
+<span class="sd">    :param exception_value: This value is returned in case an `AttributeError`</span>
+<span class="sd">        raises .</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">exception_value</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_attribute_name</span> <span class="o">=</span> <span class="n">attribute_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exception_value</span> <span class="o">=</span> <span class="n">exception_value</span>
+
+<div class="viewcode-block" id="SimpleEventToAttribute.convert"><a class="viewcode-back" href="../../../api/mutwo.core_converters.html#mutwo.core_converters.SimpleEventToAttribute.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chronon_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Extract from a :class:`mutwo.core_events.SimpleEvent` an attribute.</span>
+
+<span class="sd">        :param chronon_to_convert: The :class:`mutwo.core_events.SimpleEvent`</span>
+<span class="sd">            from which an attribute shall be extracted.</span>
+<span class="sd">        :type chronon_to_convert: mutwo.core_events.SimpleEvent</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo import core_converters</span>
+<span class="sd">        &gt;&gt;&gt; from mutwo import core_events</span>
+<span class="sd">        &gt;&gt;&gt; chronon = core_events.SimpleEvent(duration=10)</span>
+<span class="sd">        &gt;&gt;&gt; chronon_to_duration = core_converters.SimpleEventToAttribute(</span>
+<span class="sd">        ...     &#39;duration&#39;, 0</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &gt;&gt;&gt; chronon_to_duration.convert(chronon)</span>
+<span class="sd">        DirectDuration(10)</span>
+<span class="sd">        &gt;&gt;&gt; chronon_to_pasta = core_converters.SimpleEventToAttribute(</span>
+<span class="sd">        ...     &#39;pasta&#39;, &#39;spaghetti&#39;</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &gt;&gt;&gt; chronon_to_pasta.convert(chronon)</span>
+<span class="sd">        &#39;spaghetti&#39;</span>
+<span class="sd">        &gt;&gt;&gt; chronon.pasta = &#39;tagliatelle&#39;</span>
+<span class="sd">        &gt;&gt;&gt; chronon_to_pasta.convert(chronon)</span>
+<span class="sd">        &#39;tagliatelle&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">call_function_except_attribute_error</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">chronon</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">chronon</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attribute_name</span><span class="p">),</span>
+            <span class="n">chronon_to_convert</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exception_value</span><span class="p">,</span>
+        <span class="p">)</span></div></div>
+
+
+<span class="n">MutwoParameterDict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="MutwoParameterDictToKeywordArgument"><a class="viewcode-back" href="../../../api/mutwo.core_converters.html#mutwo.core_converters.MutwoParameterDictToKeywordArgument">[docs]</a><span class="k">class</span> <span class="nc">MutwoParameterDictToKeywordArgument</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Converter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Extract from a dict of mutwo parameters specific objects.</span>
+
+<span class="sd">    :param mutwo_parameter_to_search_name: The parameter name which</span>
+<span class="sd">        should be fetched from the MutwoParameterDict (if it exists).</span>
+<span class="sd">    :type mutwo_parameter_to_search_name: str</span>
+<span class="sd">    :param keyword: The keyword string to return. If no argument is given</span>
+<span class="sd">        it will use the same value as :param:`mutwo_parameter_to_search_name`.</span>
+<span class="sd">    :type keyword: typing.Optional[str]</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import core_converters</span>
+<span class="sd">    &gt;&gt;&gt; from mutwo import core_parameters</span>
+<span class="sd">    &gt;&gt;&gt; mutwo_parameter_dict_to_keyword_argument = core_converters.MutwoParameterDictToKeywordArgument(&#39;duration&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; mutwo_parameter_dict_to_keyword_argument.convert(</span>
+<span class="sd">    ...     {&#39;duration&#39;: core_parameters.DirectDuration(1)}</span>
+<span class="sd">    ... )</span>
+<span class="sd">    (&#39;duration&#39;, DirectDuration(1))</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">mutwo_parameter_to_search_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">keyword</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">keyword</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">keyword</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">mutwo_parameter_to_search_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mutwo_parameter_to_search_name</span> <span class="o">=</span> <span class="n">mutwo_parameter_to_search_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_keyword</span> <span class="o">=</span> <span class="n">keyword</span>
+
+<div class="viewcode-block" id="MutwoParameterDictToKeywordArgument.convert"><a class="viewcode-back" href="../../../api/mutwo.core_converters.html#mutwo.core_converters.MutwoParameterDictToKeywordArgument.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">mutwo_parameter_dict_to_convert</span><span class="p">:</span> <span class="n">MutwoParameterDict</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span><span class="p">]]:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_keyword</span><span class="p">,</span>
+                <span class="n">mutwo_parameter_dict_to_convert</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_mutwo_parameter_to_search_name</span><span class="p">],</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span></div></div>
+
+
+<div class="viewcode-block" id="MutwoParameterDictToDuration"><a class="viewcode-back" href="../../../api/mutwo.core_converters.html#mutwo.core_converters.MutwoParameterDictToDuration">[docs]</a><span class="k">class</span> <span class="nc">MutwoParameterDictToDuration</span><span class="p">(</span><span class="n">MutwoParameterDictToKeywordArgument</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Extract from a dict of mutwo parameters the duration.</span>
+
+<span class="sd">    :param duration_to_search_name: The name of the duration which shall</span>
+<span class="sd">        be searched for in the :const:`MutwoParameterDict`. If `None` the</span>
+<span class="sd">        value of the global constants</span>
+<span class="sd">        :const:`mutwo.core_converters.configurations.DEFAULT_DURATION_TO_SEARCH_NAME`</span>
+<span class="sd">        will be used. Default to `None`.</span>
+<span class="sd">    :type duration_to_search_name: typing.Optional[str]</span>
+<span class="sd">    :param duration_keyword_name: The name of the duration keyword for the</span>
+<span class="sd">        event. If `None` the value of the global constants</span>
+<span class="sd">        :const:`mutwo.core_converters.configurations.DEFAULT_DURATION_KEYWORD_NAME`</span>
+<span class="sd">        will be used. Default to `None`.</span>
+<span class="sd">    :type duration_keyword_name: typing.Optional[str]</span>
+<span class="sd">        :const:`mutwo.core_converters.configurations.DEFAULT_DURATION_KEYWORD_NAME`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">duration_to_search_name</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">duration_keyword_name</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">duration_to_search_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">duration_to_search_name</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">core_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_DURATION_TO_SEARCH_NAME</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">duration_keyword_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">duration_keyword_name</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">core_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_DURATION_KEYWORD_NAME</span>
+            <span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">duration_to_search_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">duration_keyword_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">duration_to_search_name</span><span class="p">,</span> <span class="n">duration_keyword_name</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MutwoParameterDictToSimpleEvent"><a class="viewcode-back" href="../../../api/mutwo.core_converters.html#mutwo.core_converters.MutwoParameterDictToSimpleEvent">[docs]</a><span class="k">class</span> <span class="nc">MutwoParameterDictToSimpleEvent</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Converter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert a dict of mutwo parameters to a :class:`mutwo.core_events.SimpleEvent`</span>
+
+<span class="sd">    :param mutwo_parameter_dict_to_keyword_argument_sequence: A sequence of</span>
+<span class="sd">        :class:`MutwoParameterDictToKeywordArgument`. If set to `None`</span>
+<span class="sd">        a sequence with :class:`MutwoParameterDictToDuration` will be created.</span>
+<span class="sd">        Default to `None`.</span>
+<span class="sd">    :type mutwo_parameter_dict_to_keyword_argument_sequence: typing.Optional[typing.Sequence[MutwoParameterDictToKeywordArgument]]</span>
+<span class="sd">    :param chronon_class: Default to :class:`mutwo.core_events.SimpleEvent`.</span>
+<span class="sd">    :type chronon_class: typing.Type[core_events.SimpleEvent]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">mutwo_parameter_dict_to_keyword_argument_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+            <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">MutwoParameterDictToKeywordArgument</span><span class="p">]</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">chronon_class</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Type</span><span class="p">[</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">mutwo_parameter_dict_to_keyword_argument_sequence</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">mutwo_parameter_dict_to_keyword_argument_sequence</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">MutwoParameterDictToDuration</span><span class="p">(),</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mutwo_parameter_dict_to_keyword_argument_sequence</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">mutwo_parameter_dict_to_keyword_argument_sequence</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_class</span> <span class="o">=</span> <span class="n">chronon_class</span>
+
+<div class="viewcode-block" id="MutwoParameterDictToSimpleEvent.convert"><a class="viewcode-back" href="../../../api/mutwo.core_converters.html#mutwo.core_converters.MutwoParameterDictToSimpleEvent.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">mutwo_parameter_dict_to_convert</span><span class="p">:</span> <span class="n">MutwoParameterDict</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">:</span>
+        <span class="n">keyword_argument_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="p">(</span>
+            <span class="n">mutwo_parameter_dict_to_keyword_argument</span>
+        <span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mutwo_parameter_dict_to_keyword_argument_sequence</span><span class="p">:</span>
+            <span class="n">keyword_argument_or_none</span> <span class="o">=</span> <span class="n">mutwo_parameter_dict_to_keyword_argument</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span>
+                <span class="n">mutwo_parameter_dict_to_convert</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">keyword_argument_or_none</span><span class="p">:</span>
+                <span class="n">keyword</span><span class="p">,</span> <span class="n">argument</span> <span class="o">=</span> <span class="n">keyword_argument_or_none</span>
+                <span class="n">keyword_argument_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">keyword</span><span class="p">:</span> <span class="n">argument</span><span class="p">})</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_class</span><span class="p">(</span><span class="o">**</span><span class="n">keyword_argument_dict</span><span class="p">)</span></div></div>
+
+
+<span class="n">T</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="UnknownObjectToObject"><a class="viewcode-back" href="../../../api/mutwo.core_converters.html#mutwo.core_converters.UnknownObjectToObject">[docs]</a><span class="k">class</span> <span class="nc">UnknownObjectToObject</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Converter</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Generic</span><span class="p">[</span><span class="n">T</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;Helper to simplify standardisation of syntactic sugar.</span>
+
+<span class="sd">    :param type_tuple_to_callable_dict: Define which types are converted by</span>
+<span class="sd">        which methods.</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import core_converters</span>
+<span class="sd">    &gt;&gt;&gt; anything_to_string = core_converters.UnknownObjectToObject[str](</span>
+<span class="sd">    ...     (</span>
+<span class="sd">    ...         ((float, int, list), str),</span>
+<span class="sd">    ...         ((tuple,), lambda t: str(len(t))),</span>
+<span class="sd">    ...         ([], lambda _: &quot;...&quot;),</span>
+<span class="sd">    ...     )</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; anything_to_string.convert(100)</span>
+<span class="sd">    &#39;100&#39;</span>
+<span class="sd">    &gt;&gt;&gt; anything_to_string.convert(7.32)</span>
+<span class="sd">    &#39;7.32&#39;</span>
+<span class="sd">    &gt;&gt;&gt; anything_to_string.convert((1, 2, 3))</span>
+<span class="sd">    &#39;3&#39;</span>
+<span class="sd">    &gt;&gt;&gt; anything_to_string.convert(b&#39;&#39;)</span>
+<span class="sd">    &#39;...&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">type_tuple_and_callable_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Type</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">],</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_type_tuple_and_callable_tuple</span> <span class="o">=</span> <span class="n">type_tuple_and_callable_tuple</span>
+
+<div class="viewcode-block" id="UnknownObjectToObject.convert"><a class="viewcode-back" href="../../../api/mutwo.core_converters.html#mutwo.core_converters.UnknownObjectToObject.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unknown_object_to_convert</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+        <span class="c1"># XXX: This may break in the future, because it is an implementation</span>
+        <span class="c1"># detail.</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">unknown_object_to_convert</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">get_args</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__orig_class__</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="n">unknown_object_to_convert</span>
+        <span class="k">for</span> <span class="n">type_tuple</span><span class="p">,</span> <span class="n">callable_object</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_tuple_and_callable_tuple</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">type_tuple</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">unknown_object_to_convert</span><span class="p">,</span> <span class="n">type_tuple</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="n">callable_object</span><span class="p">(</span><span class="n">unknown_object_to_convert</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">callable_object</span><span class="p">(</span><span class="n">unknown_object_to_convert</span><span class="p">)</span>
+
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;No conversion routine defined for object &#39;</span><span class="si">{</span><span class="n">unknown_object_to_convert</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; of type &#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">unknown_object_to_convert</span><span class="p">)</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>
+        <span class="p">)</span></div></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.core_converters.parsers</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Levin Eric Zimmermann.
+    </div>
+  </body>
+</html>

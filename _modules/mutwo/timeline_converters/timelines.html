@@ -1,0 +1,392 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mutwo.timeline_converters.timelines &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.timeline_converters.timelines</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mutwo.timeline_converters.timelines</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">ranges</span>
+
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_converters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_events</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_parameters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_utilities</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">timeline_interfaces</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;TimeLineToEventPlacementDict&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;TimeLineToConcurrence&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;TimeLineToEventPlacementTuple&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;EventPlacementTupleToGaplessEventPlacementTuple&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;EventPlacementTupleToSplitEventPlacementDict&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">Tag</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">TypeAlias</span> <span class="o">=</span> <span class="s2">&quot;str&quot;</span>
+
+
+<div class="viewcode-block" id="TimeLineToEventPlacementDict"><a class="viewcode-back" href="../../../api/mutwo.timeline_converters.html#mutwo.timeline_converters.TimeLineToEventPlacementDict">[docs]</a><span class="k">class</span> <span class="nc">TimeLineToEventPlacementDict</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Converter</span><span class="p">):</span>
+<div class="viewcode-block" id="TimeLineToEventPlacementDict.convert"><a class="viewcode-back" href="../../../api/mutwo.timeline_converters.html#mutwo.timeline_converters.TimeLineToEventPlacementDict.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">timeline_to_convert</span><span class="p">:</span> <span class="n">timeline_interfaces</span><span class="o">.</span><span class="n">TimeLine</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Tag</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">timeline_interfaces</span><span class="o">.</span><span class="n">EventPlacement</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
+        <span class="n">timeline_to_convert</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="n">tag_to_event_placement_list</span> <span class="o">=</span> <span class="p">{</span><span class="n">tag</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">timeline_to_convert</span><span class="o">.</span><span class="n">tag_set</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">event_placement</span> <span class="ow">in</span> <span class="n">timeline_to_convert</span><span class="o">.</span><span class="n">event_placement_tuple</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">event_placement</span><span class="o">.</span><span class="n">tag_tuple</span><span class="p">:</span>
+                <span class="c1"># TODO(Add checks for overlaps!)</span>
+                <span class="n">tag_to_event_placement_list</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event_placement</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">tag</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">event_placement_list</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">tag</span><span class="p">,</span> <span class="n">event_placement_list</span> <span class="ow">in</span> <span class="n">tag_to_event_placement_list</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">}</span></div></div>
+
+
+<div class="viewcode-block" id="TimeLineToConcurrence"><a class="viewcode-back" href="../../../api/mutwo.timeline_converters.html#mutwo.timeline_converters.TimeLineToConcurrence">[docs]</a><span class="k">class</span> <span class="nc">TimeLineToConcurrence</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Converter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create event with Concurrence for each tag.</span>
+
+<span class="sd">    :param random_seed: Seed for random operation in case</span>
+<span class="sd">        `start_or_start_range` or `end_or_end_range` of an</span>
+<span class="sd">        :class:`mutwo.timeline_interfaces.EventPlacement` is a</span>
+<span class="sd">        `ranges.Range` and :class:`TimeLineToConcurrence`</span>
+<span class="sd">        needs to pick a value within the given range.</span>
+<span class="sd">    :type random_seed: int</span>
+
+<span class="sd">    The main intention of this converter is to convert a</span>
+<span class="sd">    :class:`TimeLine` into a representation which is useable</span>
+<span class="sd">    for concrete third party converters like</span>
+<span class="sd">    :class:`mutwo.midi_converters.EventToMidiFile`.</span>
+
+<span class="sd">    To be successful the tagged events in the</span>
+<span class="sd">    :class:`mutwo.timeline_interfaces.EventPlacement` in the</span>
+<span class="sd">    :class:`mutwo.timeline_interfaces.TimeLine` which is</span>
+<span class="sd">    converted need a specific structure: the deepest nested</span>
+<span class="sd">    structure they can follow is:</span>
+
+<span class="sd">        core_events.Concurrence[</span>
+<span class="sd">            core_events.Consecution[</span>
+<span class="sd">                core_events.SimpleEvent</span>
+<span class="sd">            ]</span>
+<span class="sd">        ]</span>
+
+<span class="sd">    Because this will be the final structure. This clean</span>
+<span class="sd">    ordering is necessary to be functional with various third</span>
+<span class="sd">    party converters as e.g.</span>
+<span class="sd">    :class:`mutwo.midi_converters.EventToMidiFile`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">random_seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_random</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">random_seed</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_time_or_time_range_to_time</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">time_or_time_range</span><span class="p">:</span> <span class="n">ranges</span><span class="o">.</span><span class="n">Range</span> <span class="o">|</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">time_or_time_range</span><span class="p">,</span> <span class="n">ranges</span><span class="o">.</span><span class="n">Range</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">DirectDuration</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span>
+                    <span class="nb">float</span><span class="p">(</span><span class="n">time_or_time_range</span><span class="o">.</span><span class="n">start</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">time_or_time_range</span><span class="o">.</span><span class="n">end</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">time_or_time_range</span>
+
+    <span class="k">def</span> <span class="nf">_event_placement_to_start_and_end</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">event_placement</span><span class="p">:</span> <span class="n">timeline_interfaces</span><span class="o">.</span><span class="n">EventPlacement</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">,</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_time_or_time_range_to_time</span><span class="p">(</span><span class="n">event_placement</span><span class="o">.</span><span class="n">start_or_start_range</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_time_or_time_range_to_time</span><span class="p">(</span><span class="n">event_placement</span><span class="o">.</span><span class="n">end_or_end_range</span><span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_append_to_simultaneous_event</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">start</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">,</span>
+        <span class="n">simultaneous_event</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">TaggedConcurrence</span><span class="p">,</span>
+        <span class="n">event_to_append</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Concurrence</span><span class="p">[</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">]</span>
+        <span class="p">],</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">start</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">simultaneous_event_duration</span> <span class="o">:=</span> <span class="n">simultaneous_event</span><span class="o">.</span><span class="n">duration</span><span class="p">):</span>
+            <span class="c1"># In case our concurrence is still empty, &#39;extend_until&#39;</span>
+            <span class="c1"># will do nothing (because it only extends consecutions,</span>
+            <span class="c1"># but ignores concurrences). Therefore we need to explicitly</span>
+            <span class="c1"># add a consecution before extending.</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">simultaneous_event</span><span class="p">:</span>
+                <span class="n">simultaneous_event</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">([]))</span>
+            <span class="n">simultaneous_event</span><span class="o">.</span><span class="n">extend_until</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+        <span class="c1"># We have an overlap</span>
+        <span class="k">elif</span> <span class="n">start</span> <span class="o">&lt;</span> <span class="n">simultaneous_event_duration</span><span class="p">:</span>
+            <span class="c1"># TODO(We need to check for overlaps. If we find overlaps:</span>
+            <span class="c1">#       (a) with prohibit flag</span>
+            <span class="c1">#       (b) with allow flag</span>
+            <span class="c1">#</span>
+            <span class="c1">#       (a) raise Exception</span>
+            <span class="c1">#       (b) check for all other Consecutions,</span>
+            <span class="c1">#           how many are they where we don&#39;t have</span>
+            <span class="c1">#           any conflicts? Where are they? (save in list)</span>
+            <span class="c1">#           If there aren&#39;t enough, add new consecutions.</span>
+            <span class="c1">#           Then: only append to the consecutions without</span>
+            <span class="c1">#           conflicts.</span>
+            <span class="c1"># elif rest_duration &lt; 0</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Overlap handler isn&#39;t implemented yet!&quot;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">simultaneous_event</span><span class="o">.</span><span class="n">concatenate_by_tag</span><span class="p">(</span><span class="n">event_to_append</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">NoTagError</span><span class="p">:</span>
+            <span class="n">simultaneous_event</span><span class="o">.</span><span class="n">concatenate_by_index</span><span class="p">(</span><span class="n">event_to_append</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_add_tagged_event_to_simultaneous_event</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">start</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">,</span>
+        <span class="n">simultaneous_event</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">TaggedConcurrence</span><span class="p">,</span>
+        <span class="n">tagged_event</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">TaggedSimpleEvent</span>
+        <span class="o">|</span> <span class="n">core_events</span><span class="o">.</span><span class="n">TaggedConsecution</span>
+        <span class="o">|</span> <span class="n">core_events</span><span class="o">.</span><span class="n">TaggedConcurrence</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tagged_event</span><span class="p">,</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">):</span>
+            <span class="n">tagged_event</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Concurrence</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">([</span><span class="n">tagged_event</span><span class="p">])]</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tagged_event</span><span class="p">,</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">):</span>
+            <span class="n">tagged_event</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Concurrence</span><span class="p">([</span><span class="n">tagged_event</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_append_to_simultaneous_event</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">simultaneous_event</span><span class="p">,</span> <span class="n">tagged_event</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_event_placement_to_event</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">event_placement</span><span class="p">:</span> <span class="n">timeline_interfaces</span><span class="o">.</span><span class="n">EventPlacement</span><span class="p">,</span>
+        <span class="n">start</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">,</span>
+        <span class="n">end</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">Concurrence</span><span class="p">]:</span>
+        <span class="n">event_duration</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">event_placement</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;duration&quot;</span><span class="p">,</span> <span class="n">event_duration</span><span class="p">,</span> <span class="n">mutate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">CannotSetDurationOfEmptyComplexEvent</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="TimeLineToConcurrence.convert"><a class="viewcode-back" href="../../../api/mutwo.timeline_converters.html#mutwo.timeline_converters.TimeLineToConcurrence.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">timeline_to_convert</span><span class="p">:</span> <span class="n">timeline_interfaces</span><span class="o">.</span><span class="n">TimeLine</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Concurrence</span><span class="p">[</span>
+        <span class="n">core_events</span><span class="o">.</span><span class="n">TaggedConcurrence</span><span class="p">[</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">]</span>
+        <span class="p">]</span>
+    <span class="p">]:</span>
+        <span class="n">duration</span> <span class="o">=</span> <span class="n">timeline_to_convert</span><span class="o">.</span><span class="n">duration</span>
+        <span class="n">tag_tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">timeline_to_convert</span><span class="o">.</span><span class="n">tag_set</span><span class="p">))</span>
+
+        <span class="n">tag_to_tagged_simultaneous_event</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">tag</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">TaggedConcurrence</span><span class="p">([],</span> <span class="n">tag</span><span class="o">=</span><span class="n">tag</span><span class="p">)</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tag_tuple</span>
+        <span class="p">}</span>
+
+        <span class="n">timeline_to_convert</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">event_placement</span> <span class="ow">in</span> <span class="n">timeline_to_convert</span><span class="o">.</span><span class="n">event_placement_tuple</span><span class="p">:</span>
+            <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_placement_to_start_and_end</span><span class="p">(</span><span class="n">event_placement</span><span class="p">)</span>
+            <span class="c1"># If the event of our event placement doesn&#39;t have any children,</span>
+            <span class="c1"># this is `None` and we just need to ignore it.</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
+                <span class="n">event</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_placement_to_event</span><span class="p">(</span><span class="n">event_placement</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+            <span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="k">for</span> <span class="n">tagged_event</span> <span class="ow">in</span> <span class="n">event</span><span class="p">:</span>
+                <span class="n">tag</span> <span class="o">=</span> <span class="n">tagged_event</span><span class="o">.</span><span class="n">tag</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_add_tagged_event_to_simultaneous_event</span><span class="p">(</span>
+                    <span class="n">start</span><span class="p">,</span>
+                    <span class="n">tag_to_tagged_simultaneous_event</span><span class="p">[</span><span class="n">tag</span><span class="p">],</span>
+                    <span class="n">tagged_event</span><span class="p">,</span>
+                <span class="p">)</span>
+
+        <span class="n">duration</span> <span class="o">=</span> <span class="n">duration</span> <span class="ow">or</span> <span class="nb">max</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">duration</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">tag_to_tagged_simultaneous_event</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="p">)</span>
+        <span class="p">[</span><span class="n">e</span><span class="o">.</span><span class="n">extend_until</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">tag_to_tagged_simultaneous_event</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+
+        <span class="k">return</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Concurrence</span><span class="p">(</span>
+            <span class="nb">tuple</span><span class="p">(</span><span class="n">tag_to_tagged_simultaneous_event</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="TimeLineToEventPlacementTuple"><a class="viewcode-back" href="../../../api/mutwo.timeline_converters.html#mutwo.timeline_converters.TimeLineToEventPlacementTuple">[docs]</a><span class="k">class</span> <span class="nc">TimeLineToEventPlacementTuple</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Converter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Fetch from :class:`~mutwo.timeline_interfaces.TimeLine` all :class:`~mutwo.timeline_interfaces.EventPlacement` which contains of user defined tags.</span>
+
+<span class="sd">    Unlike :class:`TimeLineToEventPlacementDict` this converter</span>
+<span class="sd">    doesn&#39;t split the fetched :class:`mutwo.timeline_interfaces.EventPlacement`s</span>
+<span class="sd">    into different `tuples`, but returns all of them in one common `tuple`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TimeLineToEventPlacementTuple.convert"><a class="viewcode-back" href="../../../api/mutwo.timeline_converters.html#mutwo.timeline_converters.TimeLineToEventPlacementTuple.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">timeline_to_convert</span><span class="p">:</span> <span class="n">timeline_interfaces</span><span class="o">.</span><span class="n">TimeLine</span><span class="p">,</span>
+        <span class="n">tag_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Tag</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">timeline_interfaces</span><span class="o">.</span><span class="n">EventPlacement</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="n">timeline_to_convert</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+        <span class="c1"># XXX: Should we add any checks for overlaps?</span>
+        <span class="n">event_placement_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">timeline_interfaces</span><span class="o">.</span><span class="n">EventPlacement</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">event_placement</span> <span class="ow">in</span> <span class="n">timeline_to_convert</span><span class="o">.</span><span class="n">event_placement_tuple</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="n">tag</span> <span class="ow">in</span> <span class="n">tag_tuple</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">event_placement</span><span class="o">.</span><span class="n">tag_tuple</span><span class="p">]):</span>
+                <span class="n">event_placement_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event_placement</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">event_placement_list</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="EventPlacementTupleToSplitEventPlacementDict"><a class="viewcode-back" href="../../../api/mutwo.timeline_converters.html#mutwo.timeline_converters.EventPlacementTupleToSplitEventPlacementDict">[docs]</a><span class="k">class</span> <span class="nc">EventPlacementTupleToSplitEventPlacementDict</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Converter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Split :class:`~mutwo.timeline_interfaces.EventPlacement` into new `EventPlacement`s by tags.</span>
+
+<span class="sd">    So the returned `event` attribute of each returned</span>
+<span class="sd">    :class:`mutwo.timeline_interfaces.EventPlacement` only</span>
+<span class="sd">    contains one specific tagged event.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="EventPlacementTupleToSplitEventPlacementDict.convert"><a class="viewcode-back" href="../../../api/mutwo.timeline_converters.html#mutwo.timeline_converters.EventPlacementTupleToSplitEventPlacementDict.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">event_placement_tuple_to_convert</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span>
+            <span class="n">timeline_interfaces</span><span class="o">.</span><span class="n">EventPlacement</span><span class="p">,</span> <span class="o">...</span>
+        <span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Tag</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">timeline_interfaces</span><span class="o">.</span><span class="n">EventPlacement</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
+        <span class="n">tag_to_event_placement_list</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span>
+            <span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">timeline_interfaces</span><span class="o">.</span><span class="n">EventPlacement</span><span class="p">]</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">event_placement</span> <span class="ow">in</span> <span class="n">event_placement_tuple_to_convert</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">event_index</span><span class="p">,</span> <span class="n">event</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">event_placement</span><span class="o">.</span><span class="n">event</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">event_placement_list</span> <span class="o">=</span> <span class="n">tag_to_event_placement_list</span><span class="p">[</span><span class="n">event</span><span class="o">.</span><span class="n">tag</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                    <span class="n">event_placement_list</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">tag_to_event_placement_list</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                        <span class="p">{</span><span class="n">event</span><span class="o">.</span><span class="n">tag</span><span class="p">:</span> <span class="n">event_placement_list</span><span class="p">}</span>
+                    <span class="p">)</span>
+                <span class="n">new_event_placement</span> <span class="o">=</span> <span class="n">event_placement</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">new_event_placement</span><span class="o">.</span><span class="n">event</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Concurrence</span><span class="p">(</span>
+                    <span class="p">[</span><span class="n">new_event_placement</span><span class="o">.</span><span class="n">event</span><span class="p">[</span><span class="n">event_index</span><span class="p">]]</span>
+                <span class="p">)</span>
+                <span class="n">event_placement_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_event_placement</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">tag</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">event_placement_list</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">tag</span><span class="p">,</span> <span class="n">event_placement_list</span> <span class="ow">in</span> <span class="n">tag_to_event_placement_list</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">}</span></div></div>
+
+
+<div class="viewcode-block" id="EventPlacementTupleToGaplessEventPlacementTuple"><a class="viewcode-back" href="../../../api/mutwo.timeline_converters.html#mutwo.timeline_converters.EventPlacementTupleToGaplessEventPlacementTuple">[docs]</a><span class="k">class</span> <span class="nc">EventPlacementTupleToGaplessEventPlacementTuple</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Converter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Fill empty :class:`~mutwo.timeline_interfaces.EventPlacement` into the gaps between two `EventPlacement`.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="EventPlacementTupleToGaplessEventPlacementTuple.convert"><a class="viewcode-back" href="../../../api/mutwo.timeline_converters.html#mutwo.timeline_converters.EventPlacementTupleToGaplessEventPlacementTuple.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">event_placement_tuple_to_convert</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span>
+            <span class="n">timeline_interfaces</span><span class="o">.</span><span class="n">EventPlacement</span><span class="p">,</span> <span class="o">...</span>
+        <span class="p">],</span>
+        <span class="n">duration</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">timeline_interfaces</span><span class="o">.</span><span class="n">EventPlacement</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="k">def</span> <span class="nf">add_rest</span><span class="p">(</span>
+            <span class="n">start</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span>
+        <span class="p">):</span>
+            <span class="n">new_event_placement_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">timeline_interfaces</span><span class="o">.</span><span class="n">EventPlacement</span><span class="p">(</span>
+                    <span class="n">core_events</span><span class="o">.</span><span class="n">Concurrence</span><span class="p">(</span>
+                        <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">TaggedSimpleEvent</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="n">tag</span><span class="p">)]</span>
+                    <span class="p">),</span>
+                    <span class="n">start</span><span class="p">,</span>
+                    <span class="n">end</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">event_placement_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="n">event_placement_tuple_to_convert</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">event_placement</span><span class="p">:</span> <span class="p">(</span>
+                <span class="n">event_placement</span><span class="o">.</span><span class="n">min_start</span><span class="p">,</span>
+                <span class="n">event_placement</span><span class="o">.</span><span class="n">max_end</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="n">new_event_placement_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">last_end</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">tag</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">event_placement</span> <span class="ow">in</span> <span class="n">event_placement_list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">tag</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">tag</span> <span class="o">=</span> <span class="n">event_placement</span><span class="o">.</span><span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tag</span>
+            <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">event_placement</span><span class="o">.</span><span class="n">min_start</span><span class="p">,</span> <span class="n">event_placement</span><span class="o">.</span><span class="n">max_end</span>
+            <span class="k">if</span> <span class="n">start</span> <span class="o">&gt;</span> <span class="n">last_end</span><span class="p">:</span>
+                <span class="n">add_rest</span><span class="p">(</span><span class="n">last_end</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
+            <span class="n">new_event_placement_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event_placement</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+            <span class="n">last_end</span> <span class="o">=</span> <span class="n">end</span>
+
+        <span class="k">if</span> <span class="n">duration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">last_end</span> <span class="o">&lt;</span> <span class="n">duration</span><span class="p">:</span>
+            <span class="n">add_rest</span><span class="p">(</span><span class="n">last_end</span><span class="p">,</span> <span class="n">duration</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">new_event_placement_list</span><span class="p">)</span></div></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.timeline_converters.timelines</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Levin Eric Zimmermann.
+    </div>
+  </body>
+</html>

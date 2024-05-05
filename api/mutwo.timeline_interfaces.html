@@ -1,0 +1,779 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>mutwo.timeline_interfaces &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+    
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="mutwo.timeline_utilities" href="mutwo.timeline_utilities.html" />
+    <link rel="prev" title="mutwo.timeline_converters" href="mutwo.timeline_converters.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mutwo.timeline_utilities.html" title="mutwo.timeline_utilities"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="mutwo.timeline_converters.html" title="mutwo.timeline_converters"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="api_documentation.html" accesskey="U">mutwo API documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.timeline_interfaces</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="mutwo-timeline-interfaces">
+<h1><a class="toc-backref" href="#id1" role="doc-backlink">mutwo.timeline_interfaces</a><a class="headerlink" href="#mutwo-timeline-interfaces" title="Permalink to this heading">¶</a></h1>
+<nav class="contents" id="table-of-content">
+<p class="topic-title">Table of content</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#mutwo-timeline-interfaces" id="id1">mutwo.timeline_interfaces</a></p></li>
+</ul>
+</nav>
+<span class="target" id="module-mutwo.timeline_interfaces"></span><p>Place events with absolute start and end times on a time line.</p>
+<p><cite>Mutwo</cite> events usually follow an approach of relative placement in time.
+This means each event has a duration, and if there is a sequence of events
+the second event will start after the first event finishes. So the start
+and end time of any event dependent on all events which happens before the
+given event. This package implements the possibility to model events with
+independent start and end times in <cite>mutwo</cite>.</p>
+<table class="docutils align-center" style="width: 95%">
+<thead>
+<tr class="row-odd"><th class="head"><p>Object</p></th>
+<th class="head"><p>Documentation</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.timeline_interfaces.EventPlacement</span></code></a></p></td>
+<td><p>Place any event at specific start and end times.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.timeline_interfaces.TimeLine" title="mutwo.timeline_interfaces.TimeLine"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.timeline_interfaces.TimeLine</span></code></a></p></td>
+<td><p>Timeline to place events on.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.timeline_interfaces.Conflict" title="mutwo.timeline_interfaces.Conflict"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.timeline_interfaces.Conflict</span></code></a></p></td>
+<td><p>A conflict represents two overlapping <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.timeline_interfaces.ConflictResolutionStrategy" title="mutwo.timeline_interfaces.ConflictResolutionStrategy"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.timeline_interfaces.ConflictResolutionStrategy</span></code></a></p></td>
+<td><p>Abstract base class for overlapping solving classes.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.timeline_interfaces.AlwaysLeftStrategy" title="mutwo.timeline_interfaces.AlwaysLeftStrategy"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.timeline_interfaces.AlwaysLeftStrategy</span></code></a></p></td>
+<td><p>Always picks the left <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.timeline_interfaces.AlternatingStrategy" title="mutwo.timeline_interfaces.AlternatingStrategy"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.timeline_interfaces.AlternatingStrategy</span></code></a></p></td>
+<td><p>Alterate between the left and the right <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.timeline_interfaces.TagCountStrategy" title="mutwo.timeline_interfaces.TagCountStrategy"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.timeline_interfaces.TagCountStrategy</span></code></a></p></td>
+<td><p>Pick <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a> according to tag count.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.timeline_interfaces.EventPlacement">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EventPlacement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_or_start_range</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_or_end_range</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/timeline_interfaces/timelines.html#EventPlacement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.timeline_interfaces.EventPlacement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></p>
+<p>Place any event at specific start and end times.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>event</strong> (<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Concurrence" title="mutwo.core_events.Concurrence"><em>core_events.Concurrence</em></a><em>[</em><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><em>core_events.Chronon</em></a><em> | </em><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><em>core_events.Consecution</em></a><em> | </em><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Concurrence" title="mutwo.core_events.Concurrence"><em>core_events.Concurrence</em></a><em>]</em>) – The event to be placed on a <a class="reference internal" href="#mutwo.timeline_interfaces.TimeLine" title="mutwo.timeline_interfaces.TimeLine"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeLine</span></code></a>.
+This needs to be filled with events with a <cite>tag</cite> property. Each
+child event represents a specific object (e.g. instrument or
+player) The tag is necessary to concatenate two events on a
+<cite>TimeLine</cite> which belong to the same object (e.g. same instrument
+or same player).</p></li>
+<li><p><strong>start_or_start_range</strong> (<em>UnspecificTimeOrTimeRange</em>) – Sets when the event starts. This can
+be a single <a class="reference internal" href="mutwo.core_parameters.html#mutwo.core_parameters.abc.Duration" title="mutwo.core_parameters.abc.Duration"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_parameters.abc.Duration</span></code></a> or a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">ranges.Range</span></code> of two durations. In the second case
+the placement is flexible within the given area.</p></li>
+<li><p><strong>end_or_end_range</strong> (<em>UnspecificTimeOrTimeRange</em>) – Sets when the event ends. This can
+be a single <a class="reference internal" href="mutwo.core_parameters.html#mutwo.core_parameters.abc.Duration" title="mutwo.core_parameters.abc.Duration"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_parameters.abc.Duration</span></code></a> or a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">ranges.Range</span></code> of two durations. In the second case
+the placement is flexible within the given area.</p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Warning:</strong></p>
+<p>An <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a> itself is not an event and can’t be treated
+like an event.</p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Data Attributes:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tag_tuple</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_or_start_range</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">end_or_end_range</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">duration</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean_start</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean_end</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">min_start</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_start</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">min_end</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_end</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">time_range</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_overlapping</span></code>(other)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">move_by</span></code>(duration)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.timeline_interfaces.EventPlacement.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/timeline_interfaces/timelines.html#EventPlacement.copy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.timeline_interfaces.EventPlacement.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a deep copy of mutwo object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.timelines.EventPlacement"><em>EventPlacement</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.timeline_interfaces.EventPlacement.is_overlapping">
+<span class="sig-name descname"><span class="pre">is_overlapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/timeline_interfaces/timelines.html#EventPlacement.is_overlapping"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.timeline_interfaces.EventPlacement.is_overlapping" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>other</strong> (<a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.timelines.EventPlacement"><em>EventPlacement</em></a>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.timeline_interfaces.EventPlacement.move_by">
+<span class="sig-name descname"><span class="pre">move_by</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">duration</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/timeline_interfaces/timelines.html#EventPlacement.move_by"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.timeline_interfaces.EventPlacement.move_by" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>duration</strong> (<em>UnspecificTime</em>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement">EventPlacement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mutwo.timeline_interfaces.EventPlacement.duration">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">duration</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="mutwo.core_parameters.html#mutwo.core_parameters.abc.Duration" title="mutwo.core_parameters.abc.Duration"><span class="pre">Duration</span></a></em><a class="headerlink" href="#mutwo.timeline_interfaces.EventPlacement.duration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mutwo.timeline_interfaces.EventPlacement.end_or_end_range">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">end_or_end_range</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="mutwo.core_parameters.html#mutwo.core_parameters.abc.Duration" title="mutwo.core_parameters.abc.Duration"><span class="pre">mutwo.core_parameters.abc.Duration</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ranges.Range.Range</span></em><a class="headerlink" href="#mutwo.timeline_interfaces.EventPlacement.end_or_end_range" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mutwo.timeline_interfaces.EventPlacement.max_end">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_end</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="mutwo.core_parameters.html#mutwo.core_parameters.abc.Duration" title="mutwo.core_parameters.abc.Duration"><span class="pre">Duration</span></a></em><a class="headerlink" href="#mutwo.timeline_interfaces.EventPlacement.max_end" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mutwo.timeline_interfaces.EventPlacement.max_start">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_start</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="mutwo.core_parameters.html#mutwo.core_parameters.abc.Duration" title="mutwo.core_parameters.abc.Duration"><span class="pre">Duration</span></a></em><a class="headerlink" href="#mutwo.timeline_interfaces.EventPlacement.max_start" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mutwo.timeline_interfaces.EventPlacement.mean_end">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mean_end</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="mutwo.core_parameters.html#mutwo.core_parameters.abc.Duration" title="mutwo.core_parameters.abc.Duration"><span class="pre">Duration</span></a></em><a class="headerlink" href="#mutwo.timeline_interfaces.EventPlacement.mean_end" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mutwo.timeline_interfaces.EventPlacement.mean_start">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mean_start</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="mutwo.core_parameters.html#mutwo.core_parameters.abc.Duration" title="mutwo.core_parameters.abc.Duration"><span class="pre">Duration</span></a></em><a class="headerlink" href="#mutwo.timeline_interfaces.EventPlacement.mean_start" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mutwo.timeline_interfaces.EventPlacement.min_end">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">min_end</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="mutwo.core_parameters.html#mutwo.core_parameters.abc.Duration" title="mutwo.core_parameters.abc.Duration"><span class="pre">Duration</span></a></em><a class="headerlink" href="#mutwo.timeline_interfaces.EventPlacement.min_end" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mutwo.timeline_interfaces.EventPlacement.min_start">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">min_start</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="mutwo.core_parameters.html#mutwo.core_parameters.abc.Duration" title="mutwo.core_parameters.abc.Duration"><span class="pre">Duration</span></a></em><a class="headerlink" href="#mutwo.timeline_interfaces.EventPlacement.min_start" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mutwo.timeline_interfaces.EventPlacement.start_or_start_range">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start_or_start_range</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="mutwo.core_parameters.html#mutwo.core_parameters.abc.Duration" title="mutwo.core_parameters.abc.Duration"><span class="pre">mutwo.core_parameters.abc.Duration</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ranges.Range.Range</span></em><a class="headerlink" href="#mutwo.timeline_interfaces.EventPlacement.start_or_start_range" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mutwo.timeline_interfaces.EventPlacement.tag_tuple">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tag_tuple</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#mutwo.timeline_interfaces.EventPlacement.tag_tuple" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mutwo.timeline_interfaces.EventPlacement.time_range">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">time_range</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Range</span></em><a class="headerlink" href="#mutwo.timeline_interfaces.EventPlacement.time_range" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.timeline_interfaces.TimeLine">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TimeLine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_placement_sequence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/timeline_interfaces/timelines.html#TimeLine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.timeline_interfaces.TimeLine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></p>
+<p>Timeline to place events on.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>duration</strong> (<em>Optional</em><em>[</em><em>UnspecificTime</em><em>]</em>) – If this is set to <cite>None</cite> the <code class="docutils literal notranslate"><span class="pre">duration</span></code>
+property of the <cite>TimeLine</cite> is dynamically calculated
+(by the end times of all registered <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a>.
+If the duration is not <cite>None</cite>, then the duration is statically
+set to this time. If the user tries to register an
+<a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a> with end &gt; duration this would raise
+an error. Default to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>event_placement_sequence</strong> (<em>Sequence</em><em>[</em><a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><em>EventPlacement</em></a><em>]</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Warning:</strong></p>
+<p>An <a class="reference internal" href="#mutwo.timeline_interfaces.TimeLine" title="mutwo.timeline_interfaces.TimeLine"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeLine</span></code></a> itself is not an event and can’t be treated
+like an event.</p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Data Attributes:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">duration</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">event_placement_tuple</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tag_set</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">register</span></code>(event_placement)</p></td>
+<td><p>Register a new <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a> on given <a class="reference internal" href="#mutwo.timeline_interfaces.TimeLine" title="mutwo.timeline_interfaces.TimeLine"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeLine</span></code></a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">unregister</span></code>(event_placement)</p></td>
+<td><p>Unregister an <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a> which is part of <a class="reference internal" href="#mutwo.timeline_interfaces.TimeLine" title="mutwo.timeline_interfaces.TimeLine"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeLine</span></code></a>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort</span></code>()</p></td>
+<td><p>Sort all <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a> by start time (and if equal by end time).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_event_placement</span></code>(tag, index, *[, sort])</p></td>
+<td><p>Find specific <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">resolve_conflicts</span></code>([...])</p></td>
+<td><p>Resolve overlapping <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a> in <a class="reference internal" href="#mutwo.timeline_interfaces.TimeLine" title="mutwo.timeline_interfaces.TimeLine"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeLine</span></code></a>.</p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.timeline_interfaces.TimeLine.get_event_placement">
+<span class="sig-name descname"><span class="pre">get_event_placement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/timeline_interfaces/timelines.html#TimeLine.get_event_placement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.timeline_interfaces.TimeLine.get_event_placement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find specific <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tag</strong> (<em>str</em>) – The tag which the <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a> should include.</p></li>
+<li><p><strong>index</strong> (<em>int</em>) – The index of the <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a></p></li>
+<li><p><strong>sort</strong> (<em>bool</em>) – Can be set to <code class="docutils literal notranslate"><span class="pre">False</span></code> when sequentially calling
+<cite>get_event_placement</cite> without changing the <a class="reference internal" href="#mutwo.timeline_interfaces.TimeLine" title="mutwo.timeline_interfaces.TimeLine"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeLine</span></code></a>.
+When <cite>sort = False</cite>, but the <a class="reference internal" href="#mutwo.timeline_interfaces.TimeLine" title="mutwo.timeline_interfaces.TimeLine"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeLine</span></code></a> (or any
+<a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a> inside the time <a class="reference internal" href="#mutwo.timeline_interfaces.TimeLine" title="mutwo.timeline_interfaces.TimeLine"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeLine</span></code></a>)
+has changed unexpected results may happen. If you want to be
+sure not to break anything, just leave it as <code class="docutils literal notranslate"><span class="pre">True</span></code>.
+Default to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.timelines.EventPlacement"><em>EventPlacement</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.timeline_interfaces.TimeLine.register">
+<span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_placement</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/timeline_interfaces/timelines.html#TimeLine.register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.timeline_interfaces.TimeLine.register" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a new <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a> on given <a class="reference internal" href="#mutwo.timeline_interfaces.TimeLine" title="mutwo.timeline_interfaces.TimeLine"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeLine</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>event_placement</strong> (<a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><em>EventPlacement</em></a>) – The <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a> which should be
+placed on the <a class="reference internal" href="#mutwo.timeline_interfaces.TimeLine" title="mutwo.timeline_interfaces.TimeLine"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeLine</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.timeline_interfaces.TimeLine.resolve_conflicts">
+<span class="sig-name descname"><span class="pre">resolve_conflicts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">conflict_resolution_strategy_sequence=[&lt;mutwo.timeline_interfaces.timelines.AlwaysLeftStrategy</span> <span class="pre">object&gt;],</span> <span class="pre">is_conflict=&lt;function</span> <span class="pre">TimeLine.&lt;lambda&gt;&gt;,</span> <span class="pre">*,</span> <span class="pre">sort=True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/timeline_interfaces/timelines.html#TimeLine.resolve_conflicts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.timeline_interfaces.TimeLine.resolve_conflicts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resolve overlapping <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a> in <a class="reference internal" href="#mutwo.timeline_interfaces.TimeLine" title="mutwo.timeline_interfaces.TimeLine"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeLine</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>conflict_resolution_strategy_sequence</strong> (<em>Sequence</em><em>[</em><a class="reference internal" href="#mutwo.timeline_interfaces.ConflictResolutionStrategy" title="mutwo.timeline_interfaces.ConflictResolutionStrategy"><em>ConflictResolutionStrategy</em></a><em>]</em>) – Provide the
+<a class="reference internal" href="#mutwo.timeline_interfaces.ConflictResolutionStrategy" title="mutwo.timeline_interfaces.ConflictResolutionStrategy"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConflictResolutionStrategy</span></code></a> you want to use here.
+If multiple are added, the algorithm initially tries the
+first one and if this doesn’t work it continues with the
+next strategy. Default to <code class="docutils literal notranslate"><span class="pre">[AlwaysLeftStrategy()]</span></code>.</p></li>
+<li><p><strong>is_conflict</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><em>EventPlacement</em></a><em>, </em><a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><em>EventPlacement</em></a><em>]</em><em>, </em><em>bool</em><em>]</em>) – Function which takes two <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a>
+and which returns either <cite>True</cite> if the placements are conflicting
+and return <cite>False</cite> if not. This function doesn’t need to check
+if two placements are overlapping, this is done seperately and
+independently. A conflict is created only in case <code class="docutils literal notranslate"><span class="pre">is_conflict</span></code>
+returns <code class="docutils literal notranslate"><span class="pre">True</span></code> and the placements are overlapping. By default
+this function simply checks if the event placements share any
+common tag. The logic behind this is the assumption that tag
+equals instruments and that an instrument can’t play two
+different event placements at the same time.</p></li>
+<li><p><strong>sort</strong> (<em>bool</em>) – Can be set to <code class="docutils literal notranslate"><span class="pre">False</span></code> when sequentially calling
+<cite>resolve_conflicts</cite> without changing the <a class="reference internal" href="#mutwo.timeline_interfaces.TimeLine" title="mutwo.timeline_interfaces.TimeLine"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeLine</span></code></a>.
+When <cite>sort = False</cite>, but the <a class="reference internal" href="#mutwo.timeline_interfaces.TimeLine" title="mutwo.timeline_interfaces.TimeLine"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeLine</span></code></a> (or any
+<a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a> inside the time <a class="reference internal" href="#mutwo.timeline_interfaces.TimeLine" title="mutwo.timeline_interfaces.TimeLine"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeLine</span></code></a>)
+has changed unexpected results may happen. If you want to be
+sure not to break anything, just leave it as <code class="docutils literal notranslate"><span class="pre">True</span></code>.
+Default to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="mutwo.timeline_utilities.html#mutwo.timeline_utilities.UnresolvedConflict" title="mutwo.timeline_utilities.UnresolvedConflict"><strong>UnresolvedConflict</strong></a> – If none of the provided
+<a class="reference internal" href="#mutwo.timeline_interfaces.ConflictResolutionStrategy" title="mutwo.timeline_interfaces.ConflictResolutionStrategy"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConflictResolutionStrategy</span></code></a> could solve the conflict.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.timeline_interfaces.TimeLine.sort">
+<span class="sig-name descname"><span class="pre">sort</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/timeline_interfaces/timelines.html#TimeLine.sort"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.timeline_interfaces.TimeLine.sort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sort all <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a> by start time (and if equal by end time).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mutwo.timeline_interfaces.TimeLine" title="mutwo.timeline_interfaces.timelines.TimeLine"><em>TimeLine</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.timeline_interfaces.TimeLine.unregister">
+<span class="sig-name descname"><span class="pre">unregister</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_placement</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/timeline_interfaces/timelines.html#TimeLine.unregister"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.timeline_interfaces.TimeLine.unregister" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unregister an <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a> which is part of <a class="reference internal" href="#mutwo.timeline_interfaces.TimeLine" title="mutwo.timeline_interfaces.TimeLine"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeLine</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>event_placement</strong> (<a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><em>EventPlacement</em></a>) – The <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a> which should be
+removed from the <a class="reference internal" href="#mutwo.timeline_interfaces.TimeLine" title="mutwo.timeline_interfaces.TimeLine"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeLine</span></code></a>.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="mutwo.timeline_utilities.html#mutwo.timeline_utilities.EventPlacementNotFoundError" title="mutwo.timeline_utilities.EventPlacementNotFoundError"><strong>EventPlacementNotFoundError</strong></a> – If <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a> isn’t
+inside <a class="reference internal" href="#mutwo.timeline_interfaces.TimeLine" title="mutwo.timeline_interfaces.TimeLine"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeLine</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mutwo.timeline_interfaces.TimeLine.duration">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">duration</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="mutwo.core_parameters.html#mutwo.core_parameters.abc.Duration" title="mutwo.core_parameters.abc.Duration"><span class="pre">Duration</span></a></em><a class="headerlink" href="#mutwo.timeline_interfaces.TimeLine.duration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mutwo.timeline_interfaces.TimeLine.event_placement_tuple">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">event_placement_tuple</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.timelines.EventPlacement"><span class="pre">mutwo.timeline_interfaces.timelines.EventPlacement</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#mutwo.timeline_interfaces.TimeLine.event_placement_tuple" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mutwo.timeline_interfaces.TimeLine.tag_set">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tag_set</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">set</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#mutwo.timeline_interfaces.TimeLine.tag_set" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.timeline_interfaces.Conflict">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Conflict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/timeline_interfaces/timelines.html#Conflict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.timeline_interfaces.Conflict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></p>
+<p>A conflict represents two overlapping <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>left</strong> (<a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><em>EventPlacement</em></a>) – The earlier <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a>.</p></li>
+<li><p><strong>right</strong> (<a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><em>EventPlacement</em></a>) – The later <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Two overlapping <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a> are mostly only a problem
+if their instruments are the same. Nevertheless the precise definition
+of a <a class="reference internal" href="#mutwo.timeline_interfaces.Conflict" title="mutwo.timeline_interfaces.Conflict"><code class="xref py py-class docutils literal notranslate"><span class="pre">Conflict</span></code></a> depends on the callable passed to the ‘is_conflict’
+parameter of the <a class="reference internal" href="#mutwo.timeline_interfaces.TimeLine.resolve_conflicts" title="mutwo.timeline_interfaces.TimeLine.resolve_conflicts"><code class="xref py py-func docutils literal notranslate"><span class="pre">TimeLine.resolve_conflicts()</span></code></a> method.</p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Data Attributes:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">left</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">right</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mutwo.timeline_interfaces.Conflict.left">
+<span class="sig-name descname"><span class="pre">left</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.timelines.EventPlacement"><span class="pre">EventPlacement</span></a></em><a class="headerlink" href="#mutwo.timeline_interfaces.Conflict.left" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mutwo.timeline_interfaces.Conflict.right">
+<span class="sig-name descname"><span class="pre">right</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.timelines.EventPlacement"><span class="pre">EventPlacement</span></a></em><a class="headerlink" href="#mutwo.timeline_interfaces.Conflict.right" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.timeline_interfaces.ConflictResolutionStrategy">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ConflictResolutionStrategy</span></span><a class="reference internal" href="../_modules/mutwo/timeline_interfaces/timelines.html#ConflictResolutionStrategy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.timeline_interfaces.ConflictResolutionStrategy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Abstract base class for overlapping solving classes.</p>
+<p>You only need to the define the <cite>resolve_conflict</cite> method.</p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">resolve_conflict</span></code>(timeline, conflict)</p></td>
+<td><p>Resolve conflict between two overlapping <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.timeline_interfaces.ConflictResolutionStrategy.resolve_conflict">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">resolve_conflict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeline</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conflict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/timeline_interfaces/timelines.html#ConflictResolutionStrategy.resolve_conflict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.timeline_interfaces.ConflictResolutionStrategy.resolve_conflict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resolve conflict between two overlapping <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timeline</strong> (<a class="reference internal" href="#mutwo.timeline_interfaces.TimeLine" title="mutwo.timeline_interfaces.TimeLine"><em>TimeLine</em></a>) – The timeline which hosts the conflict. Can be used
+in order to remove one or both of the conflicting event placements.</p></li>
+<li><p><strong>conflict</strong> (<a class="reference internal" href="#mutwo.timeline_interfaces.Conflict" title="mutwo.timeline_interfaces.Conflict"><em>Conflict</em></a>) – A <a class="reference internal" href="#mutwo.timeline_interfaces.Conflict" title="mutwo.timeline_interfaces.Conflict"><code class="xref py py-class docutils literal notranslate"><span class="pre">Conflict</span></code></a> object which hosts the two
+overlapping <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+<p>This method should return <code class="docutils literal notranslate"><span class="pre">True</span></code> if the class managed to resolve
+the conflict. If it returns any negative boolean value (e.g. <code class="docutils literal notranslate"><span class="pre">None</span></code>
+<a class="reference internal" href="api_documentation.html#module-mutwo" title="mutwo"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mutwo</span></code></a> assumes that the conflict couldn’t be resolved).</p>
+<p>The concrete strategy how the conflict is resolved is up to the
+resolution strategy class: either the conflicting event placements
+are removed, or the timeline is adjusted in other ways (e.g. stretched)
+so that the event placements aren’t overlapping anymore.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.timeline_interfaces.AlwaysLeftStrategy">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AlwaysLeftStrategy</span></span><a class="reference internal" href="../_modules/mutwo/timeline_interfaces/timelines.html#AlwaysLeftStrategy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.timeline_interfaces.AlwaysLeftStrategy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mutwo.timeline_interfaces.ConflictResolutionStrategy" title="mutwo.timeline_interfaces.timelines.ConflictResolutionStrategy"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConflictResolutionStrategy</span></code></a></p>
+<p>Always picks the left <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a>.</p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">resolve_conflict</span></code>(timeline, conflict)</p></td>
+<td><p>Resolve conflict between two overlapping <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a>.</p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="#mutwo.timeline_interfaces.ConflictResolutionStrategy" title="mutwo.timeline_interfaces.timelines.ConflictResolutionStrategy"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConflictResolutionStrategy</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">resolve_conflict</span></code>(timeline, conflict)</p></td>
+<td><p>Resolve conflict between two overlapping <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a>.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.timeline_interfaces.AlwaysLeftStrategy.resolve_conflict">
+<span class="sig-name descname"><span class="pre">resolve_conflict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeline</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conflict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/timeline_interfaces/timelines.html#AlwaysLeftStrategy.resolve_conflict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.timeline_interfaces.AlwaysLeftStrategy.resolve_conflict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resolve conflict between two overlapping <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timeline</strong> (<a class="reference internal" href="#mutwo.timeline_interfaces.TimeLine" title="mutwo.timeline_interfaces.TimeLine"><em>TimeLine</em></a>) – The timeline which hosts the conflict. Can be used
+in order to remove one or both of the conflicting event placements.</p></li>
+<li><p><strong>conflict</strong> (<a class="reference internal" href="#mutwo.timeline_interfaces.Conflict" title="mutwo.timeline_interfaces.Conflict"><em>Conflict</em></a>) – A <a class="reference internal" href="#mutwo.timeline_interfaces.Conflict" title="mutwo.timeline_interfaces.Conflict"><code class="xref py py-class docutils literal notranslate"><span class="pre">Conflict</span></code></a> object which hosts the two
+overlapping <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+<p>This method should return <code class="docutils literal notranslate"><span class="pre">True</span></code> if the class managed to resolve
+the conflict. If it returns any negative boolean value (e.g. <code class="docutils literal notranslate"><span class="pre">None</span></code>
+<a class="reference internal" href="api_documentation.html#module-mutwo" title="mutwo"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mutwo</span></code></a> assumes that the conflict couldn’t be resolved).</p>
+<p>The concrete strategy how the conflict is resolved is up to the
+resolution strategy class: either the conflicting event placements
+are removed, or the timeline is adjusted in other ways (e.g. stretched)
+so that the event placements aren’t overlapping anymore.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.timeline_interfaces.AlternatingStrategy">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AlternatingStrategy</span></span><a class="reference internal" href="../_modules/mutwo/timeline_interfaces/timelines.html#AlternatingStrategy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.timeline_interfaces.AlternatingStrategy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mutwo.timeline_interfaces.ConflictResolutionStrategy" title="mutwo.timeline_interfaces.timelines.ConflictResolutionStrategy"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConflictResolutionStrategy</span></code></a></p>
+<p>Alterate between the left and the right <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a>.</p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">resolve_conflict</span></code>(timeline, conflict)</p></td>
+<td><p>Resolve conflict between two overlapping <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a>.</p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="#mutwo.timeline_interfaces.ConflictResolutionStrategy" title="mutwo.timeline_interfaces.timelines.ConflictResolutionStrategy"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConflictResolutionStrategy</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">resolve_conflict</span></code>(timeline, conflict)</p></td>
+<td><p>Resolve conflict between two overlapping <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a>.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.timeline_interfaces.AlternatingStrategy.resolve_conflict">
+<span class="sig-name descname"><span class="pre">resolve_conflict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeline</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conflict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/timeline_interfaces/timelines.html#AlternatingStrategy.resolve_conflict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.timeline_interfaces.AlternatingStrategy.resolve_conflict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resolve conflict between two overlapping <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timeline</strong> (<a class="reference internal" href="#mutwo.timeline_interfaces.TimeLine" title="mutwo.timeline_interfaces.TimeLine"><em>TimeLine</em></a>) – The timeline which hosts the conflict. Can be used
+in order to remove one or both of the conflicting event placements.</p></li>
+<li><p><strong>conflict</strong> (<a class="reference internal" href="#mutwo.timeline_interfaces.Conflict" title="mutwo.timeline_interfaces.Conflict"><em>Conflict</em></a>) – A <a class="reference internal" href="#mutwo.timeline_interfaces.Conflict" title="mutwo.timeline_interfaces.Conflict"><code class="xref py py-class docutils literal notranslate"><span class="pre">Conflict</span></code></a> object which hosts the two
+overlapping <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+<p>This method should return <code class="docutils literal notranslate"><span class="pre">True</span></code> if the class managed to resolve
+the conflict. If it returns any negative boolean value (e.g. <code class="docutils literal notranslate"><span class="pre">None</span></code>
+<a class="reference internal" href="api_documentation.html#module-mutwo" title="mutwo"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mutwo</span></code></a> assumes that the conflict couldn’t be resolved).</p>
+<p>The concrete strategy how the conflict is resolved is up to the
+resolution strategy class: either the conflicting event placements
+are removed, or the timeline is adjusted in other ways (e.g. stretched)
+so that the event placements aren’t overlapping anymore.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.timeline_interfaces.TagCountStrategy">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TagCountStrategy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prefer_more</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/timeline_interfaces/timelines.html#TagCountStrategy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.timeline_interfaces.TagCountStrategy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mutwo.timeline_interfaces.ConflictResolutionStrategy" title="mutwo.timeline_interfaces.timelines.ConflictResolutionStrategy"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConflictResolutionStrategy</span></code></a></p>
+<p>Pick <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a> according to tag count.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>prefer_more</strong> (<em>bool</em>) – If set to <code class="docutils literal notranslate"><span class="pre">True</span></code> the strategy drops the
+<a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a> with fewer tags. If set to <code class="docutils literal notranslate"><span class="pre">False</span></code>
+it drops the <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a> with more tags. Default
+to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+</dd>
+</dl>
+<p>If two <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a> have an equal amount of tags, this
+strategy won’t be able to solve the conflict.</p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">resolve_conflict</span></code>(timeline, conflict)</p></td>
+<td><p>Resolve conflict between two overlapping <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a>.</p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="#mutwo.timeline_interfaces.ConflictResolutionStrategy" title="mutwo.timeline_interfaces.timelines.ConflictResolutionStrategy"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConflictResolutionStrategy</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">resolve_conflict</span></code>(timeline, conflict)</p></td>
+<td><p>Resolve conflict between two overlapping <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a>.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.timeline_interfaces.TagCountStrategy.resolve_conflict">
+<span class="sig-name descname"><span class="pre">resolve_conflict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeline</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conflict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/timeline_interfaces/timelines.html#TagCountStrategy.resolve_conflict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.timeline_interfaces.TagCountStrategy.resolve_conflict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resolve conflict between two overlapping <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timeline</strong> (<a class="reference internal" href="#mutwo.timeline_interfaces.TimeLine" title="mutwo.timeline_interfaces.TimeLine"><em>TimeLine</em></a>) – The timeline which hosts the conflict. Can be used
+in order to remove one or both of the conflicting event placements.</p></li>
+<li><p><strong>conflict</strong> (<a class="reference internal" href="#mutwo.timeline_interfaces.Conflict" title="mutwo.timeline_interfaces.Conflict"><em>Conflict</em></a>) – A <a class="reference internal" href="#mutwo.timeline_interfaces.Conflict" title="mutwo.timeline_interfaces.Conflict"><code class="xref py py-class docutils literal notranslate"><span class="pre">Conflict</span></code></a> object which hosts the two
+overlapping <a class="reference internal" href="#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+<p>This method should return <code class="docutils literal notranslate"><span class="pre">True</span></code> if the class managed to resolve
+the conflict. If it returns any negative boolean value (e.g. <code class="docutils literal notranslate"><span class="pre">None</span></code>
+<a class="reference internal" href="api_documentation.html#module-mutwo" title="mutwo"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mutwo</span></code></a> assumes that the conflict couldn’t be resolved).</p>
+<p>The concrete strategy how the conflict is resolved is up to the
+resolution strategy class: either the conflicting event placements
+are removed, or the timeline is adjusted in other ways (e.g. stretched)
+so that the event placements aren’t overlapping anymore.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mutwo.timeline_utilities.html" title="mutwo.timeline_utilities"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="mutwo.timeline_converters.html" title="mutwo.timeline_converters"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="api_documentation.html" >mutwo API documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.timeline_interfaces</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2024, mutwo authors.
+    </div>
+  </body>
+</html>

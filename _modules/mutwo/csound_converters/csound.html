@@ -1,0 +1,418 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mutwo.csound_converters.csound &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.csound_converters.csound</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mutwo.csound_converters.csound</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Render sound files from mutwo data via Csound.</span>
+
+<span class="sd">Csound is a `&quot;domain-specific computer programming language</span>
+<span class="sd">for audio programming&quot; &lt;http://www.csounds.com/&gt;`_.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numbers</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">import</span> <span class="nn">natsort</span>  <span class="c1"># type: ignore</span>
+
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_converters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_events</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_constants</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_parameters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">csound_converters</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;EventToCsoundScore&quot;</span><span class="p">,</span> <span class="s2">&quot;EventToSoundFile&quot;</span><span class="p">)</span>
+
+<span class="n">SupportedPFieldTypes</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
+<span class="n">SupportedPFieldTypesForTypeChecker</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">numbers</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
+<span class="n">PFieldFunction</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span> <span class="n">SupportedPFieldTypes</span><span class="p">]</span>
+<span class="n">PFieldDict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">PFieldFunction</span><span class="p">]]</span>
+
+
+<span class="k">class</span> <span class="nc">MissingPFieldWarning</span><span class="p">(</span><span class="ne">Warning</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+
+<span class="k">class</span> <span class="nc">InvalidPFieldValueTypeWarning</span><span class="p">(</span><span class="ne">Warning</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+
+<div class="viewcode-block" id="EventToCsoundScore"><a class="viewcode-back" href="../../../api/mutwo.csound_converters.html#mutwo.csound_converters.EventToCsoundScore">[docs]</a><span class="k">class</span> <span class="nc">EventToCsoundScore</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">EventConverter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class to convert mutwo events to a Csound score file.</span>
+
+<span class="sd">    :param pfield: p-field / p-field-extraction-function pairs.</span>
+
+<span class="sd">    This class helps generating score files for the `&quot;domain-specific computer</span>
+<span class="sd">    programming language for audio programming&quot; Csound &lt;http://www.csounds.com/&gt;`_.</span>
+
+<span class="sd">    :class:`EventToCsoundScore` extracts data from mutwo Events and assign it to</span>
+<span class="sd">    specific p-fields. The mapping of Event attributes to p-field values has</span>
+<span class="sd">    to be defined by the user via keyword arguments during class initialization.</span>
+
+<span class="sd">    By default, mutwo already maps the following p-fields to the following values:</span>
+
+<span class="sd">    - p1 (instrument name) to 1</span>
+<span class="sd">    - p2 (start time) to the absolute start time of the event</span>
+<span class="sd">    - p3 (duration) to the :attr:`duration` attribute of the event</span>
+
+<span class="sd">    If p2 shall be assigned to the absolute entry delay of the event,</span>
+<span class="sd">    it has to be set to None.</span>
+
+<span class="sd">    The :class:`EventToCsoundScore` ignores any p-field that returns</span>
+<span class="sd">    any unsupported p-field type (anything else than a string</span>
+<span class="sd">    or a number). If the returned type is a string, :class:`EventToCsoundScore`</span>
+<span class="sd">    automatically adds quotations marks around the string in the score file.</span>
+
+<span class="sd">    All p-fields can be overwritten in the following manner:</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import csound_converters</span>
+<span class="sd">    &gt;&gt;&gt; my_converter = csound_converters.EventToCsoundScore(</span>
+<span class="sd">    ...     p1=lambda event: 2,</span>
+<span class="sd">    ...     p4=lambda event: event.pitch.frequency,</span>
+<span class="sd">    ...     p5=lambda event: event.volume</span>
+<span class="sd">    ... )</span>
+
+<span class="sd">    For easier debugging of faulty score files, :mod:`mutwo` adds annotations</span>
+<span class="sd">    when a new :class:`Consecution` or a new :class:`Concurrence`</span>
+<span class="sd">    starts.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_default_p_field_dict</span><span class="p">:</span> <span class="n">PFieldDict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;p1&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">event</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># default instrument name &quot;1&quot;</span>
+        <span class="s2">&quot;p2&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># default to absolute start time</span>
+        <span class="s2">&quot;p3&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">event</span><span class="p">:</span> <span class="n">event</span><span class="o">.</span><span class="n">duration</span><span class="o">.</span><span class="n">duration_in_floats</span>  <span class="c1"># type: ignore</span>
+        <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">duration</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># default key for duration</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">pfield</span><span class="p">:</span> <span class="n">PFieldFunction</span><span class="p">):</span>
+        <span class="n">concatenated_p_field_dict</span><span class="p">:</span> <span class="n">PFieldDict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([])</span>
+        <span class="k">for</span> <span class="p">(</span>
+            <span class="n">default_p_field</span><span class="p">,</span>
+            <span class="n">default_p_field_function</span><span class="p">,</span>
+        <span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_p_field_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">default_p_field</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pfield</span><span class="p">:</span>
+                <span class="n">concatenated_p_field_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                    <span class="p">{</span><span class="n">default_p_field</span><span class="p">:</span> <span class="n">default_p_field_function</span><span class="p">}</span>
+                <span class="p">)</span>
+
+        <span class="n">concatenated_p_field_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">pfield</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pfield_tuple</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_pfield_mapping</span><span class="p">(</span><span class="n">concatenated_p_field_dict</span><span class="p">)</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                          static methods                                #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_generate_pfield_mapping</span><span class="p">(</span>
+        <span class="n">pfield_key_to_function_mapping</span><span class="p">:</span> <span class="n">PFieldDict</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">PFieldFunction</span><span class="p">],</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Maps p-fields to their respective p_field_function.&quot;&quot;&quot;</span>
+
+        <span class="n">sorted_pfield_keys</span> <span class="o">=</span> <span class="n">natsort</span><span class="o">.</span><span class="n">natsorted</span><span class="p">(</span><span class="n">pfield_key_to_function_mapping</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">pfield_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">key0</span><span class="p">,</span> <span class="n">key1</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">sorted_pfield_keys</span><span class="p">,</span> <span class="n">sorted_pfield_keys</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+            <span class="n">number0</span><span class="p">,</span> <span class="n">number1</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">pfield_name</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="k">for</span> <span class="n">pfield_name</span> <span class="ow">in</span> <span class="p">(</span><span class="n">key0</span><span class="p">,</span> <span class="n">key1</span><span class="p">))</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">number0</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+            <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Can&#39;t assign p-field &#39;</span><span class="si">{</span><span class="n">key0</span><span class="si">}</span><span class="s2">&#39;. &quot;</span>
+                    <span class="s2">&quot;P-field number has to bigger than 0.&quot;</span>
+                <span class="p">)</span>
+
+            <span class="n">pfield_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pfield_key_to_function_mapping</span><span class="p">[</span><span class="n">key0</span><span class="p">])</span>
+
+            <span class="n">difference</span> <span class="o">=</span> <span class="n">number1</span> <span class="o">-</span> <span class="n">number0</span>
+            <span class="k">if</span> <span class="n">difference</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">difference</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="n">pfield_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="s2">&quot;Couldn&#39;t find any mapping for p-fields &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;between &#39;</span><span class="si">{</span><span class="n">key0</span><span class="si">}</span><span class="s2">&#39; and &#39;</span><span class="si">{</span><span class="n">key1</span><span class="si">}</span><span class="s2">&#39;. &quot;</span>
+                    <span class="s2">&quot;Assigned these p-fields to 0.&quot;</span><span class="p">,</span>
+                    <span class="n">MissingPFieldWarning</span><span class="p">,</span>
+                <span class="p">)</span>
+
+        <span class="n">pfield_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pfield_key_to_function_mapping</span><span class="p">[</span><span class="n">key1</span><span class="p">])</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">pfield_list</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_process_p_field_value</span><span class="p">(</span>
+        <span class="n">nth_p_field</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">p_field_value</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Makes sure pfield value is of correct type &amp; adds quotation marks for str.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p_field_value</span><span class="p">,</span> <span class="n">SupportedPFieldTypesForTypeChecker</span><span class="o">.</span><span class="n">__args__</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
+            <span class="c1"># silently adding quotation marks</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p_field_value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">p_field_value</span> <span class="o">=</span> <span class="s1">&#39;&quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">p_field_value</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">p_field_value</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">p_field_value</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">p_field_value</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ignored_p_field</span> <span class="o">=</span> <span class="n">nth_p_field</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Can&#39;t assign returned value &#39;</span><span class="si">{</span><span class="n">p_field_value</span><span class="si">}</span><span class="s2">&#39; of type &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">p_field_value</span><span class="p">)</span><span class="si">}</span><span class="s2">&#39; to p-field </span><span class="si">{</span><span class="n">ignored_p_field</span><span class="si">}</span><span class="s2">. &quot;</span>
+                <span class="s2">&quot; Supported types for p-fields include &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="nb">repr</span><span class="p">(</span><span class="n">SupportedPFieldTypes</span><span class="p">)</span><span class="si">}</span><span class="s2">&#39;. &quot;</span>
+                <span class="s2">&quot;Ignored p-field </span><span class="si">{ignored_p_field}</span><span class="s2">.&quot;</span><span class="p">,</span>
+                <span class="n">InvalidPFieldValueTypeWarning</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#           private methods (conversion of different event types)        #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="k">def</span> <span class="nf">_convert_chronon</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">chronon</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">,</span>
+        <span class="n">absolute_entry_delay</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Extract p-field data from chronon and write one Csound-Score line.&quot;&quot;&quot;</span>
+
+        <span class="n">csound_score_line</span> <span class="o">=</span> <span class="s2">&quot;i&quot;</span>
+        <span class="k">for</span> <span class="n">nth_p_field</span><span class="p">,</span> <span class="n">p_field_function</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pfield_tuple</span><span class="p">):</span>
+            <span class="c1"># special case of absolute start time initialization</span>
+            <span class="k">if</span> <span class="n">nth_p_field</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">p_field_function</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">csound_score_line</span> <span class="o">+=</span> <span class="s2">&quot; </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">absolute_entry_delay</span><span class="o">.</span><span class="n">duration_in_floats</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">p_field_value</span> <span class="o">=</span> <span class="n">p_field_function</span><span class="p">(</span><span class="n">chronon</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+
+                <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                    <span class="c1"># if attribute couldn&#39;t be found, just make a rest</span>
+                    <span class="k">return</span> <span class="nb">tuple</span><span class="p">([])</span>
+
+                <span class="n">p_field_value</span> <span class="o">=</span> <span class="n">EventToCsoundScore</span><span class="o">.</span><span class="n">_process_p_field_value</span><span class="p">(</span>
+                    <span class="n">nth_p_field</span><span class="p">,</span> <span class="n">p_field_value</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">p_field_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">csound_score_line</span> <span class="o">+=</span> <span class="s2">&quot; </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">p_field_value</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">csound_score_line</span><span class="p">,)</span>
+
+    <span class="k">def</span> <span class="nf">_convert_consecution</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">consecution</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">,</span>
+        <span class="n">absolute_entry_delay</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="n">csound_score_line_list</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">csound_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">SEQUENTIAL_EVENT_ANNOTATION</span>
+        <span class="p">]</span>
+        <span class="n">csound_score_line_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_convert_consecution</span><span class="p">(</span><span class="n">consecution</span><span class="p">,</span> <span class="n">absolute_entry_delay</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span>
+            <span class="n">csound_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">N_EMPTY_LINES_AFTER_COMPLEX_EVENT</span>
+        <span class="p">):</span>
+            <span class="n">csound_score_line_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">csound_score_line_list</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_convert_simultaneous_event</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">simultaneous_event</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Concurrence</span><span class="p">,</span>
+        <span class="n">absolute_entry_delay</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="n">csound_score_line_list</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">csound_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">SIMULTANEOUS_EVENT_ANNOTATION</span>
+        <span class="p">]</span>
+        <span class="n">csound_score_line_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_convert_simultaneous_event</span><span class="p">(</span>
+                <span class="n">simultaneous_event</span><span class="p">,</span> <span class="n">absolute_entry_delay</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span>
+            <span class="n">csound_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">N_EMPTY_LINES_AFTER_COMPLEX_EVENT</span>
+        <span class="p">):</span>
+            <span class="n">csound_score_line_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">csound_score_line_list</span><span class="p">)</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                             public api                                 #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+<div class="viewcode-block" id="EventToCsoundScore.convert"><a class="viewcode-back" href="../../../api/mutwo.csound_converters.html#mutwo.csound_converters.EventToCsoundScore.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Render csound score file (.sco) from the passed event.</span>
+
+<span class="sd">        :param event_to_convert: The event that shall be rendered to a csound score</span>
+<span class="sd">            file.</span>
+<span class="sd">        :type event_to_convert: core_events.abc.Event</span>
+<span class="sd">        :param path: where to write the csound score file</span>
+<span class="sd">        :type path: str</span>
+
+<span class="sd">        &gt;&gt;&gt; import random</span>
+<span class="sd">        &gt;&gt;&gt; from mutwo import core_events</span>
+<span class="sd">        &gt;&gt;&gt; from mutwo import csound_converters</span>
+<span class="sd">        &gt;&gt;&gt; converter = csound_converters.EventToCsoundScore(</span>
+<span class="sd">        ...    p4=lambda event: event.tempo_envelope.duration</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &gt;&gt;&gt; event = core_events.Consecution(</span>
+<span class="sd">        ...    [</span>
+<span class="sd">        ...        core_events.SimpleEvent(</span>
+<span class="sd">        ...             random.uniform(0.3, 1.2)</span>
+<span class="sd">        ...        ) for _ in range(15)</span>
+<span class="sd">        ...    ]</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &gt;&gt;&gt; for e in event:</span>
+<span class="sd">        ...     e.tempo_envelope = core_events.TempoEnvelope(</span>
+<span class="sd">        ...         [[0, 1], [random.uniform(10, 20), 0]]</span>
+<span class="sd">        ...     )</span>
+<span class="sd">        &gt;&gt;&gt; converter.convert(event, &#39;score.sco&#39;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">csound_score_line_tuple</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_event</span><span class="p">(</span>
+            <span class="n">event_to_convert</span><span class="p">,</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">DirectDuration</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="c1"># convert events to strings (where each string represents one csound score line)</span>
+        <span class="c1"># write csound score lines to file</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">csound_score_line_tuple</span><span class="p">))</span></div></div>
+
+
+<div class="viewcode-block" id="EventToSoundFile"><a class="viewcode-back" href="../../../api/mutwo.csound_converters.html#mutwo.csound_converters.EventToSoundFile">[docs]</a><span class="k">class</span> <span class="nc">EventToSoundFile</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Converter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate audio files with `Csound &lt;http://www.csounds.com/&gt;`_.</span>
+
+<span class="sd">    :param csound_orchestra_path: Path to the csound orchestra (.orc) file.</span>
+<span class="sd">    :param event_to_csound_score: The :class:`EventToCsoundScore` that shall be used</span>
+<span class="sd">        to render the csound score file (.sco) from a mutwo event.</span>
+<span class="sd">    :param *flag: Flag that shall be added when calling csound. Several of the supported</span>
+<span class="sd">        csound flags can be found in :mod:`mutwo.csound_converters.constants`.</span>
+<span class="sd">    :param remove_score_file: Set to True if :class:`EventToSoundFile` shall remove the</span>
+<span class="sd">        csound score file after rendering. Defaults to False.</span>
+
+<span class="sd">    **Disclaimer:** Before using the :class:`EventToSoundFile`, make sure</span>
+<span class="sd">    `Csound &lt;http://www.csounds.com/&gt;`_ has been correctly installed on</span>
+<span class="sd">    your system.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">csound_orchestra_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">event_to_csound_score</span><span class="p">:</span> <span class="n">EventToCsoundScore</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">flag</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">remove_score_file</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flags</span> <span class="o">=</span> <span class="n">flag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">csound_orchestra_path</span> <span class="o">=</span> <span class="n">csound_orchestra_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">event_to_csound_score</span> <span class="o">=</span> <span class="n">event_to_csound_score</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">remove_score_file</span> <span class="o">=</span> <span class="n">remove_score_file</span>
+
+<div class="viewcode-block" id="EventToSoundFile.convert"><a class="viewcode-back" href="../../../api/mutwo.csound_converters.html#mutwo.csound_converters.EventToSoundFile.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">event_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">,</span>
+        <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">score_path</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Render sound file from the mutwo event.</span>
+
+<span class="sd">        :param event_to_convert: The event that shall be rendered.</span>
+<span class="sd">        :type event_to_convert: core_events.abc.Event</span>
+<span class="sd">        :param path: where to write the sound file</span>
+<span class="sd">        :type path: str</span>
+<span class="sd">        :param score_path: where to write the score file</span>
+<span class="sd">        :type score_path: typing.Optional[str]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">score_path</span><span class="p">:</span>
+            <span class="n">score_path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;.sco&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">event_to_csound_score</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">event_to_convert</span><span class="p">,</span> <span class="n">score_path</span><span class="p">)</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;csound -o </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">flag</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">:</span>
+            <span class="n">command</span> <span class="o">+=</span> <span class="s2">&quot; </span><span class="si">{}</span><span class="s2"> &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span>
+        <span class="n">command</span> <span class="o">+=</span> <span class="s2">&quot; </span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">csound_orchestra_path</span><span class="p">,</span> <span class="n">score_path</span><span class="p">)</span>
+
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">remove_score_file</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">score_path</span><span class="p">)</span></div></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.csound_converters.csound</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Levin Eric Zimmermann.
+    </div>
+  </body>
+</html>

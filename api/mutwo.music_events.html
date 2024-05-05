@@ -1,0 +1,359 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>mutwo.music_events &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+    
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="mutwo.music_generators" href="mutwo.music_generators.html" />
+    <link rel="prev" title="mutwo.music_converters" href="mutwo.music_converters.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mutwo.music_generators.html" title="mutwo.music_generators"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="mutwo.music_converters.html" title="mutwo.music_converters"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="api_documentation.html" accesskey="U">mutwo API documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.music_events</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="mutwo-music-events">
+<h1><a class="toc-backref" href="#id2" role="doc-backlink">mutwo.music_events</a><a class="headerlink" href="#mutwo-music-events" title="Permalink to this heading">¶</a></h1>
+<nav class="contents" id="table-of-content">
+<p class="topic-title">Table of content</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#mutwo-music-events" id="id2">mutwo.music_events</a></p>
+<ul>
+<li><p><a class="reference internal" href="#module-mutwo.music_events.configurations" id="id3">mutwo.music_events.configurations</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<span class="target" id="module-mutwo.music_events"></span><p>Event classes which are designated for musical usage.</p>
+<table class="docutils align-center" style="width: 95%">
+<thead>
+<tr class="row-odd"><th class="head"><p>Object</p></th>
+<th class="head"><p>Documentation</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_events.NoteLike</span></code></a></p></td>
+<td><p><a class="reference internal" href="#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoteLike</span></code></a> can be a tone, chord, percussion note or rest.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.music_events.NoteLike">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NoteLike</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pitch_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">volume</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mf'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grace_note_consecution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">after_grace_note_consecution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">playing_indicator_collection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">notation_indicator_collection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lyric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">DirectLyric()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tempo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/music_events/music.html#NoteLike"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.music_events.NoteLike" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.basic.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">Chronon</span></code></a></p>
+<p><a class="reference internal" href="#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoteLike</span></code></a> can be a tone, chord, percussion note or rest.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pitch_list</strong> (<em>music_parameters.abc.PitchList.Type</em>) – The pitch or pitches of the event. This can
+be a pitch object (any class that inherits from <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Pitch" title="mutwo.music_parameters.abc.Pitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pitch</span></code></a>)
+or a list of pitch objects. Furthermore <a class="reference internal" href="api_documentation.html#module-mutwo" title="mutwo"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mutwo</span></code></a> supports syntactic sugar
+to convert other objects on the fly to pitch objects: A string can be
+read as pitch class names to build
+<a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.WesternPitch" title="mutwo.music_parameters.WesternPitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.WesternPitch</span></code></a> objects or as ratios to
+build <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.JustIntonationPitch" title="mutwo.music_parameters.JustIntonationPitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.JustIntonationPitch</span></code></a> objects.
+Fraction will also build <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.JustIntonationPitch" title="mutwo.music_parameters.JustIntonationPitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.JustIntonationPitch</span></code></a>
+objects. Other numbers (integer and float) will be read as pitch class numbers
+to make <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.WesternPitch" title="mutwo.music_parameters.WesternPitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.WesternPitch</span></code></a> objects.</p></li>
+<li><p><strong>duration</strong> (<em>mutwo.core_parameters.abc.Duration.Type</em>) – The duration of <a class="reference internal" href="#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoteLike</span></code></a>.</p></li>
+<li><p><strong>volume</strong> (<em>music_parameters.abc.Volume.Type</em>) – The volume of the event. Can either be a object of
+<a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Volume" title="mutwo.music_parameters.abc.Volume"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mutwo.music_parameters.abc.Volume</span></code></a>, a number or a string. If the number
+ranges from 0 to 1, <a class="reference internal" href="api_documentation.html#module-mutwo" title="mutwo"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mutwo</span></code></a> automatically generates a
+<a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.AmplitudeVolume" title="mutwo.music_parameters.AmplitudeVolume"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.AmplitudeVolume</span></code></a> object (and the number
+is interpreted as the amplitude). If the number is smaller than 0,
+<a class="reference internal" href="api_documentation.html#module-mutwo" title="mutwo"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mutwo</span></code></a> automatically generates a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.volumes.DecibelVolume</span></code> (and the number
+is interpreted as <a class="reference external" href="https://en.wikipedia.org/wiki/Decibel">decibel</a>). If the argument is a string,
+<cite>mutwo</cite> initialises a <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.WesternVolume" title="mutwo.music_parameters.volumes.WesternVolume"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.volumes.WesternVolume</span></code></a>.</p></li>
+<li><p><strong>grace_note_consecution</strong> (<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><em>core_events.Consecution</em></a><em>[</em><a class="reference internal" href="#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><em>NoteLike</em></a><em>]</em>) – Specify <a class="reference external" href="https://en.wikipedia.org/wiki/Grace_note">grace notes</a>
+which are played before the <a class="reference internal" href="#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoteLike</span></code></a>. If the <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a>
+is empty, no grace notes are present.</p></li>
+<li><p><strong>after_grace_note_consecution</strong> (<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><em>core_events.Consecution</em></a><em>[</em><a class="reference internal" href="#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><em>NoteLike</em></a><em>]</em>) – <p>Specify <a class="reference external" href="https://en.wikipedia.org/wiki/Grace_note">grace notes</a>
+which are played after the <a class="reference internal" href="#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoteLike</span></code></a>. If the <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a>
+is empty, no grace notes are present.</p>
+</p></li>
+<li><p><strong>playing_indicator_collection</strong> (<em>music_parameters.abc.IndicatorCollection.Type</em>) – A <code class="xref py py-class docutils literal notranslate"><span class="pre">PlayingIndicatorCollection</span></code>.
+Playing indicators alter the sound of <a class="reference internal" href="#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoteLike</span></code></a> (e.g.
+tremolo, fermata, pizzicato).</p></li>
+<li><p><strong>notation_indicator_collection</strong> (<em>music_parameters.abc.IndicatorCollection.Type</em>) – A <code class="xref py py-class docutils literal notranslate"><span class="pre">NotationIndicatorCollection</span></code>.
+Notation indicators alter the visual representation of <a class="reference internal" href="#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoteLike</span></code></a>
+(e.g. ottava, clefs) without affecting the resulting sound.</p></li>
+<li><p><strong>lyric</strong> (<em>core_parameters.abc.Lyric</em>) – If with this <a class="reference internal" href="#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoteLike</span></code></a> a text is to be sung or spoken,
+this text can be specified here. Default to <code class="docutils literal notranslate"><span class="pre">music_parameters.DirectLyric(&quot;&quot;)</span></code>.</p></li>
+<li><p><strong>instrument_list</strong> (<em>list</em><em>[</em><a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Instrument" title="mutwo.music_parameters.abc.Instrument"><em>music_parameters.abc.Instrument</em></a><em>]</em>) – If an event is played with one or more specifc
+<a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Instrument" title="mutwo.music_parameters.abc.Instrument"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.abc.Instrument</span></code></a>, these instruments can be
+assigned here. Default is an empty list.</p></li>
+<li><p><strong>tempo</strong> (<em>Optional</em><em>[</em><a class="reference internal" href="mutwo.core_parameters.html#mutwo.core_parameters.abc.Tempo" title="mutwo.core_parameters.abc.Tempo"><em>Tempo</em></a><em>]</em>) – </p></li>
+<li><p><strong>tag</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">mutwo.music</span></code> doesn’t differentiate between tones, chords and
+rests, but rather simply implements one general class that can
+represent any of the mentioned definitions (e.g. a <cite>NoteLike</cite>
+with several pitches may be called a ‘chord’ and a <cite>NoteLike</cite>
+with only one pitch may be called a ‘tone’).</p>
+<p><strong>Example:</strong></p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_parameters</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_events</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tone</span> <span class="o">=</span> <span class="n">music_events</span><span class="o">.</span><span class="n">NoteLike</span><span class="p">(</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">WesternPitch</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">other_tone</span> <span class="o">=</span> <span class="n">music_events</span><span class="o">.</span><span class="n">NoteLike</span><span class="p">(</span><span class="s1">&#39;3/2&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">chord</span> <span class="o">=</span> <span class="n">music_events</span><span class="o">.</span><span class="n">NoteLike</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">WesternPitch</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">),</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">JustIntonationPitch</span><span class="p">(</span><span class="s1">&#39;3/2&#39;</span><span class="p">)],</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">other_chord</span> <span class="o">=</span> <span class="n">music_events</span><span class="o">.</span><span class="n">NoteLike</span><span class="p">(</span><span class="s1">&#39;c4 dqs3 10/7&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Data Attributes:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pitch_list</span></code></p></td>
+<td><p>The pitch or pitches of the event.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">volume</span></code></p></td>
+<td><p>The <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Volume" title="mutwo.music_parameters.abc.Volume"><code class="xref py py-class docutils literal notranslate"><span class="pre">Volume</span></code></a> of the event.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">grace_note_consecution</span></code></p></td>
+<td><p><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a> before <a class="reference internal" href="#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoteLike</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">after_grace_note_consecution</span></code></p></td>
+<td><p><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a> after <a class="reference internal" href="#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoteLike</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">playing_indicator_collection</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">notation_indicator_collection</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.basic.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">Chronon</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">parameter_to_exclude_from_representation_tuple</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">duration</span></code></p></td>
+<td><p>The duration of an event.</p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Event" title="mutwo.core_events.abc.Event"><code class="xref py py-class docutils literal notranslate"><span class="pre">Event</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Event.duration" title="mutwo.core_events.abc.Event.duration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">duration</span></code></a></p></td>
+<td><p>The duration of an event.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Event.tempo" title="mutwo.core_events.abc.Event.tempo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tempo</span></code></a></p></td>
+<td><p>The tempo of an event.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<details><summary>Inherited from <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.basic.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">Chronon</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">destructive_copy</span></code>()</p></td>
+<td><p>Adapted deep copy method that returns a new object for every leaf.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_parameter</span></code>(parameter_name[, flat, ...])</p></td>
+<td><p>Return event attribute with the entered name.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_parameter</span></code>(*args, **kwargs)</p></td>
+<td><p>Sets event parameter to new value.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">metrize</span></code>()</p></td>
+<td><p>Apply tempo of event on itself</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cut_out</span></code>(start, end)</p></td>
+<td><p>Time-based slicing of the respective event.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cut_off</span></code>(start, end)</p></td>
+<td><p>Time-based deletion / shortening of the respective event.</p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Event" title="mutwo.core_events.abc.Event"><code class="xref py py-class docutils literal notranslate"><span class="pre">Event</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Event.destructive_copy" title="mutwo.core_events.abc.Event.destructive_copy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">destructive_copy</span></code></a>()</p></td>
+<td><p>Adapted deep copy method that returns a new object for every leaf.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Event.set" title="mutwo.core_events.abc.Event.set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set</span></code></a>(attribute_name, value)</p></td>
+<td><p>Set an attribute of the object to a specific value</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Event.get_parameter" title="mutwo.core_events.abc.Event.get_parameter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_parameter</span></code></a>(parameter_name[, flat, ...])</p></td>
+<td><p>Return event attribute with the entered name.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Event.set_parameter" title="mutwo.core_events.abc.Event.set_parameter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_parameter</span></code></a>(parameter_name, object_or_function)</p></td>
+<td><p>Sets parameter to new value for all children events.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Event.mutate_parameter" title="mutwo.core_events.abc.Event.mutate_parameter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mutate_parameter</span></code></a>(parameter_name, function)</p></td>
+<td><p>Mutate parameter with a function.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Event.reset_tempo" title="mutwo.core_events.abc.Event.reset_tempo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_tempo</span></code></a>()</p></td>
+<td><p>Set events tempo so that one beat equals one second (tempo 60).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Event.metrize" title="mutwo.core_events.abc.Event.metrize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">metrize</span></code></a>()</p></td>
+<td><p>Apply tempo of event on itself</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Event.cut_out" title="mutwo.core_events.abc.Event.cut_out"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cut_out</span></code></a>(start, end)</p></td>
+<td><p>Time-based slicing of the respective event.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Event.cut_off" title="mutwo.core_events.abc.Event.cut_off"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cut_off</span></code></a>(start, end)</p></td>
+<td><p>Time-based deletion / shortening of the respective event.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Event.split_at" title="mutwo.core_events.abc.Event.split_at"><code class="xref py py-obj docutils literal notranslate"><span class="pre">split_at</span></code></a>(*absolute_time[, ...])</p></td>
+<td><p>Split event into <em>n</em> events at <code class="xref py py-attr docutils literal notranslate"><span class="pre">absolute_time</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py property">
+<dt class="sig sig-object py" id="mutwo.music_events.NoteLike.after_grace_note_consecution">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">after_grace_note_consecution</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.basic.Consecution"><span class="pre">Consecution</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.basic.Chronon"><span class="pre">Chronon</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#mutwo.music_events.NoteLike.after_grace_note_consecution" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a> after <a class="reference internal" href="#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoteLike</span></code></a></p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mutwo.music_events.NoteLike.grace_note_consecution">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">grace_note_consecution</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.basic.Consecution"><span class="pre">Consecution</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.basic.Chronon"><span class="pre">Chronon</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#mutwo.music_events.NoteLike.grace_note_consecution" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a> before <a class="reference internal" href="#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoteLike</span></code></a></p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mutwo.music_events.NoteLike.notation_indicator_collection">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">notation_indicator_collection</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.NotationIndicatorCollection" title="mutwo.music_parameters.notation_indicators.NotationIndicatorCollection"><span class="pre">NotationIndicatorCollection</span></a></em><a class="headerlink" href="#mutwo.music_events.NoteLike.notation_indicator_collection" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mutwo.music_events.NoteLike.pitch_list">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pitch_list</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Any</span></em><a class="headerlink" href="#mutwo.music_events.NoteLike.pitch_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>The pitch or pitches of the event.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mutwo.music_events.NoteLike.playing_indicator_collection">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">playing_indicator_collection</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.PlayingIndicatorCollection" title="mutwo.music_parameters.playing_indicators.PlayingIndicatorCollection"><span class="pre">PlayingIndicatorCollection</span></a></em><a class="headerlink" href="#mutwo.music_events.NoteLike.playing_indicator_collection" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mutwo.music_events.NoteLike.volume">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">volume</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Any</span></em><a class="headerlink" href="#mutwo.music_events.NoteLike.volume" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Volume" title="mutwo.music_parameters.abc.Volume"><code class="xref py py-class docutils literal notranslate"><span class="pre">Volume</span></code></a> of the event.</p>
+</dd></dl>
+
+</dd></dl>
+
+<section id="module-mutwo.music_events.configurations">
+<span id="mutwo-music-events-configurations"></span><h2><a class="toc-backref" href="#id3" role="doc-backlink">mutwo.music_events.configurations</a><a class="headerlink" href="#module-mutwo.music_events.configurations" title="Permalink to this heading">¶</a></h2>
+<p>Set default values for <a class="reference internal" href="#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_events.NoteLike</span></code></a>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mutwo.music_events.configurations.DEFAULT_NOTATION_INDICATORS_COLLECTION_CLASS">
+<span class="sig-name descname"><span class="pre">DEFAULT_NOTATION_INDICATORS_COLLECTION_CLASS</span></span><a class="headerlink" href="#mutwo.music_events.configurations.DEFAULT_NOTATION_INDICATORS_COLLECTION_CLASS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default value for <a class="reference internal" href="#mutwo.music_events.NoteLike.notation_indicator_collection" title="mutwo.music_events.NoteLike.notation_indicator_collection"><code class="xref py py-attr docutils literal notranslate"><span class="pre">mutwo.music_events.NoteLike.notation_indicator_collection</span></code></a>
+in <a class="reference internal" href="#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoteLike</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mutwo.music_events.configurations.DEFAULT_PLAYING_INDICATORS_COLLECTION_CLASS">
+<span class="sig-name descname"><span class="pre">DEFAULT_PLAYING_INDICATORS_COLLECTION_CLASS</span></span><a class="headerlink" href="#mutwo.music_events.configurations.DEFAULT_PLAYING_INDICATORS_COLLECTION_CLASS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default value for <a class="reference internal" href="#mutwo.music_events.NoteLike.playing_indicator_collection" title="mutwo.music_events.NoteLike.playing_indicator_collection"><code class="xref py py-attr docutils literal notranslate"><span class="pre">mutwo.music_events.NoteLike.playing_indicator_collection</span></code></a>
+in <a class="reference internal" href="#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoteLike</span></code></a></p>
+</dd></dl>
+
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mutwo.music_generators.html" title="mutwo.music_generators"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="mutwo.music_converters.html" title="mutwo.music_converters"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="api_documentation.html" >mutwo API documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.music_events</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2024, mutwo authors.
+    </div>
+  </body>
+</html>

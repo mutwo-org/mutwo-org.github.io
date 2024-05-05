@@ -1,0 +1,74 @@
+
+.. currentmodule:: mutwo.timeline_interfaces
+
+mutwo.timeline_interfaces
+=========================
+
+.. contents:: Table of content
+   :depth: 3
+
+.. automodule:: mutwo.timeline_interfaces
+   :members:
+
+
+.. list-table::
+   :align: center
+   :width: 95%
+   :header-rows: 1
+
+   * - Object
+     - Documentation
+   * - :class:`mutwo.timeline_interfaces.EventPlacement`
+     - Place any event at specific start and end times.
+   * - :class:`mutwo.timeline_interfaces.TimeLine`
+     - Timeline to place events on.
+   * - :class:`mutwo.timeline_interfaces.Conflict`
+     - A conflict represents two overlapping :class:`EventPlacement`
+   * - :class:`mutwo.timeline_interfaces.ConflictResolutionStrategy`
+     - Abstract base class for overlapping solving classes.
+   * - :class:`mutwo.timeline_interfaces.AlwaysLeftStrategy`
+     - Always picks the left :class:`EventPlacement`.
+   * - :class:`mutwo.timeline_interfaces.AlternatingStrategy`
+     - Alterate between the left and the right :class:`EventPlacement`.
+   * - :class:`mutwo.timeline_interfaces.TagCountStrategy`
+     - Pick :class:`EventPlacement` according to tag count.
+
+
+
+
+.. autoclass:: mutwo.timeline_interfaces.EventPlacement
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.timeline_interfaces.TimeLine
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.timeline_interfaces.Conflict
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.timeline_interfaces.ConflictResolutionStrategy
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.timeline_interfaces.AlwaysLeftStrategy
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.timeline_interfaces.AlternatingStrategy
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.timeline_interfaces.TagCountStrategy
+
+        .. autoclasstoc::
+    
+
+

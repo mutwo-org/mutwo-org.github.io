@@ -1,0 +1,378 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>mutwo.csound_converters &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+    
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="mutwo.csound_version" href="mutwo.csound_version.html" />
+    <link rel="prev" title="mutwo.core_version" href="mutwo.core_version.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mutwo.csound_version.html" title="mutwo.csound_version"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="mutwo.core_version.html" title="mutwo.core_version"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="api_documentation.html" accesskey="U">mutwo API documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.csound_converters</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="mutwo-csound-converters">
+<h1><a class="toc-backref" href="#id5" role="doc-backlink">mutwo.csound_converters</a><a class="headerlink" href="#mutwo-csound-converters" title="Permalink to this heading">¶</a></h1>
+<nav class="contents" id="table-of-content">
+<p class="topic-title">Table of content</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#mutwo-csound-converters" id="id5">mutwo.csound_converters</a></p>
+<ul>
+<li><p><a class="reference internal" href="#module-mutwo.csound_converters.configurations" id="id6">mutwo.csound_converters.configurations</a></p></li>
+<li><p><a class="reference internal" href="#module-mutwo.csound_converters.constants" id="id7">mutwo.csound_converters.constants</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<span class="target" id="module-mutwo.csound_converters"></span><table class="docutils align-center" style="width: 95%">
+<thead>
+<tr class="row-odd"><th class="head"><p>Object</p></th>
+<th class="head"><p>Documentation</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.csound_converters.EventToCsoundScore" title="mutwo.csound_converters.EventToCsoundScore"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.csound_converters.EventToCsoundScore</span></code></a></p></td>
+<td><p>Class to convert mutwo events to a Csound score file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.csound_converters.EventToSoundFile" title="mutwo.csound_converters.EventToSoundFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.csound_converters.EventToSoundFile</span></code></a></p></td>
+<td><p>Generate audio files with <a class="reference external" href="http://www.csounds.com/">Csound</a>.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.csound_converters.EventToCsoundScore">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EventToCsoundScore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">pfield</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/csound_converters/csound.html#EventToCsoundScore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.csound_converters.EventToCsoundScore" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.EventConverter" title="mutwo.core_converters.abc.EventConverter"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventConverter</span></code></a></p>
+<p>Class to convert mutwo events to a Csound score file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pfield</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.basic.Chronon"><em>Chronon</em></a><em>]</em><em>, </em><em>Union</em><em>[</em><em>float</em><em>, </em><em>Fraction</em><em>, </em><em>int</em><em>, </em><em>Fraction</em><em>, </em><em>str</em><em>]</em><em>]</em>) – p-field / p-field-extraction-function pairs.</p>
+</dd>
+</dl>
+<p>This class helps generating score files for the <a class="reference external" href="http://www.csounds.com/">“domain-specific computer
+programming language for audio programming” Csound</a>.</p>
+<p><a class="reference internal" href="#mutwo.csound_converters.EventToCsoundScore" title="mutwo.csound_converters.EventToCsoundScore"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventToCsoundScore</span></code></a> extracts data from mutwo Events and assign it to
+specific p-fields. The mapping of Event attributes to p-field values has
+to be defined by the user via keyword arguments during class initialization.</p>
+<p>By default, mutwo already maps the following p-fields to the following values:</p>
+<ul class="simple">
+<li><p>p1 (instrument name) to 1</p></li>
+<li><p>p2 (start time) to the absolute start time of the event</p></li>
+<li><p>p3 (duration) to the <code class="xref py py-attr docutils literal notranslate"><span class="pre">duration</span></code> attribute of the event</p></li>
+</ul>
+<p>If p2 shall be assigned to the absolute entry delay of the event,
+it has to be set to None.</p>
+<p>The <a class="reference internal" href="#mutwo.csound_converters.EventToCsoundScore" title="mutwo.csound_converters.EventToCsoundScore"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventToCsoundScore</span></code></a> ignores any p-field that returns
+any unsupported p-field type (anything else than a string
+or a number). If the returned type is a string, <a class="reference internal" href="#mutwo.csound_converters.EventToCsoundScore" title="mutwo.csound_converters.EventToCsoundScore"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventToCsoundScore</span></code></a>
+automatically adds quotations marks around the string in the score file.</p>
+<p>All p-fields can be overwritten in the following manner:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">csound_converters</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">my_converter</span> <span class="o">=</span> <span class="n">csound_converters</span><span class="o">.</span><span class="n">EventToCsoundScore</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">p1</span><span class="o">=</span><span class="k">lambda</span> <span class="n">event</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">p4</span><span class="o">=</span><span class="k">lambda</span> <span class="n">event</span><span class="p">:</span> <span class="n">event</span><span class="o">.</span><span class="n">pitch</span><span class="o">.</span><span class="n">hertz</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">p5</span><span class="o">=</span><span class="k">lambda</span> <span class="n">event</span><span class="p">:</span> <span class="n">event</span><span class="o">.</span><span class="n">volume</span>
+<span class="gp">... </span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For easier debugging of faulty score files, <a class="reference internal" href="api_documentation.html#module-mutwo" title="mutwo"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mutwo</span></code></a> adds annotations
+when a new <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a> or a new <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Concurrence" title="mutwo.core_events.Concurrence"><code class="xref py py-class docutils literal notranslate"><span class="pre">Concurrence</span></code></a>
+starts.</p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(event_to_convert, path)</p></td>
+<td><p>Render csound score file (.sco) from the passed event.</p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.csound_converters.EventToCsoundScore.convert">
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_to_convert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/csound_converters/csound.html#EventToCsoundScore.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.csound_converters.EventToCsoundScore.convert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Render csound score file (.sco) from the passed event.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>event_to_convert</strong> (<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Event" title="mutwo.core_events.abc.Event"><em>core_events.abc.Event</em></a>) – The event that shall be rendered to a csound score
+file.</p></li>
+<li><p><strong>path</strong> (<em>str</em>) – where to write the csound score file</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">random</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_events</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">csound_converters</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">converter</span> <span class="o">=</span> <span class="n">csound_converters</span><span class="o">.</span><span class="n">EventToCsoundScore</span><span class="p">(</span>
+<span class="gp">... </span>   <span class="n">p4</span><span class="o">=</span><span class="k">lambda</span> <span class="n">event</span><span class="p">:</span> <span class="n">event</span><span class="o">.</span><span class="n">tempo_envelope</span><span class="o">.</span><span class="n">duration</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">event</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">(</span>
+<span class="gp">... </span>   <span class="p">[</span>
+<span class="gp">... </span>       <span class="n">core_events</span><span class="o">.</span><span class="n">Chronon</span><span class="p">(</span>
+<span class="gp">... </span>            <span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">)</span>
+<span class="gp">... </span>       <span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
+<span class="gp">... </span>   <span class="p">]</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">event</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">e</span><span class="o">.</span><span class="n">tempo</span> <span class="o">=</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">FlexTempo</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span> <span class="mi">0</span><span class="p">]]</span>
+<span class="gp">... </span>    <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">converter</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="s1">&#39;score.sco&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.csound_converters.EventToSoundFile">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EventToSoundFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">csound_orchestra_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_to_csound_score</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">flag</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_score_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/csound_converters/csound.html#EventToSoundFile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.csound_converters.EventToSoundFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></p>
+<p>Generate audio files with <a class="reference external" href="http://www.csounds.com/">Csound</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>csound_orchestra_path</strong> (<em>str</em>) – Path to the csound orchestra (.orc) file.</p></li>
+<li><p><strong>event_to_csound_score</strong> (<a class="reference internal" href="#mutwo.csound_converters.EventToCsoundScore" title="mutwo.csound_converters.csound.EventToCsoundScore"><em>EventToCsoundScore</em></a>) – The <a class="reference internal" href="#mutwo.csound_converters.EventToCsoundScore" title="mutwo.csound_converters.EventToCsoundScore"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventToCsoundScore</span></code></a> that shall be used
+to render the csound score file (.sco) from a mutwo event.</p></li>
+<li><p><strong>*flag</strong> (<em>str</em>) – <p>Flag that shall be added when calling csound. Several of the supported
+csound flags can be found in <a class="reference internal" href="#module-mutwo.csound_converters.constants" title="mutwo.csound_converters.constants"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mutwo.csound_converters.constants</span></code></a>.</p>
+</p></li>
+<li><p><strong>remove_score_file</strong> (<em>bool</em>) – Set to True if <a class="reference internal" href="#mutwo.csound_converters.EventToSoundFile" title="mutwo.csound_converters.EventToSoundFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventToSoundFile</span></code></a> shall remove the
+csound score file after rendering. Defaults to False.</p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Disclaimer:</strong> Before using the <a class="reference internal" href="#mutwo.csound_converters.EventToSoundFile" title="mutwo.csound_converters.EventToSoundFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventToSoundFile</span></code></a>, make sure
+<a class="reference external" href="http://www.csounds.com/">Csound</a> has been correctly installed on
+your system.</p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(event_to_convert, path[, score_path])</p></td>
+<td><p>Render sound file from the mutwo event.</p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.csound_converters.EventToSoundFile.convert">
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_to_convert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">score_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/csound_converters/csound.html#EventToSoundFile.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.csound_converters.EventToSoundFile.convert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Render sound file from the mutwo event.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>event_to_convert</strong> (<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Event" title="mutwo.core_events.abc.Event"><em>core_events.abc.Event</em></a>) – The event that shall be rendered.</p></li>
+<li><p><strong>path</strong> (<em>str</em>) – where to write the sound file</p></li>
+<li><p><strong>score_path</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – where to write the score file</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<section id="module-mutwo.csound_converters.configurations">
+<span id="mutwo-csound-converters-configurations"></span><h2><a class="toc-backref" href="#id6" role="doc-backlink">mutwo.csound_converters.configurations</a><a class="headerlink" href="#module-mutwo.csound_converters.configurations" title="Permalink to this heading">¶</a></h2>
+<p>Configure the behaviour of <a class="reference internal" href="#module-mutwo.csound_converters" title="mutwo.csound_converters"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mutwo.csound_converters</span></code></a>.</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="mutwo.csound_converters.configurations.CONCURRENCE_ANNOTATION">
+<span class="sig-name descname"><span class="pre">CONCURRENCE_ANNOTATION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">';;</span> <span class="pre">NEW</span> <span class="pre">CONCURRENCE\n;;'</span></em><a class="headerlink" href="#mutwo.csound_converters.configurations.CONCURRENCE_ANNOTATION" title="Permalink to this definition">¶</a></dt>
+<dd><p>Annotation in Csound Score files when a new <code class="xref py py-class docutils literal notranslate"><span class="pre">Concurrence</span></code> starts.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mutwo.csound_converters.configurations.CONSECUTION_ANNOTATION">
+<span class="sig-name descname"><span class="pre">CONSECUTION_ANNOTATION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">';;</span> <span class="pre">NEW</span> <span class="pre">CONSECUTION\n;;'</span></em><a class="headerlink" href="#mutwo.csound_converters.configurations.CONSECUTION_ANNOTATION" title="Permalink to this definition">¶</a></dt>
+<dd><p>Annotation in Csound Score files when a new <code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code> starts.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mutwo.csound_converters.configurations.CSOUND_BINARY">
+<span class="sig-name descname"><span class="pre">CSOUND_BINARY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'csound'</span></em><a class="headerlink" href="#mutwo.csound_converters.configurations.CSOUND_BINARY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path to csound binary.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mutwo.csound_converters.configurations.N_EMPTY_LINES_AFTER_COMPOUND">
+<span class="sig-name descname"><span class="pre">N_EMPTY_LINES_AFTER_COMPOUND</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#mutwo.csound_converters.configurations.N_EMPTY_LINES_AFTER_COMPOUND" title="Permalink to this definition">¶</a></dt>
+<dd><p>How many empty lines shall be written to a Csound Score file after a <code class="xref py py-class docutils literal notranslate"><span class="pre">Compound</span></code>.</p>
+</dd></dl>
+
+</section>
+<section id="module-mutwo.csound_converters.constants">
+<span id="mutwo-csound-converters-constants"></span><h2><a class="toc-backref" href="#id7" role="doc-backlink">mutwo.csound_converters.constants</a><a class="headerlink" href="#module-mutwo.csound_converters.constants" title="Permalink to this heading">¶</a></h2>
+<p>Constants to be used for and with <a class="reference internal" href="#module-mutwo.csound_converters" title="mutwo.csound_converters"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mutwo.csound_converters</span></code></a>.</p>
+<p>The file mostly contains different flags for running Csound.
+The flag definitions are documented
+<a class="reference external" href="https://csound.com/docs/manual/CommandFlags.html">here</a>.</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="mutwo.csound_converters.constants.FORMAT_24BIT">
+<span class="sig-name descname"><span class="pre">FORMAT_24BIT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'--format=24bit'</span></em><a class="headerlink" href="#mutwo.csound_converters.constants.FORMAT_24BIT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flag for rendering sound files in 24bit.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mutwo.csound_converters.constants.FORMAT_64BIT">
+<span class="sig-name descname"><span class="pre">FORMAT_64BIT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'--format=double'</span></em><a class="headerlink" href="#mutwo.csound_converters.constants.FORMAT_64BIT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flag for rendering sound files in 64bit floating point.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mutwo.csound_converters.constants.FORMAT_8BIT">
+<span class="sig-name descname"><span class="pre">FORMAT_8BIT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'--format=uchar'</span></em><a class="headerlink" href="#mutwo.csound_converters.constants.FORMAT_8BIT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flag for rendering sound files in 8bit.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mutwo.csound_converters.constants.FORMAT_FLOAT">
+<span class="sig-name descname"><span class="pre">FORMAT_FLOAT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'--format=float'</span></em><a class="headerlink" href="#mutwo.csound_converters.constants.FORMAT_FLOAT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flag for rendering sound files in single-format float audio samples.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mutwo.csound_converters.constants.FORMAT_IRCAM">
+<span class="sig-name descname"><span class="pre">FORMAT_IRCAM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'--format=ircam'</span></em><a class="headerlink" href="#mutwo.csound_converters.constants.FORMAT_IRCAM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flag for rendering sound files in IRCAM format.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mutwo.csound_converters.constants.FORMAT_WAV">
+<span class="sig-name descname"><span class="pre">FORMAT_WAV</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'--format=wav'</span></em><a class="headerlink" href="#mutwo.csound_converters.constants.FORMAT_WAV" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flag for rendering sound files in wav file format.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mutwo.csound_converters.constants.SILENT_FLAG">
+<span class="sig-name descname"><span class="pre">SILENT_FLAG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'-O</span> <span class="pre">null'</span></em><a class="headerlink" href="#mutwo.csound_converters.constants.SILENT_FLAG" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flag for preventing Csound from printing any information
+while rendering.</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mutwo.csound_version.html" title="mutwo.csound_version"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="mutwo.core_version.html" title="mutwo.core_version"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="api_documentation.html" >mutwo API documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.csound_converters</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2024, mutwo authors.
+    </div>
+  </body>
+</html>

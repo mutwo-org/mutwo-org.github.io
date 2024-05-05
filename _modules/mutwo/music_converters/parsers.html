@@ -1,0 +1,409 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mutwo.music_converters.parsers &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.music_converters.parsers</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mutwo.music_converters.parsers</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Standardization for transformations between parameters and chronons</span>
+
+<span class="sd">All converters here expect by default a :class:`mutwo.music_events.NoteLike`</span>
+<span class="sd">(and uses the attribute names defined for the</span>
+<span class="sd">:class:`mutwo.music_events.NoteLike`). To adjust the used names you can change</span>
+<span class="sd">the values in the :mod:`mutwo.music_converters.configurations` module.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">abc</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_converters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_events</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_converters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_events</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_parameters</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;SimpleEventToPitchList&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SimpleEventToVolume&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SimpleEventToLyric&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SimpleEventToInstrumentList&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SimpleEventToPlayingIndicatorCollection&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SimpleEventToNotationIndicatorCollection&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SimpleEventToGraceNoteConsecution&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SimpleEventToAfterGraceNoteConsecution&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;MutwoParameterDictToPitchList&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;MutwoParameterDictToVolume&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;MutwoParameterDictToInstrumentList&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;MutwoParameterDictToPlayingIndicatorCollection&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;MutwoParameterDictToNotationIndicatorCollection&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;MutwoParameterDictToGraceNoteConsecution&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;MutwoParameterDictToAfterGraceNoteConsecution&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;MutwoParameterDictToNoteLike&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="SimpleEventToPitchList"><a class="viewcode-back" href="../../../api/mutwo.music_converters.html#mutwo.music_converters.SimpleEventToPitchList">[docs]</a><span class="k">class</span> <span class="nc">SimpleEventToPitchList</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">SimpleEventToAttribute</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">attribute_name</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">exception_value</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">]</span> <span class="o">=</span> <span class="p">[],</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">attribute_name</span>
+            <span class="ow">or</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_PITCH_LIST_TO_SEARCH_NAME</span><span class="p">,</span>
+            <span class="n">exception_value</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SimpleEventToVolume"><a class="viewcode-back" href="../../../api/mutwo.music_converters.html#mutwo.music_converters.SimpleEventToVolume">[docs]</a><span class="k">class</span> <span class="nc">SimpleEventToVolume</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">SimpleEventToAttribute</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">attribute_name</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">exception_value</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Volume</span> <span class="o">=</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">DirectVolume</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">attribute_name</span>
+            <span class="ow">or</span> <span class="p">(</span><span class="n">music_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_VOLUME_TO_SEARCH_NAME</span><span class="p">),</span>
+            <span class="n">exception_value</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SimpleEventToLyric"><a class="viewcode-back" href="../../../api/mutwo.music_converters.html#mutwo.music_converters.SimpleEventToLyric">[docs]</a><span class="k">class</span> <span class="nc">SimpleEventToLyric</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">SimpleEventToAttribute</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">attribute_name</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">exception_value</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Volume</span> <span class="o">=</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">DirectLyric</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">),</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">attribute_name</span>
+            <span class="ow">or</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_LYRIC_TO_SEARCH_NAME</span><span class="p">,</span>
+            <span class="n">exception_value</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SimpleEventToInstrumentList"><a class="viewcode-back" href="../../../api/mutwo.music_converters.html#mutwo.music_converters.SimpleEventToInstrumentList">[docs]</a><span class="k">class</span> <span class="nc">SimpleEventToInstrumentList</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">SimpleEventToAttribute</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">attribute_name</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">exception_value</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Instrument</span><span class="p">]</span> <span class="o">=</span> <span class="p">[],</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">attribute_name</span>
+            <span class="ow">or</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_INSTRUMENT_LIST_TO_SEARCH_NAME</span><span class="p">,</span>
+            <span class="n">exception_value</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<span class="k">class</span> <span class="nc">SimpleEventToAttributeWithDefaultValue</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">SimpleEventToAttribute</span><span class="p">):</span>
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">_get_default_exception_value</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
+        <span class="c1"># If it is undefined we will use the default value.</span>
+        <span class="n">is_default_exception_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exception_value</span> <span class="ow">is</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">is_default_exception_value</span><span class="p">:</span>
+            <span class="c1"># We use a method to get the default value (instead of e.g.</span>
+            <span class="c1"># a class attribute), because in case the user changes the</span>
+            <span class="c1"># value of the default value (usually defined in a constants</span>
+            <span class="c1"># module) the change should take effect.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exception_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_default_exception_value</span><span class="p">()</span>
+
+        <span class="n">attribute</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">is_default_exception_value</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exception_value</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="n">attribute</span>
+
+
+<div class="viewcode-block" id="SimpleEventToPlayingIndicatorCollection"><a class="viewcode-back" href="../../../api/mutwo.music_converters.html#mutwo.music_converters.SimpleEventToPlayingIndicatorCollection">[docs]</a><span class="k">class</span> <span class="nc">SimpleEventToPlayingIndicatorCollection</span><span class="p">(</span><span class="n">SimpleEventToAttributeWithDefaultValue</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">attribute_name</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">exception_value</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+            <span class="n">music_parameters</span><span class="o">.</span><span class="n">NotationIndicatorCollection</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">attribute_name</span>
+            <span class="ow">or</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_PLAYING_INDICATOR_COLLECTION_TO_SEARCH_NAME</span><span class="p">,</span>
+            <span class="n">exception_value</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_default_exception_value</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">music_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_PLAYING_INDICATORS_COLLECTION_CLASS</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="SimpleEventToNotationIndicatorCollection"><a class="viewcode-back" href="../../../api/mutwo.music_converters.html#mutwo.music_converters.SimpleEventToNotationIndicatorCollection">[docs]</a><span class="k">class</span> <span class="nc">SimpleEventToNotationIndicatorCollection</span><span class="p">(</span><span class="n">SimpleEventToAttributeWithDefaultValue</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">attribute_name</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">exception_value</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+            <span class="n">music_parameters</span><span class="o">.</span><span class="n">NotationIndicatorCollection</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">attribute_name</span>
+            <span class="ow">or</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_NOTATION_INDICATOR_COLLECTION_TO_SEARCH_NAME</span><span class="p">,</span>
+            <span class="n">exception_value</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_default_exception_value</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">music_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_NOTATION_INDICATORS_COLLECTION_CLASS</span><span class="p">()</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SimpleEventToGraceNoteConsecution"><a class="viewcode-back" href="../../../api/mutwo.music_converters.html#mutwo.music_converters.SimpleEventToGraceNoteConsecution">[docs]</a><span class="k">class</span> <span class="nc">SimpleEventToGraceNoteConsecution</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">SimpleEventToAttribute</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">attribute_name</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">exception_value</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">([]),</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">attribute_name</span>
+            <span class="ow">or</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_GRACE_NOTE_SEQUENTIAL_EVENT_TO_SEARCH_NAME</span><span class="p">,</span>
+            <span class="n">exception_value</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SimpleEventToAfterGraceNoteConsecution"><a class="viewcode-back" href="../../../api/mutwo.music_converters.html#mutwo.music_converters.SimpleEventToAfterGraceNoteConsecution">[docs]</a><span class="k">class</span> <span class="nc">SimpleEventToAfterGraceNoteConsecution</span><span class="p">(</span>
+    <span class="n">core_converters</span><span class="o">.</span><span class="n">SimpleEventToAttribute</span>
+<span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">attribute_name</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">exception_value</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">([]),</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">attribute_name</span>
+            <span class="ow">or</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_AFTER_GRACE_NOTE_SEQUENTIAL_EVENT_TO_SEARCH_NAME</span><span class="p">,</span>
+            <span class="n">exception_value</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MutwoParameterDictToPitchList"><a class="viewcode-back" href="../../../api/mutwo.music_converters.html#mutwo.music_converters.MutwoParameterDictToPitchList">[docs]</a><span class="k">class</span> <span class="nc">MutwoParameterDictToPitchList</span><span class="p">(</span>
+    <span class="n">core_converters</span><span class="o">.</span><span class="n">MutwoParameterDictToKeywordArgument</span>
+<span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">pitch_list_to_search_name</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">pitch_list_keyword_name</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">pitch_list_to_search_name</span>
+            <span class="ow">or</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_PITCH_LIST_TO_SEARCH_NAME</span><span class="p">,</span>
+            <span class="n">pitch_list_keyword_name</span>
+            <span class="ow">or</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_PITCH_LIST_KEYWORD_NAME</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MutwoParameterDictToVolume"><a class="viewcode-back" href="../../../api/mutwo.music_converters.html#mutwo.music_converters.MutwoParameterDictToVolume">[docs]</a><span class="k">class</span> <span class="nc">MutwoParameterDictToVolume</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">MutwoParameterDictToKeywordArgument</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">volume_to_search_name</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">volume_keyword_name</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">volume_to_search_name</span>
+            <span class="ow">or</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_VOLUME_TO_SEARCH_NAME</span><span class="p">,</span>
+            <span class="n">volume_keyword_name</span>
+            <span class="ow">or</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_VOLUME_KEYWORD_NAME</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MutwoParameterDictToInstrumentList"><a class="viewcode-back" href="../../../api/mutwo.music_converters.html#mutwo.music_converters.MutwoParameterDictToInstrumentList">[docs]</a><span class="k">class</span> <span class="nc">MutwoParameterDictToInstrumentList</span><span class="p">(</span>
+    <span class="n">core_converters</span><span class="o">.</span><span class="n">MutwoParameterDictToKeywordArgument</span>
+<span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">instrument_list_to_search_name</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">instrument_list_keyword_name</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">instrument_list_to_search_name</span>
+            <span class="ow">or</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_INSTRUMENT_LIST_TO_SEARCH_NAME</span><span class="p">,</span>
+            <span class="n">instrument_list_keyword_name</span>
+            <span class="ow">or</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_INSTRUMENT_LIST_KEYWORD_NAME</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MutwoParameterDictToPlayingIndicatorCollection"><a class="viewcode-back" href="../../../api/mutwo.music_converters.html#mutwo.music_converters.MutwoParameterDictToPlayingIndicatorCollection">[docs]</a><span class="k">class</span> <span class="nc">MutwoParameterDictToPlayingIndicatorCollection</span><span class="p">(</span>
+    <span class="n">core_converters</span><span class="o">.</span><span class="n">MutwoParameterDictToKeywordArgument</span>
+<span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">playing_indicator_collection_to_search_name</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">playing_indicator_collection_keyword_name</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">playing_indicator_collection_to_search_name</span>
+            <span class="ow">or</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_PLAYING_INDICATOR_COLLECTION_TO_SEARCH_NAME</span><span class="p">,</span>
+            <span class="n">playing_indicator_collection_keyword_name</span>
+            <span class="ow">or</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_PLAYING_INDICATOR_COLLECTION_KEYWORD_NAME</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MutwoParameterDictToNotationIndicatorCollection"><a class="viewcode-back" href="../../../api/mutwo.music_converters.html#mutwo.music_converters.MutwoParameterDictToNotationIndicatorCollection">[docs]</a><span class="k">class</span> <span class="nc">MutwoParameterDictToNotationIndicatorCollection</span><span class="p">(</span>
+    <span class="n">core_converters</span><span class="o">.</span><span class="n">MutwoParameterDictToKeywordArgument</span>
+<span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">notation_indicator_collection_to_search_name</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">notation_indicator_collection_keyword_name</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">notation_indicator_collection_to_search_name</span>
+            <span class="ow">or</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_NOTATION_INDICATOR_COLLECTION_TO_SEARCH_NAME</span><span class="p">,</span>
+            <span class="n">notation_indicator_collection_keyword_name</span>
+            <span class="ow">or</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_NOTATION_INDICATOR_COLLECTION_KEYWORD_NAME</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MutwoParameterDictToGraceNoteConsecution"><a class="viewcode-back" href="../../../api/mutwo.music_converters.html#mutwo.music_converters.MutwoParameterDictToGraceNoteConsecution">[docs]</a><span class="k">class</span> <span class="nc">MutwoParameterDictToGraceNoteConsecution</span><span class="p">(</span>
+    <span class="n">core_converters</span><span class="o">.</span><span class="n">MutwoParameterDictToKeywordArgument</span>
+<span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">grace_note_consecution_to_search_name</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">grace_note_consecution_keyword_name</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">grace_note_consecution_to_search_name</span>
+            <span class="ow">or</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_GRACE_NOTE_SEQUENTIAL_EVENT_TO_SEARCH_NAME</span><span class="p">,</span>
+            <span class="n">grace_note_consecution_keyword_name</span>
+            <span class="ow">or</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_GRACE_NOTE_SEQUENTIAL_EVENT_KEYWORD_NAME</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MutwoParameterDictToAfterGraceNoteConsecution"><a class="viewcode-back" href="../../../api/mutwo.music_converters.html#mutwo.music_converters.MutwoParameterDictToAfterGraceNoteConsecution">[docs]</a><span class="k">class</span> <span class="nc">MutwoParameterDictToAfterGraceNoteConsecution</span><span class="p">(</span>
+    <span class="n">core_converters</span><span class="o">.</span><span class="n">MutwoParameterDictToKeywordArgument</span>
+<span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">after_grace_note_consecution_to_search_name</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">after_grace_note_consecution_keyword_name</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">after_grace_note_consecution_to_search_name</span>
+            <span class="ow">or</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_AFTER_GRACE_NOTE_SEQUENTIAL_EVENT_TO_SEARCH_NAME</span><span class="p">,</span>
+            <span class="n">after_grace_note_consecution_keyword_name</span>
+            <span class="ow">or</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_AFTER_GRACE_NOTE_SEQUENTIAL_EVENT_KEYWORD_NAME</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MutwoParameterDictToNoteLike"><a class="viewcode-back" href="../../../api/mutwo.music_converters.html#mutwo.music_converters.MutwoParameterDictToNoteLike">[docs]</a><span class="k">class</span> <span class="nc">MutwoParameterDictToNoteLike</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">MutwoParameterDictToSimpleEvent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert a dict of mutwo parameters to a :class:`mutwo.music_events.NoteLike`</span>
+
+<span class="sd">    :param mutwo_parameter_dict_to_keyword_argument_sequence: A sequence of</span>
+<span class="sd">        :class:`MutwoParameterDictToKeywordArgument`.</span>
+<span class="sd">        Default to `None`.</span>
+<span class="sd">    :type mutwo_parameter_dict_to_keyword_argument_sequence: typing.Optional[typing.Sequence[MutwoParameterDictToKeywordArgument]]</span>
+<span class="sd">    :param chronon_class: Default to :class:`mutwo.music_events.NoteLike`.</span>
+<span class="sd">    :type chronon_class: typing.Type[core_events.SimpleEvent]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">mutwo_parameter_dict_to_keyword_argument_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+            <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">core_converters</span><span class="o">.</span><span class="n">MutwoParameterDictToKeywordArgument</span><span class="p">]</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">chronon_class</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Type</span><span class="p">[</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">music_events</span><span class="o">.</span><span class="n">NoteLike</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">mutwo_parameter_dict_to_keyword_argument_sequence</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">mutwo_parameter_dict_to_keyword_argument_sequence</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">core_converters</span><span class="o">.</span><span class="n">MutwoParameterDictToDuration</span><span class="p">(),</span>
+                <span class="n">MutwoParameterDictToPitchList</span><span class="p">(),</span>
+                <span class="n">MutwoParameterDictToVolume</span><span class="p">(),</span>
+                <span class="n">MutwoParameterDictToPlayingIndicatorCollection</span><span class="p">(),</span>
+                <span class="n">MutwoParameterDictToNotationIndicatorCollection</span><span class="p">(),</span>
+                <span class="n">MutwoParameterDictToGraceNoteConsecution</span><span class="p">(),</span>
+                <span class="n">MutwoParameterDictToAfterGraceNoteConsecution</span><span class="p">(),</span>
+                <span class="n">MutwoParameterDictToInstrumentList</span><span class="p">(),</span>
+            <span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">mutwo_parameter_dict_to_keyword_argument_sequence</span><span class="p">,</span> <span class="n">chronon_class</span>
+        <span class="p">)</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.music_converters.parsers</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Levin Eric Zimmermann.
+    </div>
+  </body>
+</html>

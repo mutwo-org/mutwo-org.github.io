@@ -1,0 +1,491 @@
+
+.. currentmodule:: mutwo.music_parameters
+
+mutwo.music_parameters
+======================
+
+.. contents:: Table of content
+   :depth: 3
+
+.. automodule:: mutwo.music_parameters
+   :members:
+
+
+.. list-table::
+   :align: center
+   :width: 95%
+   :header-rows: 1
+
+   * - Object
+     - Documentation
+   * - :class:`mutwo.music_parameters.OctaveAmbitus`
+     - 
+   * - :class:`mutwo.music_parameters.Comma`
+     - A `tuning comma <https://en.wikipedia.org/wiki/Comma_(music)>`_.
+   * - :class:`mutwo.music_parameters.CommaCompound`
+     - Collection of tuning commas.
+   * - :class:`mutwo.music_parameters.NaturalHarmonic`
+     - Model the natural harmonic of a :class:`String`.
+   * - :class:`mutwo.music_parameters.String`
+     - :class:`String` represents a string of an instrument.
+   * - :class:`mutwo.music_parameters.StringInstrumentMixin`
+     - Mixin to model instrument with strings.
+   * - :class:`mutwo.music_parameters.UnpitchedInstrument`
+     - Model a musical instruments without any clear pitches.
+   * - :class:`mutwo.music_parameters.ContinuousPitchedInstrument`
+     - Model a musical instrument with continuous pitches (e.g. not fretted).
+   * - :class:`mutwo.music_parameters.DiscreetPitchedInstrument`
+     - Model a musical instrument with discreet pitches (e.g. fretted).
+   * - :class:`mutwo.music_parameters.ContinuousPitchedStringInstrument`
+     - 
+   * - :class:`mutwo.music_parameters.DiscreetPitchedStringInstrument`
+     - 
+   * - :class:`mutwo.music_parameters.Orchestration`
+     - Create a name space for the instrumentation of a composition.
+   * - :class:`mutwo.music_parameters.OrchestrationMixin`
+     - Helper base class from which adhoc created `Orchestration` object inherits.
+   * - :class:`mutwo.music_parameters.CelticHarp`
+     - A typical beginners harp without any pedals.
+   * - :class:`mutwo.music_parameters.Piccolo`
+     - 
+   * - :class:`mutwo.music_parameters.Flute`
+     - 
+   * - :class:`mutwo.music_parameters.Oboe`
+     - 
+   * - :class:`mutwo.music_parameters.BfClarinet`
+     - 
+   * - :class:`mutwo.music_parameters.EfClarinet`
+     - 
+   * - :class:`mutwo.music_parameters.Bassoon`
+     - 
+   * - :class:`mutwo.music_parameters.DirectLyric`
+     - Lyric which is directly initialised by its phonetic representation
+   * - :class:`mutwo.music_parameters.LanguageBasedLyric`
+     - Lyric based on a natural language.
+   * - :class:`mutwo.music_parameters.LanguageBasedSyllable`
+     - Syllable based on a natural language.
+   * - :class:`mutwo.music_parameters.DirectPitchInterval`
+     - Simple interval class which gets directly assigned by its cents value
+   * - :class:`mutwo.music_parameters.WesternPitchInterval`
+     - Model intervals by using European music theory based representations
+   * - :class:`mutwo.music_parameters.DirectPitch`
+     - A simple pitch class that gets directly initialised by its frequency.
+   * - :class:`mutwo.music_parameters.JustIntonationPitch`
+     - Pitch that is defined by a frequency ratio and a reference pitch.
+   * - :class:`mutwo.music_parameters.Partial`
+     - Abstract representation of a harmonic spectrum partial.
+   * - :class:`mutwo.music_parameters.EqualDividedOctavePitch`
+     - Pitch that is tuned to an Equal divided octave tuning system.
+   * - :class:`mutwo.music_parameters.WesternPitch`
+     - Pitch with a traditional Western nomenclature.
+   * - :class:`mutwo.music_parameters.MidiPitch`
+     - Pitch that is defined by its midi pitch number.
+   * - :class:`mutwo.music_parameters.CommonHarmonic`
+     - :class:`JustIntonationPitch` which is the common harmonic between two or more other pitches.
+   * - :class:`mutwo.music_parameters.ScalePitch`
+     - Pitch that is defined by its scale degree, octave and reference scale.
+   * - :class:`mutwo.music_parameters.FlexPitch`
+     - A flexible pitch.
+   * - :class:`mutwo.music_parameters.DirectVolume`
+     - A simple volume class that gets directly initialised by decibel.
+   * - :class:`mutwo.music_parameters.FlexVolume`
+     - A flexible volume.
+   * - :class:`mutwo.music_parameters.AmplitudeVolume`
+     - A simple volume class that gets directly initialised by its amplitude.
+   * - :class:`mutwo.music_parameters.WesternVolume`
+     - Volume with a traditional Western nomenclature.
+   * - :class:`mutwo.music_parameters.BarLine`
+     - BarLine(abbreviation: Optional[str] = None)
+   * - :class:`mutwo.music_parameters.Clef`
+     - Clef(name: Optional[str] = None)
+   * - :class:`mutwo.music_parameters.Ottava`
+     - Ottava(octave_count: Optional[int] = 0)
+   * - :class:`mutwo.music_parameters.MarginMarkup`
+     - MarginMarkup(content: Optional[str] = None, context: Optional[str] = 'Staff')
+   * - :class:`mutwo.music_parameters.Markup`
+     - Markup(content: Optional[str] = None, direction: Optional[str] = None)
+   * - :class:`mutwo.music_parameters.RehearsalMark`
+     - RehearsalMark(markup: Optional[str] = None)
+   * - :class:`mutwo.music_parameters.NotationIndicatorCollection`
+     - Collection of notation indicators
+   * - :class:`mutwo.music_parameters.Tremolo`
+     - Tremolo(flag_count: Optional[int] = None)
+   * - :class:`mutwo.music_parameters.Articulation`
+     - Articulation(name: Optional[Literal['accent', 'marcato', 'staccatissimo', 'espressivo', 'staccato', 'tenuto', 'portato', 'upbow', 'downbow', 'flageolet', 'thumb', 'lheel', 'rheel', 'ltoe', 'rtoe', 'open', 'halfopen', 'snappizzicato', 'stopped', 'turn', 'reverseturn', 'trill', 'prall', 'mordent', 'prallprall', 'prallmordent', 'upprall', 'downprall', 'upmordent', 'downmordent', 'pralldown', 'prallup', 'lineprall', 'signumcongruentiae', 'shortfermata', 'fermata', 'longfermata', 'verylongfermata', 'segno', 'coda', 'varcoda', '^', '+', '-', '|', '>', '.', '_']] = None)
+   * - :class:`mutwo.music_parameters.Arpeggio`
+     - Arpeggio(direction: Optional[Literal['up', 'down']] = None)
+   * - :class:`mutwo.music_parameters.Pedal`
+     - Pedal(type: Optional[Literal['sustain', 'sostenuto', 'corda']] = None, activity: Optional[bool] = True)
+   * - :class:`mutwo.music_parameters.Slur`
+     - Slur(activity: Optional[bool] = None)
+   * - :class:`mutwo.music_parameters.StringContactPoint`
+     - StringContactPoint(contact_point: Optional[Literal['dietro ponticello', 'molto sul ponticello', 'molto sul tasto', 'ordinario', 'pizzicato', 'ponticello', 'sul ponticello', 'sul tasto', 'col legno tratto', 'd.p.', 'm.s.p', 'm.s.t.', 'ord.', 'pizz.', 'p.', 's.p.', 's.t.', 'c.l.t.']] = None)
+   * - :class:`mutwo.music_parameters.Ornamentation`
+     - Ornamentation(direction: Optional[Literal['up', 'down']] = None, count: int = 1)
+   * - :class:`mutwo.music_parameters.BendAfter`
+     - BendAfter(bend_amount: Optional[float] = None, minimum_length: Optional[float] = 3, thickness: Optional[float] = 3)
+   * - :class:`mutwo.music_parameters.ArtificalHarmonic`
+     - ArtificalHarmonic(semitone_count: Optional[int] = None)
+   * - :class:`mutwo.music_parameters.NaturalHarmonicNodeList`
+     - Assign natural harmonics to your note.
+   * - :class:`mutwo.music_parameters.Fermata`
+     - Fermata(type: Optional[Literal['shortfermata', 'fermata', 'longfermata', 'verylongfermata']] = None)
+   * - :class:`mutwo.music_parameters.Hairpin`
+     - Hairpin(symbol: Optional[Literal['<', '>', '<>', '!']] = None, niente: bool = False)
+   * - :class:`mutwo.music_parameters.Trill`
+     - Trill(pitch: Optional[mutwo.music_parameters.abc.Pitch] = None)
+   * - :class:`mutwo.music_parameters.WoodwindFingering`
+     - WoodwindFingering(cc: Optional[Tuple[str, ...]] = None, left_hand: Optional[Tuple[str, ...]] = None, right_hand: Optional[Tuple[str, ...]] = None, instrument: str = 'clarinet')
+   * - :class:`mutwo.music_parameters.Cue`
+     - Cue for electronics etc.
+   * - :class:`mutwo.music_parameters.PlayingIndicatorCollection`
+     - Collection of playing indicators
+   * - :class:`mutwo.music_parameters.ScaleFamily`
+     - A :class:`ScaleFamily` is a sorted sequence of :class:`mutwo.music_parameters.abc.PitchInterval`.
+   * - :class:`mutwo.music_parameters.RepeatingScaleFamily`
+     - A `RepeatingScaleFamily` is a sorted sequence of repeating intervals over a repetition interval.
+   * - :class:`mutwo.music_parameters.Scale`
+     - A :class:`Scale` is a sorted sequence of :class:`~mutwo.music_parameters.abc.Pitch`.
+
+
+
+
+.. autofunction:: Orchestration
+    
+
+.. autoclass:: mutwo.music_parameters.OctaveAmbitus
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.Comma
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.CommaCompound
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.NaturalHarmonic
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.String
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.StringInstrumentMixin
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.UnpitchedInstrument
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.ContinuousPitchedInstrument
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.DiscreetPitchedInstrument
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.ContinuousPitchedStringInstrument
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.DiscreetPitchedStringInstrument
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.OrchestrationMixin
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.CelticHarp
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.Piccolo
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.Flute
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.Oboe
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.BfClarinet
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.EfClarinet
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.Bassoon
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.DirectLyric
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.LanguageBasedLyric
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.LanguageBasedSyllable
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.DirectPitchInterval
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.WesternPitchInterval
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.DirectPitch
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.JustIntonationPitch
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.Partial
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.EqualDividedOctavePitch
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.WesternPitch
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.MidiPitch
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.CommonHarmonic
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.ScalePitch
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.FlexPitch
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.DirectVolume
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.FlexVolume
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.AmplitudeVolume
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.WesternVolume
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.BarLine
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.Clef
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.Ottava
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.MarginMarkup
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.Markup
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.RehearsalMark
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.NotationIndicatorCollection
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.Tremolo
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.Articulation
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.Arpeggio
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.Pedal
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.Slur
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.StringContactPoint
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.Ornamentation
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.BendAfter
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.ArtificalHarmonic
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.NaturalHarmonicNodeList
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.Fermata
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.Hairpin
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.Trill
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.WoodwindFingering
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.Cue
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.PlayingIndicatorCollection
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.ScaleFamily
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.RepeatingScaleFamily
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_parameters.Scale
+
+        .. autoclasstoc::
+    
+
+
+mutwo.music_parameters.abc
+--------------------------
+
+.. automodule:: mutwo.music_parameters.abc
+   :members:
+
+
+mutwo.music_parameters.configurations.instruments
+-------------------------------------------------
+
+.. automodule:: mutwo.music_parameters.configurations.instruments
+   :members:
+
+
+mutwo.music_parameters.constants
+--------------------------------
+
+.. automodule:: mutwo.music_parameters.constants
+   :members:
+

@@ -1,0 +1,638 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>mutwo.core_converters &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+    
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="mutwo.core_events" href="mutwo.core_events.html" />
+    <link rel="prev" title="mutwo.core_constants" href="mutwo.core_constants.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mutwo.core_events.html" title="mutwo.core_events"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="mutwo.core_constants.html" title="mutwo.core_constants"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="api_documentation.html" accesskey="U">mutwo API documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.core_converters</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="mutwo-core-converters">
+<h1><a class="toc-backref" href="#id3" role="doc-backlink">mutwo.core_converters</a><a class="headerlink" href="#mutwo-core-converters" title="Permalink to this heading">¶</a></h1>
+<nav class="contents" id="table-of-content">
+<p class="topic-title">Table of content</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#mutwo-core-converters" id="id3">mutwo.core_converters</a></p>
+<ul>
+<li><p><a class="reference internal" href="#module-mutwo.core_converters.abc" id="id4">mutwo.core_converters.abc</a></p></li>
+<li><p><a class="reference internal" href="#module-mutwo.core_converters.configurations" id="id5">mutwo.core_converters.configurations</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<span class="target" id="module-mutwo.core_converters"></span><p>Convert data from and to mutwo.</p>
+<table class="docutils align-center" style="width: 95%">
+<thead>
+<tr class="row-odd"><th class="head"><p>Object</p></th>
+<th class="head"><p>Documentation</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.core_converters.ChrononToAttribute" title="mutwo.core_converters.ChrononToAttribute"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_converters.ChrononToAttribute</span></code></a></p></td>
+<td><p>Extract from a chronon an attribute.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_converters.dict</span></code></p></td>
+<td><p>dict() -&gt; new empty dictionary</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.core_converters.MutwoParameterDictToKeywordArgument" title="mutwo.core_converters.MutwoParameterDictToKeywordArgument"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_converters.MutwoParameterDictToKeywordArgument</span></code></a></p></td>
+<td><p>Extract from a dict of mutwo parameters specific objects.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.core_converters.MutwoParameterDictToDuration" title="mutwo.core_converters.MutwoParameterDictToDuration"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_converters.MutwoParameterDictToDuration</span></code></a></p></td>
+<td><p>Extract from a dict of mutwo parameters the duration.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.core_converters.MutwoParameterDictToChronon" title="mutwo.core_converters.MutwoParameterDictToChronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_converters.MutwoParameterDictToChronon</span></code></a></p></td>
+<td><p>Convert a dict of mutwo parameters to a <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_events.Chronon</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.core_converters.TempoConverter" title="mutwo.core_converters.TempoConverter"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_converters.TempoConverter</span></code></a></p></td>
+<td><p>Apply tempo on an <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Event" title="mutwo.core_events.abc.Event"><code class="xref py py-class docutils literal notranslate"><span class="pre">Event</span></code></a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.core_converters.EventToMetrizedEvent" title="mutwo.core_converters.EventToMetrizedEvent"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_converters.EventToMetrizedEvent</span></code></a></p></td>
+<td><p>Apply tempo of event on copy of itself</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.core_converters.ChrononToAttribute">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ChrononToAttribute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attribute_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exception_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/core_converters/parsers.html#ChrononToAttribute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.core_converters.ChrononToAttribute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></p>
+<p>Extract from a chronon an attribute.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>attribute_name</strong> (<em>str</em>) – The name of the attribute which is fetched
+from a <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_events.Chronon</span></code></a>.</p></li>
+<li><p><strong>exception_value</strong> (<em>Any</em>) – This value is returned in case an <cite>AttributeError</cite>
+raises .</p></li>
+</ul>
+</dd>
+</dl>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(chronon_to_convert)</p></td>
+<td><p>Extract from a <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_events.Chronon</span></code></a> an attribute.</p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.core_converters.ChrononToAttribute.convert">
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chronon_to_convert</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/core_converters/parsers.html#ChrononToAttribute.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.core_converters.ChrononToAttribute.convert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract from a <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_events.Chronon</span></code></a> an attribute.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>chronon_to_convert</strong> (<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><em>mutwo.core_events.Chronon</em></a>) – The <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_events.Chronon</span></code></a>
+from which an attribute shall be extracted.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Any</em></p>
+</dd>
+</dl>
+<p><strong>Example:</strong></p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_converters</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_events</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">chronon</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Chronon</span><span class="p">(</span><span class="n">duration</span><span class="o">=</span><span class="mf">10.0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">chronon_to_duration</span> <span class="o">=</span> <span class="n">core_converters</span><span class="o">.</span><span class="n">ChrononToAttribute</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="s1">&#39;duration&#39;</span><span class="p">,</span> <span class="mi">0</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">chronon_to_duration</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">chronon</span><span class="p">)</span>
+<span class="go">DirectDuration(10.0)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">chronon_to_pasta</span> <span class="o">=</span> <span class="n">core_converters</span><span class="o">.</span><span class="n">ChrononToAttribute</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="s1">&#39;pasta&#39;</span><span class="p">,</span> <span class="s1">&#39;spaghetti&#39;</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">chronon_to_pasta</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">chronon</span><span class="p">)</span>
+<span class="go">&#39;spaghetti&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">chronon</span><span class="o">.</span><span class="n">pasta</span> <span class="o">=</span> <span class="s1">&#39;tagliatelle&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">chronon_to_pasta</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">chronon</span><span class="p">)</span>
+<span class="go">&#39;tagliatelle&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.core_converters.MutwoParameterDictToKeywordArgument">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MutwoParameterDictToKeywordArgument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mutwo_parameter_to_search_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keyword</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/core_converters/parsers.html#MutwoParameterDictToKeywordArgument"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.core_converters.MutwoParameterDictToKeywordArgument" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></p>
+<p>Extract from a dict of mutwo parameters specific objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mutwo_parameter_to_search_name</strong> (<em>str</em>) – The parameter name which
+should be fetched from the MutwoParameterDict (if it exists).</p></li>
+<li><p><strong>keyword</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – The keyword string to return. If no argument is given
+it will use the same value as <a href="#id1"><span class="problematic" id="id2">:param:`mutwo_parameter_to_search_name`</span></a>.</p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Example:</strong></p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_converters</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_parameters</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mutwo_parameter_dict_to_keyword_argument</span> <span class="o">=</span> <span class="n">core_converters</span><span class="o">.</span><span class="n">MutwoParameterDictToKeywordArgument</span><span class="p">(</span><span class="s1">&#39;duration&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mutwo_parameter_dict_to_keyword_argument</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">{</span><span class="s1">&#39;duration&#39;</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">DirectDuration</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)}</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="go">(&#39;duration&#39;, DirectDuration(1.0))</span>
+</pre></div>
+</div>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(mutwo_parameter_dict_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.core_converters.MutwoParameterDictToKeywordArgument.convert">
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mutwo_parameter_dict_to_convert</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/core_converters/parsers.html#MutwoParameterDictToKeywordArgument.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.core_converters.MutwoParameterDictToKeywordArgument.convert" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mutwo_parameter_dict_to_convert</strong> (<em>dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Optional</em>[tuple[str, <em>Any</em>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.core_converters.MutwoParameterDictToDuration">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MutwoParameterDictToDuration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">duration_to_search_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration_keyword_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/core_converters/parsers.html#MutwoParameterDictToDuration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.core_converters.MutwoParameterDictToDuration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mutwo.core_converters.MutwoParameterDictToKeywordArgument" title="mutwo.core_converters.parsers.MutwoParameterDictToKeywordArgument"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoParameterDictToKeywordArgument</span></code></a></p>
+<p>Extract from a dict of mutwo parameters the duration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>duration_to_search_name</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – The name of the duration which shall
+be searched for in the <code class="xref py py-const docutils literal notranslate"><span class="pre">MutwoParameterDict</span></code>. If <cite>None</cite> the
+value of the global constants
+<a class="reference internal" href="#mutwo.core_converters.configurations.DEFAULT_DURATION_TO_SEARCH_NAME" title="mutwo.core_converters.configurations.DEFAULT_DURATION_TO_SEARCH_NAME"><code class="xref py py-const docutils literal notranslate"><span class="pre">mutwo.core_converters.configurations.DEFAULT_DURATION_TO_SEARCH_NAME</span></code></a>
+will be used. Default to <cite>None</cite>.</p></li>
+<li><p><strong>duration_keyword_name</strong> (typing.Optional[str]
+<a class="reference internal" href="#mutwo.core_converters.configurations.DEFAULT_DURATION_KEYWORD_NAME" title="mutwo.core_converters.configurations.DEFAULT_DURATION_KEYWORD_NAME"><code class="xref py py-const docutils literal notranslate"><span class="pre">mutwo.core_converters.configurations.DEFAULT_DURATION_KEYWORD_NAME</span></code></a>.) – The name of the duration keyword for the
+event. If <cite>None</cite> the value of the global constants
+<a class="reference internal" href="#mutwo.core_converters.configurations.DEFAULT_DURATION_KEYWORD_NAME" title="mutwo.core_converters.configurations.DEFAULT_DURATION_KEYWORD_NAME"><code class="xref py py-const docutils literal notranslate"><span class="pre">mutwo.core_converters.configurations.DEFAULT_DURATION_KEYWORD_NAME</span></code></a>
+will be used. Default to <cite>None</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<details><summary>Inherited from <a class="reference internal" href="#mutwo.core_converters.MutwoParameterDictToKeywordArgument" title="mutwo.core_converters.parsers.MutwoParameterDictToKeywordArgument"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoParameterDictToKeywordArgument</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(mutwo_parameter_dict_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+</dd></dl>
+
+<hr class="docutils" />
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.core_converters.MutwoParameterDictToChronon">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MutwoParameterDictToChronon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mutwo_parameter_dict_to_keyword_argument_sequence=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chronon_class=&lt;class</span> <span class="pre">'mutwo.core_events.basic.Chronon'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/core_converters/parsers.html#MutwoParameterDictToChronon"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.core_converters.MutwoParameterDictToChronon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></p>
+<p>Convert a dict of mutwo parameters to a <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_events.Chronon</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mutwo_parameter_dict_to_keyword_argument_sequence</strong> (<em>Optional</em><em>[</em><em>Sequence</em><em>[</em><a class="reference internal" href="#mutwo.core_converters.MutwoParameterDictToKeywordArgument" title="mutwo.core_converters.MutwoParameterDictToKeywordArgument"><em>MutwoParameterDictToKeywordArgument</em></a><em>]</em><em>]</em>) – A sequence of
+<a class="reference internal" href="#mutwo.core_converters.MutwoParameterDictToKeywordArgument" title="mutwo.core_converters.MutwoParameterDictToKeywordArgument"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoParameterDictToKeywordArgument</span></code></a>. If set to <cite>None</cite>
+a sequence with <a class="reference internal" href="#mutwo.core_converters.MutwoParameterDictToDuration" title="mutwo.core_converters.MutwoParameterDictToDuration"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoParameterDictToDuration</span></code></a> will be created.
+Default to <cite>None</cite>.</p></li>
+<li><p><strong>chronon_class</strong> (<em>Type</em><em>[</em><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><em>core_events.Chronon</em></a><em>]</em>) – Default to <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_events.Chronon</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(mutwo_parameter_dict_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.core_converters.MutwoParameterDictToChronon.convert">
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mutwo_parameter_dict_to_convert</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/core_converters/parsers.html#MutwoParameterDictToChronon.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.core_converters.MutwoParameterDictToChronon.convert" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mutwo_parameter_dict_to_convert</strong> (<em>dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.basic.Chronon"><em>Chronon</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.core_converters.TempoConverter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TempoConverter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tempo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">apply_converter_on_events_tempo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/core_converters/tempos.html#TempoConverter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.core_converters.TempoConverter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mutwo.core_converters.abc.EventConverter" title="mutwo.core_converters.abc.EventConverter"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventConverter</span></code></a></p>
+<p>Apply tempo on an <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Event" title="mutwo.core_events.abc.Event"><code class="xref py py-class docutils literal notranslate"><span class="pre">Event</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tempo</strong> (<a class="reference internal" href="mutwo.core_parameters.html#mutwo.core_parameters.abc.Tempo" title="mutwo.core_parameters.abc.Tempo"><em>Tempo</em></a>) – The tempo that shall be applied on the mutwo events.
+This must be a <a class="reference internal" href="mutwo.core_parameters.html#mutwo.core_parameters.abc.Tempo" title="mutwo.core_parameters.abc.Tempo"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tempo</span></code></a> object.</p></li>
+<li><p><strong>apply_converter_on_events_tempo</strong> (<em>bool</em>) – If set to <cite>True</cite> the
+converter adjusts the <code class="xref py py-attr docutils literal notranslate"><span class="pre">tempo</span></code> attribute of each
+converted event. Default to <cite>True</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Example:</strong></p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_converters</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_parameters</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tempo</span> <span class="o">=</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">FlexTempo</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">DirectTempo</span><span class="p">(</span><span class="mi">60</span><span class="p">)],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">60</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">30</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">50</span><span class="p">]],</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">core_converters</span><span class="o">.</span><span class="n">TempoConverter</span><span class="p">(</span><span class="n">tempo</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(event_to_convert)</p></td>
+<td><p>Apply tempo curve of the converter on copy of 'event_to_convert'.</p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.core_converters.TempoConverter.convert">
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_to_convert</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/core_converters/tempos.html#TempoConverter.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.core_converters.TempoConverter.convert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply tempo curve of the converter on copy of ‘event_to_convert’.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>event_to_convert</strong> (<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Event" title="mutwo.core_events.abc.Event"><em>Event</em></a>) – The event to convert. Can be any object
+that inherits from <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Event" title="mutwo.core_events.abc.Event"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_events.abc.Event</span></code></a>. If the event that
+shall be converted is longer than the tempo curve of the
+<a class="reference internal" href="#mutwo.core_converters.TempoConverter" title="mutwo.core_converters.TempoConverter"><code class="xref py py-class docutils literal notranslate"><span class="pre">TempoConverter</span></code></a>, then the last tempo of the curve is hold.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Event" title="mutwo.core_events.abc.Event"><code class="xref py py-class docutils literal notranslate"><span class="pre">Event</span></code></a> which duration has been
+adapted by the tempo curve of the <a class="reference internal" href="#mutwo.core_converters.TempoConverter" title="mutwo.core_converters.TempoConverter"><code class="xref py py-class docutils literal notranslate"><span class="pre">TempoConverter</span></code></a>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Event" title="mutwo.core_events.abc.Event"><em>Event</em></a></p>
+</dd>
+</dl>
+<p><strong>Example:</strong></p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_converters</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_events</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_parameters</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tempo</span> <span class="o">=</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">FlexTempo</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">DirectTempo</span><span class="p">(</span><span class="mi">60</span><span class="p">)],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">60</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">30</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">50</span><span class="p">]],</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">my_tempo_converter</span> <span class="o">=</span> <span class="n">core_converters</span><span class="o">.</span><span class="n">TempoConverter</span><span class="p">(</span><span class="n">tempo</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">my_events</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">([</span><span class="n">core_events</span><span class="o">.</span><span class="n">Chronon</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">my_tempo_converter</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">my_events</span><span class="p">)</span>
+<span class="go">Consecution([Chronon(duration=DirectDuration(3.0)), Chronon(duration=DirectDuration(3.2)), Chronon(duration=DirectDuration(6.0))])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.core_converters.EventToMetrizedEvent">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EventToMetrizedEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skip_level_count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxima_depth_count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/core_converters/tempos.html#EventToMetrizedEvent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.core_converters.EventToMetrizedEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mutwo.core_converters.abc.SymmetricalEventConverter" title="mutwo.core_converters.abc.SymmetricalEventConverter"><code class="xref py py-class docutils literal notranslate"><span class="pre">SymmetricalEventConverter</span></code></a></p>
+<p>Apply tempo of event on copy of itself</p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(event_to_convert)</p></td>
+<td><p>Apply tempo of event on copy of itself</p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>skip_level_count</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – </p></li>
+<li><p><strong>maxima_depth_count</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.core_converters.EventToMetrizedEvent.convert">
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_to_convert</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/core_converters/tempos.html#EventToMetrizedEvent.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.core_converters.EventToMetrizedEvent.convert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply tempo of event on copy of itself</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>event_to_convert</strong> (<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Event" title="mutwo.core_events.abc.Event"><em>Event</em></a>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Event" title="mutwo.core_events.abc.Event"><em>Event</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<section id="module-mutwo.core_converters.abc">
+<span id="mutwo-core-converters-abc"></span><h2><a class="toc-backref" href="#id4" role="doc-backlink">mutwo.core_converters.abc</a><a class="headerlink" href="#module-mutwo.core_converters.abc" title="Permalink to this heading">¶</a></h2>
+<p>Defining the public API for any converter class.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.core_converters.abc.Converter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Converter</span></span><a class="reference internal" href="../_modules/mutwo/core_converters/abc.html#Converter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.core_converters.abc.Converter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Abstract base class for all Converter classes.</p>
+<p>Converter classes are defined as classes that convert data between
+two different encodings. Their only public method (besides initialisation)
+should be a <cite>convert</cite> method. The first argument of the convert method
+should be the data to convert.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.core_converters.abc.Converter.convert">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_or_parameter_or_file_to_convert</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/core_converters/abc.html#Converter.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.core_converters.abc.Converter.convert" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>event_or_parameter_or_file_to_convert</strong> (<em>Any</em>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Any</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.core_converters.abc.EventConverter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EventConverter</span></span><a class="reference internal" href="../_modules/mutwo/core_converters/abc.html#EventConverter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.core_converters.abc.EventConverter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></p>
+<p>Abstract base class for Converter which handle mutwo events.</p>
+<p>This class helps building new classes which convert mutwo events
+with few general private methods (and without adding any new public
+method). Converting mutwo event often involves the same pattern:
+due to the nested structure of an Event, the converter has
+to iterate through the different layers until it reaches leaves
+(any class that inherits from <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_events.Chronon</span></code></a>).
+This common iteration process and the different time treatment
+between <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_events.Consecution</span></code></a> and
+<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Concurrence" title="mutwo.core_events.Concurrence"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_events.Concurrence</span></code></a> are implemented in
+<a class="reference internal" href="#mutwo.core_converters.abc.EventConverter" title="mutwo.core_converters.abc.EventConverter"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventConverter</span></code></a>.  For writing a new EventConverter class,
+one only has to override the abstract method <code class="xref py py-func docutils literal notranslate"><span class="pre">_convert_chronon()</span></code>
+and the abstract method <code class="xref py py-func docutils literal notranslate"><span class="pre">convert()</span></code> (where one will perhaps call
+<code class="xref py py-func docutils literal notranslate"><span class="pre">_convert_event()</span></code>.).</p>
+<p><strong>Example:</strong></p>
+<p>The following example defines a dummy class for demonstrating how
+to use EventConverter.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_converters</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">DurationPrintConverter</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">EventConverter</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">_convert_chronon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event_to_convert</span><span class="p">,</span> <span class="n">absolute_time</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">absolute_time</span><span class="p">,</span> <span class="n">event_to_convert</span><span class="o">.</span><span class="n">duration</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event_to_convert</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="n">data_per_event</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_event</span><span class="p">(</span><span class="n">event_to_convert</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="p">[</span><span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">data_per_event</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># now test with random event</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">random</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_events</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">random_event</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Concurrence</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span>
+<span class="gp">... </span>       <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">(</span>
+<span class="gp">... </span>            <span class="p">[</span>
+<span class="gp">... </span>               <span class="n">core_events</span><span class="o">.</span><span class="n">Chronon</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="gp">... </span>                <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="gp">... </span>            <span class="p">]</span>
+<span class="gp">... </span>        <span class="p">)</span>
+<span class="gp">... </span>        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="p">]</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">DurationPrintConverter</span><span class="p">()</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">random_event</span><span class="p">)</span>
+<span class="go">D(0.0): D(1.1823905068)</span>
+<span class="go">D(1.1823905068): D(1.6561757085)</span>
+<span class="go">D(2.8385662153): D(1.5582698404)</span>
+<span class="go">D(4.3968360557): D(1.5979384595)</span>
+<span class="go">D(5.9947745152): D(1.1502716523)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.core_converters.abc.SymmetricalEventConverter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SymmetricalEventConverter</span></span><a class="reference internal" href="../_modules/mutwo/core_converters/abc.html#SymmetricalEventConverter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.core_converters.abc.SymmetricalEventConverter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mutwo.core_converters.abc.EventConverter" title="mutwo.core_converters.abc.EventConverter"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventConverter</span></code></a></p>
+<p>Abstract base class for Converter which handle mutwo core_events.</p>
+<p>This converter is a more specified version of the <a class="reference internal" href="#mutwo.core_converters.abc.EventConverter" title="mutwo.core_converters.abc.EventConverter"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventConverter</span></code></a>.
+It helps for building converters which aim to return mutwo core_events.</p>
+</dd></dl>
+
+</section>
+<section id="module-mutwo.core_converters.configurations">
+<span id="mutwo-core-converters-configurations"></span><h2><a class="toc-backref" href="#id5" role="doc-backlink">mutwo.core_converters.configurations</a><a class="headerlink" href="#module-mutwo.core_converters.configurations" title="Permalink to this heading">¶</a></h2>
+<p>Configure <a class="reference internal" href="#module-mutwo.core_converters" title="mutwo.core_converters"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mutwo.core_converters</span></code></a></p>
+<dl class="py data">
+<dt class="sig sig-object py" id="mutwo.core_converters.configurations.DEFAULT_DURATION_KEYWORD_NAME">
+<span class="sig-name descname"><span class="pre">DEFAULT_DURATION_KEYWORD_NAME</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'duration'</span></em><a class="headerlink" href="#mutwo.core_converters.configurations.DEFAULT_DURATION_KEYWORD_NAME" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default value for <code class="docutils literal notranslate"><span class="pre">duration_keyword_name</span></code> parameter in
+<a class="reference internal" href="#mutwo.core_converters.MutwoParameterDictToDuration" title="mutwo.core_converters.MutwoParameterDictToDuration"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_converters.MutwoParameterDictToDuration</span></code></a></p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mutwo.core_converters.configurations.DEFAULT_DURATION_TO_SEARCH_NAME">
+<span class="sig-name descname"><span class="pre">DEFAULT_DURATION_TO_SEARCH_NAME</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'duration'</span></em><a class="headerlink" href="#mutwo.core_converters.configurations.DEFAULT_DURATION_TO_SEARCH_NAME" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default value for <code class="docutils literal notranslate"><span class="pre">duration_to_search_name</span></code> parameter in
+<a class="reference internal" href="#mutwo.core_converters.MutwoParameterDictToDuration" title="mutwo.core_converters.MutwoParameterDictToDuration"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_converters.MutwoParameterDictToDuration</span></code></a></p>
+</dd></dl>
+
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mutwo.core_events.html" title="mutwo.core_events"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="mutwo.core_constants.html" title="mutwo.core_constants"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="api_documentation.html" >mutwo API documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.core_converters</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2024, mutwo authors.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,33 @@
+
+.. currentmodule:: mutwo.music_generators
+
+mutwo.music_generators
+======================
+
+.. contents:: Table of content
+   :depth: 3
+
+.. automodule:: mutwo.music_generators
+   :members:
+
+
+.. list-table::
+   :align: center
+   :width: 95%
+   :header-rows: 1
+
+   * - Object
+     - Documentation
+
+
+
+
+
+
+
+mutwo.music_generators.constants
+--------------------------------
+
+.. automodule:: mutwo.music_generators.constants
+   :members:
+

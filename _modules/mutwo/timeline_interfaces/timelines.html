@@ -1,0 +1,687 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mutwo.timeline_interfaces.timelines &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.timeline_interfaces.timelines</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mutwo.timeline_interfaces.timelines</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">abc</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">dataclasses</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">statistics</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">import</span> <span class="nn">ranges</span>
+
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_events</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_parameters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_utilities</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">timeline_utilities</span>
+
+<span class="n">UnspecificTime</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">TypeAlias</span> <span class="o">=</span> <span class="s2">&quot;core_parameters.abc.Duration | typing.Any&quot;</span>
+<span class="n">UnspecificTimeOrTimeRange</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">TypeAlias</span> <span class="o">=</span> <span class="s2">&quot;UnspecificTime | ranges.Range&quot;</span>
+<span class="n">TimeOrTimeRange</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">TypeAlias</span> <span class="o">=</span> <span class="s2">&quot;core_parameters.abc.Duration | ranges.Range&quot;</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;EventPlacement&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;TimeLine&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Conflict&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ConflictResolutionStrategy&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;AlwaysLeftStrategy&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;AlternatingStrategy&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;TagCountStrategy&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="EventPlacement"><a class="viewcode-back" href="../../../api/mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.EventPlacement">[docs]</a><span class="k">class</span> <span class="nc">EventPlacement</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Place any event at specific start and end times.</span>
+
+<span class="sd">    :param event: The event to be placed on a :class:`TimeLine`.</span>
+<span class="sd">        This needs to be filled with events with a `tag` property. Each</span>
+<span class="sd">        child event represents a specific object (e.g. instrument or</span>
+<span class="sd">        player) The tag is necessary to concatenate two events on a</span>
+<span class="sd">        `TimeLine` which belong to the same object (e.g. same instrument</span>
+<span class="sd">        or same player).</span>
+<span class="sd">    :type event: core_events.Concurrence[core_events.TaggedSimpleEvent | core_events.TaggedConsecution | core_events.Concurrence]</span>
+<span class="sd">    :param start_or_start_range: Sets when the event starts. This can</span>
+<span class="sd">        be a single :class:`mutwo.core_parameters.abc.Duration` or a</span>
+<span class="sd">        :class:`ranges.Range` of two durations. In the second case</span>
+<span class="sd">        the placement is flexible within the given area.</span>
+<span class="sd">    :type start_or_start_range: UnspecificTimeOrTimeRange</span>
+<span class="sd">    :param end_or_end_range: Sets when the event ends. This can</span>
+<span class="sd">        be a single :class:`mutwo.core_parameters.abc.Duration` or a</span>
+<span class="sd">        :class:`ranges.Range` of two durations. In the second case</span>
+<span class="sd">        the placement is flexible within the given area.</span>
+<span class="sd">    :type end_or_end_range: UnspecificTimeOrTimeRange</span>
+
+<span class="sd">    **Warning:**</span>
+
+<span class="sd">    An :class:`EventPlacement` itself is not an event and can&#39;t be treated</span>
+<span class="sd">    like an event.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">event</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Concurrence</span><span class="p">[</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">TaggedSimpleEvent</span>
+            <span class="o">|</span> <span class="n">core_events</span><span class="o">.</span><span class="n">TaggedConsecution</span>
+            <span class="o">|</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Concurrence</span>
+        <span class="p">],</span>
+        <span class="n">start_or_start_range</span><span class="p">:</span> <span class="n">UnspecificTimeOrTimeRange</span><span class="p">,</span>
+        <span class="n">end_or_end_range</span><span class="p">:</span> <span class="n">UnspecificTimeOrTimeRange</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_or_start_range</span> <span class="o">=</span> <span class="n">start_or_start_range</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">end_or_end_range</span> <span class="o">=</span> <span class="n">end_or_end_range</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">event</span> <span class="o">=</span> <span class="n">event</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                       private static methods                           #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="k">def</span> <span class="nf">_unspecified_to_specified_time_or_time_range</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">unspecified_time_or_time_range</span><span class="p">:</span> <span class="n">UnspecificTimeOrTimeRange</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TimeOrTimeRange</span><span class="p">:</span>
+        <span class="c1"># Ensure we get ranges filled with Duration objects or single</span>
+        <span class="c1"># duration objects.</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">unspecified_time_or_time_range</span><span class="p">,</span> <span class="n">ranges</span><span class="o">.</span><span class="n">Range</span><span class="p">):</span>
+            <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+                <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">UNKNOWN_OBJECT_TO_DURATION</span><span class="p">(</span><span class="n">unknown_object</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">unknown_object</span> <span class="ow">in</span> <span class="p">(</span>
+                    <span class="n">unspecified_time_or_time_range</span><span class="o">.</span><span class="n">start</span><span class="p">,</span>
+                    <span class="n">unspecified_time_or_time_range</span><span class="o">.</span><span class="n">end</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">ranges</span><span class="o">.</span><span class="n">Range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+            <span class="c1"># This means we catched a rounding error: the difference</span>
+            <span class="c1"># between start &amp; end is smaller than the rounding loss</span>
+            <span class="c1"># which is caused by</span>
+            <span class="c1"># mutwo.core_parameters.configurations.ROUND_DURATION_TO_N_DIGITS.</span>
+            <span class="c1">#</span>
+            <span class="c1"># Because the difference is so small we can simply return only</span>
+            <span class="c1"># one value, because the range doesn&#39;t really matter anyway.</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="n">timeline_utilities</span><span class="o">.</span><span class="n">TooSmallRangeWarning</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="p">,</span> <span class="n">unspecified_time_or_time_range</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+                <span class="k">return</span> <span class="n">start</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">UNKNOWN_OBJECT_TO_DURATION</span><span class="p">(</span>
+                <span class="n">unspecified_time_or_time_range</span>
+            <span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_mean_of_time_or_time_range</span><span class="p">(</span>
+        <span class="n">time_or_time_range</span><span class="p">:</span> <span class="n">TimeOrTimeRange</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">time_or_time_range</span><span class="p">,</span> <span class="n">ranges</span><span class="o">.</span><span class="n">Range</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">DirectDuration</span><span class="p">(</span>
+                <span class="n">statistics</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">time_or_time_range</span><span class="o">.</span><span class="n">start</span><span class="o">.</span><span class="n">duration</span><span class="p">,</span> <span class="n">time_or_time_range</span><span class="o">.</span><span class="n">end</span><span class="o">.</span><span class="n">duration</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">time_or_time_range</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_extrema_of_time_or_time_range</span><span class="p">(</span>
+        <span class="n">time_or_time_range</span><span class="p">:</span> <span class="n">TimeOrTimeRange</span><span class="p">,</span>
+        <span class="n">operation</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">],</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">],</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">time_or_time_range</span><span class="p">,</span> <span class="n">ranges</span><span class="o">.</span><span class="n">Range</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">operation</span><span class="p">((</span><span class="n">time_or_time_range</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">time_or_time_range</span><span class="o">.</span><span class="n">end</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">time_or_time_range</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_move_time_or_time_range</span><span class="p">(</span>
+        <span class="n">time_or_time_range</span><span class="p">:</span> <span class="n">TimeOrTimeRange</span><span class="p">,</span> <span class="n">duration</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TimeOrTimeRange</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">time_or_time_range</span><span class="p">,</span> <span class="n">ranges</span><span class="o">.</span><span class="n">Range</span><span class="p">):</span>
+            <span class="n">time_or_time_range</span><span class="o">.</span><span class="n">start</span> <span class="o">+=</span> <span class="n">duration</span>
+            <span class="n">time_or_time_range</span><span class="o">.</span><span class="n">end</span> <span class="o">+=</span> <span class="n">duration</span>
+            <span class="k">return</span> <span class="n">time_or_time_range</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">time_or_time_range</span> <span class="o">+</span> <span class="n">duration</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                          magic methods                                 #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">test_if_objects_are_equal_by_parameter_tuple</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;event&quot;</span><span class="p">,</span> <span class="s2">&quot;start_or_start_range&quot;</span><span class="p">,</span> <span class="s2">&quot;end_or_end_range&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(event = &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="si">}</span><span class="s2">&#39;, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;start_or_start_range = &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">start_or_start_range</span><span class="si">}</span><span class="s2">&#39;, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;end_or_end_range = &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">end_or_end_range</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                          public properties                             #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tag_tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">tag</span> <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">start_or_start_range</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TimeOrTimeRange</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_or_start_range</span>
+
+    <span class="nd">@start_or_start_range</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">start_or_start_range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_or_start_range</span><span class="p">:</span> <span class="n">UnspecificTimeOrTimeRange</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start_or_start_range</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unspecified_to_specified_time_or_time_range</span><span class="p">(</span>
+            <span class="n">start_or_start_range</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">end_or_end_range</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TimeOrTimeRange</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_or_end_range</span>
+
+    <span class="nd">@end_or_end_range</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">end_or_end_range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">end_or_end_range</span><span class="p">:</span> <span class="n">UnspecificTimeOrTimeRange</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_end_or_end_range</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unspecified_to_specified_time_or_time_range</span><span class="p">(</span>
+            <span class="n">end_or_end_range</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">duration</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_end</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_start</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">mean_start</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">EventPlacement</span><span class="o">.</span><span class="n">_get_mean_of_time_or_time_range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_or_start_range</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">mean_end</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">EventPlacement</span><span class="o">.</span><span class="n">_get_mean_of_time_or_time_range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end_or_end_range</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">min_start</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">EventPlacement</span><span class="o">.</span><span class="n">_get_extrema_of_time_or_time_range</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">start_or_start_range</span><span class="p">,</span> <span class="nb">min</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">max_start</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">EventPlacement</span><span class="o">.</span><span class="n">_get_extrema_of_time_or_time_range</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">start_or_start_range</span><span class="p">,</span> <span class="nb">max</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">min_end</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">EventPlacement</span><span class="o">.</span><span class="n">_get_extrema_of_time_or_time_range</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">end_or_end_range</span><span class="p">,</span> <span class="nb">min</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">max_end</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">EventPlacement</span><span class="o">.</span><span class="n">_get_extrema_of_time_or_time_range</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">end_or_end_range</span><span class="p">,</span> <span class="nb">max</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">time_range</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ranges</span><span class="o">.</span><span class="n">Range</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ranges</span><span class="o">.</span><span class="n">Range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min_start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_end</span><span class="p">)</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                          public methods                                #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+<div class="viewcode-block" id="EventPlacement.is_overlapping"><a class="viewcode-back" href="../../../api/mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.EventPlacement.is_overlapping">[docs]</a>    <span class="k">def</span> <span class="nf">is_overlapping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">EventPlacement</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_range</span><span class="o">.</span><span class="n">isdisjoint</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">time_range</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="EventPlacement.move_by"><a class="viewcode-back" href="../../../api/mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.EventPlacement.move_by">[docs]</a>    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">move_by</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">duration</span><span class="p">:</span> <span class="n">UnspecificTime</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EventPlacement</span><span class="p">:</span>
+        <span class="n">duration</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">UNKNOWN_OBJECT_TO_DURATION</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_or_start_range</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_or_end_range</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">EventPlacement</span><span class="o">.</span><span class="n">_move_time_or_time_range</span><span class="p">(</span><span class="n">time_or_time_range</span><span class="p">,</span> <span class="n">duration</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">time_or_time_range</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_or_start_range</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_or_end_range</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="EventPlacement.copy"><a class="viewcode-back" href="../../../api/mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.EventPlacement.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EventPlacement</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+            <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_or_start_range</span><span class="p">),</span>
+            <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end_or_end_range</span><span class="p">),</span>
+        <span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="Conflict"><a class="viewcode-back" href="../../../api/mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.Conflict">[docs]</a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">Conflict</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">left</span><span class="p">:</span> <span class="n">EventPlacement</span>
+    <span class="n">right</span><span class="p">:</span> <span class="n">EventPlacement</span></div>
+
+
+<div class="viewcode-block" id="ConflictResolutionStrategy"><a class="viewcode-back" href="../../../api/mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.ConflictResolutionStrategy">[docs]</a><span class="k">class</span> <span class="nc">ConflictResolutionStrategy</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Abstract base class for overlapping solving classes.</span>
+
+<span class="sd">    You only need to the define the `resolve_conflict` method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># It may look simpler to return the event placements which should be</span>
+    <span class="c1"># removed instead of passing the time line. But then we don&#39;t allow</span>
+    <span class="c1"># other creative ideas of solving overlaps (e.g. adding new gaps between</span>
+    <span class="c1"># the overlapping event placements etc.).</span>
+<div class="viewcode-block" id="ConflictResolutionStrategy.resolve_conflict"><a class="viewcode-back" href="../../../api/mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.ConflictResolutionStrategy.resolve_conflict">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">resolve_conflict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeline</span><span class="p">:</span> <span class="n">TimeLine</span><span class="p">,</span> <span class="n">conflict</span><span class="p">:</span> <span class="n">Conflict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Resolve conflict between two overlapping :class:`EventPlacement`.</span>
+
+<span class="sd">        :param timeline: The timeline which hosts the conflict. Can be used</span>
+<span class="sd">            in order to remove one or both of the conflicting event placements.</span>
+<span class="sd">        :type timeline: TimeLine</span>
+<span class="sd">        :param conflict: A :class:`Conflict` object which hosts the two</span>
+<span class="sd">            overlapping :class:`EventPlacement`.</span>
+<span class="sd">        :type conflict: Conflict</span>
+
+<span class="sd">        This method should return ``True`` if the class managed to resolve</span>
+<span class="sd">        the conflict. If it returns any negative boolean value (e.g. ``None``</span>
+<span class="sd">        :mod:`mutwo` assumes that the conflict couldn&#39;t be resolved).</span>
+
+<span class="sd">        The concrete strategy how the conflict is resolved is up to the</span>
+<span class="sd">        resolution strategy class: either the conflicting event placements</span>
+<span class="sd">        are removed, or the timeline is adjusted in other ways (e.g. stretched)</span>
+<span class="sd">        so that the event placements aren&#39;t overlapping anymore.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div></div>
+
+
+<div class="viewcode-block" id="AlwaysLeftStrategy"><a class="viewcode-back" href="../../../api/mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.AlwaysLeftStrategy">[docs]</a><span class="k">class</span> <span class="nc">AlwaysLeftStrategy</span><span class="p">(</span><span class="n">ConflictResolutionStrategy</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Always picks the left :class:`EventPlacement`.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="AlwaysLeftStrategy.resolve_conflict"><a class="viewcode-back" href="../../../api/mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.AlwaysLeftStrategy.resolve_conflict">[docs]</a>    <span class="k">def</span> <span class="nf">resolve_conflict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeline</span><span class="p">:</span> <span class="n">TimeLine</span><span class="p">,</span> <span class="n">conflict</span><span class="p">:</span> <span class="n">Conflict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="n">timeline</span><span class="o">.</span><span class="n">unregister</span><span class="p">(</span><span class="n">conflict</span><span class="o">.</span><span class="n">right</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span></div></div>
+
+
+<div class="viewcode-block" id="AlternatingStrategy"><a class="viewcode-back" href="../../../api/mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.AlternatingStrategy">[docs]</a><span class="k">class</span> <span class="nc">AlternatingStrategy</span><span class="p">(</span><span class="n">ConflictResolutionStrategy</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Alterate between the left and the right :class:`EventPlacement`.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_position_cycle</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">((</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="s2">&quot;right&quot;</span><span class="p">))</span>
+
+<div class="viewcode-block" id="AlternatingStrategy.resolve_conflict"><a class="viewcode-back" href="../../../api/mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.AlternatingStrategy.resolve_conflict">[docs]</a>    <span class="k">def</span> <span class="nf">resolve_conflict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeline</span><span class="p">:</span> <span class="n">TimeLine</span><span class="p">,</span> <span class="n">conflict</span><span class="p">:</span> <span class="n">Conflict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="n">timeline</span><span class="o">.</span><span class="n">unregister</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">conflict</span><span class="p">,</span> <span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_position_cycle</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="kc">True</span></div></div>
+
+
+<div class="viewcode-block" id="TagCountStrategy"><a class="viewcode-back" href="../../../api/mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.TagCountStrategy">[docs]</a><span class="k">class</span> <span class="nc">TagCountStrategy</span><span class="p">(</span><span class="n">ConflictResolutionStrategy</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Pick :class:`EventPlacement` according to tag count.</span>
+
+<span class="sd">    :param prefer_more: If set to ``True`` the strategy drops the</span>
+<span class="sd">        :class:`EventPlacement` with fewer tags. If set to ``False``</span>
+<span class="sd">        it drops the :class:`EventPlacement` with more tags. Default</span>
+<span class="sd">        to ``True``.</span>
+<span class="sd">    :type prefer_more: bool</span>
+
+<span class="sd">    If two :class:`EventPlacement` have an equal amount of tags, this</span>
+<span class="sd">    strategy won&#39;t be able to solve the conflict.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prefer_more</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prefer_more</span> <span class="o">=</span> <span class="n">prefer_more</span>
+
+<div class="viewcode-block" id="TagCountStrategy.resolve_conflict"><a class="viewcode-back" href="../../../api/mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.TagCountStrategy.resolve_conflict">[docs]</a>    <span class="k">def</span> <span class="nf">resolve_conflict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeline</span><span class="p">:</span> <span class="n">TimeLine</span><span class="p">,</span> <span class="n">conflict</span><span class="p">:</span> <span class="n">Conflict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="n">tag_count0</span><span class="p">,</span> <span class="n">tag_count1</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">ep</span><span class="o">.</span><span class="n">tag_tuple</span><span class="p">)</span> <span class="k">for</span> <span class="n">ep</span> <span class="ow">in</span> <span class="p">(</span><span class="n">conflict</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="n">conflict</span><span class="o">.</span><span class="n">right</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">tag_count0</span> <span class="o">==</span> <span class="n">tag_count1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">elif</span> <span class="n">tag_count0</span> <span class="o">&gt;</span> <span class="n">tag_count1</span><span class="p">:</span>
+            <span class="n">sorted_event_placement_tuple</span> <span class="o">=</span> <span class="p">(</span><span class="n">conflict</span><span class="o">.</span><span class="n">right</span><span class="p">,</span> <span class="n">conflict</span><span class="o">.</span><span class="n">left</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sorted_event_placement_tuple</span> <span class="o">=</span> <span class="p">(</span><span class="n">conflict</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="n">conflict</span><span class="o">.</span><span class="n">right</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prefer_more</span><span class="p">:</span>
+            <span class="n">sorted_event_placement_tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">sorted_event_placement_tuple</span><span class="p">))</span>
+
+        <span class="n">timeline</span><span class="o">.</span><span class="n">unregister</span><span class="p">(</span><span class="n">sorted_event_placement_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">return</span> <span class="kc">True</span></div></div>
+
+
+<div class="viewcode-block" id="TimeLine"><a class="viewcode-back" href="../../../api/mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.TimeLine">[docs]</a><span class="k">class</span> <span class="nc">TimeLine</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Timeline to place events on.</span>
+
+<span class="sd">    :param duration: If this is set to `None` the ``duration``</span>
+<span class="sd">        property of the `TimeLine` is dynamically calculated</span>
+<span class="sd">        (by the end times of all registered :class:`EventPlacement`.</span>
+<span class="sd">        If the duration is not `None`, then the duration is statically</span>
+<span class="sd">        set to this time. If the user tries to register an</span>
+<span class="sd">        :class:`EventPlacement` with end &gt; duration this would raise</span>
+<span class="sd">        an error. Default to ``None``.</span>
+<span class="sd">    :type duration: typing.Optional[UnspecificTime]</span>
+
+<span class="sd">    **Warning:**</span>
+
+<span class="sd">    An :class:`TimeLine` itself is not an event and can&#39;t be treated</span>
+<span class="sd">    like an event.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">event_placement_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">EventPlacement</span><span class="p">]</span> <span class="o">=</span> <span class="p">[],</span>
+        <span class="n">duration</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">UnspecificTime</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_duration</span> <span class="o">=</span> <span class="n">duration</span> <span class="ow">is</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_duration</span> <span class="o">=</span> <span class="n">duration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_event_placement_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">EventPlacement</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+            <span class="n">event_placement_sequence</span>
+        <span class="p">)</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                          public properties                             #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">duration</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_duration</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">max</span><span class="p">(</span>
+                    <span class="p">[</span>
+                        <span class="n">event_placement</span><span class="o">.</span><span class="n">max_end</span>
+                        <span class="k">for</span> <span class="n">event_placement</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_placement_list</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+            <span class="c1"># If there isn&#39;t any registered EventPlacement yet.</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">DirectDuration</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_duration</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">event_placement_tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">EventPlacement</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_event_placement_list</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tag_set</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="n">tag_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([])</span>
+        <span class="k">for</span> <span class="n">event_placement</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">event_placement_tuple</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">event_placement</span><span class="o">.</span><span class="n">tag_tuple</span><span class="p">:</span>
+                <span class="n">tag_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tag_set</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                          public methods                                #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="c1"># FIXME: In &#39;unregister&#39; we remove the &#39;EventPlacement&#39; which is equal to</span>
+    <span class="c1"># the given input. This means if we have multiple equal &#39;EventPlacement&#39;</span>
+    <span class="c1"># within a timeline, currently this won&#39;t remove all of those equal copies.</span>
+    <span class="c1"># We may want to add a test here which ensures that no equal &#39;EventPlacement&#39;</span>
+    <span class="c1"># are added to a &#39;TimeLine&#39;. But this leads to expensive comparison of mutwo</span>
+    <span class="c1"># events, which needs to be avoided for performance reasons.</span>
+    <span class="c1"># Can we find a way to make this method safer without having such a bad</span>
+    <span class="c1"># performance? Test by id?</span>
+<div class="viewcode-block" id="TimeLine.register"><a class="viewcode-back" href="../../../api/mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.TimeLine.register">[docs]</a>    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event_placement</span><span class="p">:</span> <span class="n">EventPlacement</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Register a new :class:`EventPlacement` on given :class:`TimeLine`.</span>
+
+<span class="sd">        :param event_placement: The :class:`EventPlacement` which should be</span>
+<span class="sd">            placed on the :class:`TimeLine`.</span>
+<span class="sd">        :type event_placement: EventPlacement</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">event_placement</span><span class="o">.</span><span class="n">max_end</span>
+
+        <span class="c1"># TODO(I think we should move the ExceedDurationError also to</span>
+        <span class="c1"># follow-up classes (same like OverlapError). Why? This</span>
+        <span class="c1"># improves performance here. And I&#39;m not sure if a static</span>
+        <span class="c1"># duration of TimeLine makes sense. On the other hand it</span>
+        <span class="c1"># makes sense to stretch all outcoming events to the same</span>
+        <span class="c1"># duration in the end.)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_duration</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">end</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">duration</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">duration</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">timeline_utilities</span><span class="o">.</span><span class="n">ExceedDurationError</span><span class="p">(</span><span class="n">event_placement</span><span class="p">,</span> <span class="n">duration</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_event_placement_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event_placement</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TimeLine.unregister"><a class="viewcode-back" href="../../../api/mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.TimeLine.unregister">[docs]</a>    <span class="k">def</span> <span class="nf">unregister</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event_placement</span><span class="p">:</span> <span class="n">EventPlacement</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Unregister an :class:`EventPlacement` which is part of :class:`TimeLine`.</span>
+
+<span class="sd">        :param event_placement: The :class:`EventPlacement` which should be</span>
+<span class="sd">            removed from the :class:`TimeLine`.</span>
+<span class="sd">        :type event_placement: EventPlacement</span>
+<span class="sd">        :raises EventPlacementNotFoundError: If :class:`EventPlacement` isn&#39;t</span>
+<span class="sd">            inside :class:`TimeLine`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># We don&#39;t use &#39;self._event_placement_list.index(event_placement)&#39;,</span>
+        <span class="c1"># because this results in expensive &#39;__eq__&#39; calls (they are expensive,</span>
+        <span class="c1"># because mutwo event comparison is complex).</span>
+        <span class="c1"># &#39;EventPlacement&#39; are mostly complex objects and it&#39;s difficult to</span>
+        <span class="c1"># reproduce them, so the &#39;normal&#39; API of this method expects anyway</span>
+        <span class="c1"># that we have access to the original &#39;EventPlacement&#39; (either via</span>
+        <span class="c1"># &#39;get_event_placement&#39; or because we are iteration over</span>
+        <span class="c1"># &#39;event_placement_tuple&#39;).</span>
+        <span class="n">ep_id</span> <span class="o">=</span> <span class="nb">id</span><span class="p">(</span><span class="n">event_placement</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ep</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">event_placement_tuple</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">id</span><span class="p">(</span><span class="n">ep</span><span class="p">)</span> <span class="o">==</span> <span class="n">ep_id</span><span class="p">:</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_placement_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="k">return</span>
+        <span class="k">raise</span> <span class="n">timeline_utilities</span><span class="o">.</span><span class="n">EventPlacementNotFoundError</span><span class="p">(</span>
+            <span class="n">event_placement</span><span class="o">=</span><span class="n">event_placement</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="TimeLine.sort"><a class="viewcode-back" href="../../../api/mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.TimeLine.sort">[docs]</a>    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">sort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mutate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TimeLine</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Sort :class:`EventPlacement`s by start time (and if equal by end time).&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_event_placement_list</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span>
+            <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">event_placement</span><span class="p">:</span> <span class="p">(</span>
+                <span class="n">event_placement</span><span class="o">.</span><span class="n">min_start</span><span class="p">,</span>
+                <span class="n">event_placement</span><span class="o">.</span><span class="n">max_end</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="TimeLine.get_event_placement"><a class="viewcode-back" href="../../../api/mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.TimeLine.get_event_placement">[docs]</a>    <span class="k">def</span> <span class="nf">get_event_placement</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">sort</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EventPlacement</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Find specific :class:`EventPlacement`</span>
+
+<span class="sd">        :param tag: The tag which the :class:`EventPlacement` should include.</span>
+<span class="sd">        :type tag: str</span>
+<span class="sd">        :param index: The index of the :class:`EventPlacement`</span>
+<span class="sd">        :type index: int</span>
+<span class="sd">        :param sort: Can be set to ``False`` when sequentially calling</span>
+<span class="sd">            `get_event_placement` without changing the :class:`TimeLine`.</span>
+<span class="sd">            When `sort = False`, but the :class:`TimeLine` (or any</span>
+<span class="sd">            :class:`EventPlacement` inside the time :class:`TimeLine`)</span>
+<span class="sd">            has changed unexpected results may happen. If you want to be</span>
+<span class="sd">            sure not to break anything, just leave it as ``True``.</span>
+<span class="sd">            Default to ``True``.</span>
+<span class="sd">        :type sort: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">sort</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">counter</span><span class="p">,</span> <span class="n">event_placement</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+            <span class="nb">filter</span><span class="p">(</span>
+                <span class="k">lambda</span> <span class="n">event_placement</span><span class="p">:</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">event_placement</span><span class="o">.</span><span class="n">tag_tuple</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">event_placement_tuple</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="n">counter</span> <span class="o">==</span> <span class="n">index</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">event_placement</span>
+        <span class="k">raise</span> <span class="n">timeline_utilities</span><span class="o">.</span><span class="n">EventPlacementNotFoundError</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TimeLine.resolve_conflicts"><a class="viewcode-back" href="../../../api/mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.TimeLine.resolve_conflicts">[docs]</a>    <span class="k">def</span> <span class="nf">resolve_conflicts</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">conflict_resolution_strategy_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span>
+            <span class="n">ConflictResolutionStrategy</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">AlwaysLeftStrategy</span><span class="p">()],</span>
+        <span class="n">is_conflict</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">EventPlacement</span><span class="p">,</span> <span class="n">EventPlacement</span><span class="p">],</span> <span class="nb">bool</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">ep0</span><span class="p">,</span> <span class="n">ep1</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">ep0</span><span class="o">.</span><span class="n">tag_tuple</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">ep1</span><span class="o">.</span><span class="n">tag_tuple</span><span class="p">))),</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">sort</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Resolve overlapping :class:`EventPlacement` in :class:`TimeLine`.</span>
+
+<span class="sd">        :param conflict_resolution_strategy_sequence: Provide the</span>
+<span class="sd">            :class:`ConflictResolutionStrategy` you want to use here.</span>
+<span class="sd">            If multiple are added, the algorithm initially tries the</span>
+<span class="sd">            first one and if this doesn&#39;t work it continues with the</span>
+<span class="sd">            next strategy. Default to ``[AlwaysLeftStrategy()]``.</span>
+<span class="sd">        :type conflict_resolution_strategy_sequence: typing.Sequence[ConflictResolutionStrategy]</span>
+<span class="sd">        :param is_conflict: Function which takes two :class:`EventPlacement`</span>
+<span class="sd">            and which returns either `True` if the placements are conflicting</span>
+<span class="sd">            and return `False` if not. This function doesn&#39;t need to check</span>
+<span class="sd">            if two placements are overlapping, this is done seperately and</span>
+<span class="sd">            independently. A conflict is created only in case ``is_conflict``</span>
+<span class="sd">            returns ``True`` and the placements are overlapping. By default</span>
+<span class="sd">            this function simply checks if the event placements share any</span>
+<span class="sd">            common tag. The logic behind this is the assumption that tag</span>
+<span class="sd">            equals instruments and that an instrument can&#39;t play two</span>
+<span class="sd">            different event placements at the same time.</span>
+<span class="sd">        :type is_conflict: typing.Callable[[EventPlacement, EventPlacement], bool]</span>
+<span class="sd">        :param sort: Can be set to ``False`` when sequentially calling</span>
+<span class="sd">            `resolve_conflicts` without changing the :class:`TimeLine`.</span>
+<span class="sd">            When `sort = False`, but the :class:`TimeLine` (or any</span>
+<span class="sd">            :class:`EventPlacement` inside the time :class:`TimeLine`)</span>
+<span class="sd">            has changed unexpected results may happen. If you want to be</span>
+<span class="sd">            sure not to break anything, just leave it as ``True``.</span>
+<span class="sd">            Default to ``True``.</span>
+<span class="sd">        :type sort: bool</span>
+<span class="sd">        :raises UnresolvedConflict: If none of the provided</span>
+<span class="sd">            :class:`ConflictResolutionStrategy` could solve the conflict.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># To allow generators, we cast the sequence to a tuple (we may need</span>
+        <span class="c1"># to iterate it multiple times).</span>
+        <span class="n">crst</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">conflict_resolution_strategy_sequence</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sort</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="c1"># We can always only solve the first conflict which we encounter</span>
+        <span class="c1"># and then we need to start again, because every conflict resolution</span>
+        <span class="c1"># could affect all event placements and therefore the looped list</span>
+        <span class="c1"># may have changed (some event placement may not even be part of</span>
+        <span class="c1"># the time line anymore).</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_first_conflict</span><span class="p">(</span><span class="n">crst</span><span class="p">,</span> <span class="n">is_conflict</span><span class="p">):</span>
+            <span class="k">pass</span></div>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                          private methods                               #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="k">def</span> <span class="nf">_resolve_first_conflict</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">conflict_resolution_strategy_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">ConflictResolutionStrategy</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+        <span class="n">is_conflict</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">EventPlacement</span><span class="p">,</span> <span class="n">EventPlacement</span><span class="p">],</span> <span class="nb">bool</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;This methods resolves the first conflict it finds and then stops.</span>
+
+<span class="sd">        :return: ``True`` if it found any conflict and resolved it and</span>
+<span class="sd">            ``False`` if no conflict was found.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">event_placement0</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">event_placement_tuple</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">event_placement1</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">event_placement_tuple</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">is_conflict</span><span class="p">(</span><span class="n">event_placement0</span><span class="p">,</span> <span class="n">event_placement1</span><span class="p">):</span>
+                    <span class="k">continue</span>
+
+                <span class="k">if</span> <span class="n">event_placement0</span><span class="o">.</span><span class="n">is_overlapping</span><span class="p">(</span><span class="n">event_placement1</span><span class="p">):</span>
+                    <span class="c1"># We got a conflict: The same instruments want to play</span>
+                    <span class="c1"># at the same time.</span>
+                    <span class="n">conflict</span> <span class="o">=</span> <span class="n">Conflict</span><span class="p">(</span><span class="n">event_placement0</span><span class="p">,</span> <span class="n">event_placement1</span><span class="p">)</span>
+
+                    <span class="c1"># Try to solve the conflict.</span>
+                    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">conflict_resolution_strategy_tuple</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">resolve_conflict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conflict</span><span class="p">):</span>
+                            <span class="k">return</span> <span class="kc">True</span>
+
+                    <span class="k">raise</span> <span class="n">timeline_utilities</span><span class="o">.</span><span class="n">UnresolvedConflict</span><span class="p">(</span><span class="n">conflict</span><span class="p">)</span>
+
+                <span class="c1"># If they aren&#39;t overlapping, it means that all following</span>
+                <span class="c1"># event placements are much further away from</span>
+                <span class="c1"># event_placement_0 and are therefore also not overlapping.</span>
+                <span class="c1"># We can stop and save some time :)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+        <span class="k">return</span> <span class="kc">False</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.timeline_interfaces.timelines</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Levin Eric Zimmermann.
+    </div>
+  </body>
+</html>

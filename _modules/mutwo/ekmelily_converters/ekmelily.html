@@ -1,0 +1,987 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mutwo.ekmelily_converters.ekmelily &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.ekmelily_converters.ekmelily</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mutwo.ekmelily_converters.ekmelily</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Build tuning files for `Lilypond &lt;https://lilypond.org/&gt;`_ extension `Ekmelily &lt;http://www.ekmelic-music.org/en/extra/ekmelily.htm&gt;`_.</span>
+
+<span class="sd">By default the smallest step which Lilypond supports is one quartertone. With</span>
+<span class="sd">the help of Ekmelily it is easily possible to add more complex micro- or</span>
+<span class="sd">macrotonal tunings to Lilypond. The converter in this module aims to make it easier</span>
+<span class="sd">to build tuning files to be used with the &#39;ekmel-main.ily&#39; script from Thomas Richter.</span>
+
+<span class="sd">**Disclaimer:**</span>
+
+<span class="sd">For now the converters only support making notation tables for English note names.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">dataclasses</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">quicktions</span> <span class="k">as</span> <span class="nn">fractions</span>  <span class="c1"># type: ignore</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">fractions</span>  <span class="c1"># type: ignore</span>
+
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_converters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_constants</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">ekmelily_converters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_parameters</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;EkmelilyAccidental&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;EkmelilyTuningFileConverter&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;HEJIEkmelilyTuningFileConverter&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="EkmelilyAccidental"><a class="viewcode-back" href="../../../api/mutwo.ekmelily_converters.html#mutwo.ekmelily_converters.EkmelilyAccidental">[docs]</a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">EkmelilyAccidental</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Representation of an Ekmelily accidental.</span>
+
+<span class="sd">    :param accidental_name: The name of the accidental that</span>
+<span class="sd">        follows after the diatonic pitch name (e.g. &#39;s&#39; or &#39;qf&#39;)</span>
+<span class="sd">    :type accidental_name: str</span>
+<span class="sd">    :param accidental_glyph_tuple: The name of accidental glyphs that should</span>
+<span class="sd">        appear before the notehead. For</span>
+<span class="sd">        a list of available glyphs, check the documentation of</span>
+<span class="sd">        `Ekmelos &lt;http://www.ekmelic-music.org/en/extra/ekmelos.htm&gt;`_.</span>
+<span class="sd">        Furthermore one can find mappings from mutwo data to Ekmelos glyph</span>
+<span class="sd">        names in :const:`~mutwo.ekmelily_converters.constants.PRIME_AND_EXPONENT_AND_TRADITIONAL_ACCIDENTAL_TO_ACCIDENTAL_GLYPH_DICT`</span>
+<span class="sd">        and :const:`~mutwo.ekmelily_converters.constants.TEMPERED_ACCIDENTAL_TO_ACCIDENTAL_GLYPH_DICT`.</span>
+<span class="sd">    :type accidental_glyph_tuple: tuple[str, ...]</span>
+<span class="sd">    :param deviation_in_cents: How many cents shall an altered pitch differ from</span>
+<span class="sd">        its diatonic / natural counterpart.</span>
+<span class="sd">    :type deviation_in_cents: float</span>
+<span class="sd">    :param available_diatonic_pitch_index_tuple: Sometimes one</span>
+<span class="sd">        may want to define accidentals which are only available for certain</span>
+<span class="sd">        diatonic music_parameters. For this case, one can use this argument</span>
+<span class="sd">        and specify all diatonic music_parameters which should know this</span>
+<span class="sd">        accidental. If this argument keeps undefined, the accidental</span>
+<span class="sd">        will be added to all seven diatonic music_parameters.</span>
+<span class="sd">    :type available_diatonic_pitch_index_tuple: typing.Optional[tuple[int, ...]], optional</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import ekmelily_converters</span>
+<span class="sd">    &gt;&gt;&gt; natural = ekmelily_converters.EkmelilyAccidental(&#39;&#39;, (&quot;#xE261&quot;,), 0)</span>
+<span class="sd">    &gt;&gt;&gt; sharp = ekmelily_converters.EkmelilyAccidental(&#39;s&#39;, (&quot;#xE262&quot;,), 100)</span>
+<span class="sd">    &gt;&gt;&gt; flat = ekmelily_converters.EkmelilyAccidental(&#39;f&#39;, (&quot;#xE260&quot;,), -100)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">accidental_name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">accidental_glyph_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+    <span class="n">deviation_in_cents</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">available_diatonic_pitch_index_tuple</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">accidental_name</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">accidental_glyph_tuple</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">deviation_in_cents</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">available_diatonic_pitch_index_tuple</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="EkmelilyTuningFileConverter"><a class="viewcode-back" href="../../../api/mutwo.ekmelily_converters.html#mutwo.ekmelily_converters.EkmelilyTuningFileConverter">[docs]</a><span class="k">class</span> <span class="nc">EkmelilyTuningFileConverter</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Converter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Build Ekmelily tuning files from Ekmelily accidentals.</span>
+
+<span class="sd">    :param path: Path where the new Ekmelily tuning file shall be written.</span>
+<span class="sd">        The suffix &#39;.ily&#39; is recommended, but not necessary.</span>
+<span class="sd">    :type path: str</span>
+<span class="sd">    :param ekmelily_accidental_sequence: A sequence which contains all</span>
+<span class="sd">        :class:`EkmelilyAccidental` that shall be written to the tuning file,</span>
+<span class="sd">    :type ekmelily_accidental_sequence: typing.Sequence[EkmelilyAccidental]</span>
+<span class="sd">    :param global_scale: From the `Lilypond documentation &lt;https://lilypond.org/doc/v2.20/Documentation/notation/scheme-functions&gt;`_:</span>
+<span class="sd">        &quot;This determines the tuning of music_parameters with no accidentals or key signatures.</span>
+<span class="sd">        The first pitch is c. Alterations are calculated relative to this scale.</span>
+<span class="sd">        The number of music_parameters in this scale determines the number of scale steps</span>
+<span class="sd">        that make up an octave. Usually the 7-note major scale.&quot;</span>
+<span class="sd">    :type global_scale: tuple[fractions.Fraction, ...], optional</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import ekmelily_converters</span>
+<span class="sd">    &gt;&gt;&gt; natural = ekmelily_converters.EkmelilyAccidental(&#39;&#39;, (&quot;#xE261&quot;,), 0)</span>
+<span class="sd">    &gt;&gt;&gt; sharp = ekmelily_converters.EkmelilyAccidental(&#39;s&#39;, (&quot;#xE262&quot;,), 100)</span>
+<span class="sd">    &gt;&gt;&gt; flat = ekmelily_converters.EkmelilyAccidental(&#39;f&#39;, (&quot;#xE260&quot;,), -100)</span>
+<span class="sd">    &gt;&gt;&gt; eigth_tone_sharp = ekmelily_converters.EkmelilyAccidental(&#39;es&#39;, (&quot;#xE2C7&quot;,), 25)</span>
+<span class="sd">    &gt;&gt;&gt; eigth_tone_flat = ekmelily_converters.EkmelilyAccidental(&#39;ef&#39;, (&quot;#xE2C2&quot;,), -25)</span>
+<span class="sd">    &gt;&gt;&gt; converter = ekmelily_converters.EkmelilyTuningFileConverter(</span>
+<span class="sd">    &gt;&gt;&gt;     &#39;ekme-test.ily&#39;, (natural, sharp, flat, eigth_tone_sharp, eigth_tone_flat)</span>
+<span class="sd">    &gt;&gt;&gt; )</span>
+<span class="sd">    &gt;&gt;&gt; converter.convert()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">ekmelily_accidental_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">EkmelilyAccidental</span><span class="p">],</span>
+        <span class="c1"># should have exactly 7 fractions (one for each diatonic pitch)</span>
+        <span class="n">global_scale</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">global_scale</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># set to default 12 EDO, a&#39; = 440 Hertz</span>
+            <span class="n">global_scale</span> <span class="o">=</span> <span class="n">ekmelily_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_GLOBAL_SCALE</span>
+
+        <span class="n">global_scale</span> <span class="o">=</span> <span class="n">EkmelilyTuningFileConverter</span><span class="o">.</span><span class="n">_correct_global_scale</span><span class="p">(</span><span class="n">global_scale</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_global_scale</span> <span class="o">=</span> <span class="n">global_scale</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ekmelily_accidental_sequence</span> <span class="o">=</span> <span class="n">ekmelily_accidental_sequence</span>
+        <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_accidental_to_alteration_code_mapping</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_alteration_code_to_alteration_fraction_mapping</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="n">EkmelilyTuningFileConverter</span><span class="o">.</span><span class="n">_make_accidental_to_alteration_code_mapping_and_alteration_code_to_alteration_fraction_mapping</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ekmelily_accidental_sequence</span>
+        <span class="p">)</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                          static methods                                #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_correct_global_scale</span><span class="p">(</span>
+        <span class="n">global_scale</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="c1"># Lilypond doesn&#39;t allow negative values for first item in global scale.</span>
+        <span class="c1"># Therefore Mutwo makes sure that the first item isn&#39;t a negative number.</span>
+        <span class="n">corrected_global_scale</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">global_scale</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">corrected_global_scale</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;Found value &#39;</span><span class="si">{}</span><span class="s2">&#39; for first scale degree in global scale. Autoset value&quot;</span>
+                <span class="s2">&quot; to 0 (Lilypond doesn&#39;t allow values != 0 for the first scale degree)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">corrected_global_scale</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="n">corrected_global_scale</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">corrected_global_scale</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_deviation_in_cents_to_alteration_fraction</span><span class="p">(</span>
+        <span class="n">deviation_in_cents</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span> <span class="n">max_denominator</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">:</span>
+        <span class="c1"># simplify fraction to avoid too complex calculations during Lilyponds midi</span>
+        <span class="c1"># render (otherwise Lilypond won&#39;t be able to render Midi / it will take</span>
+        <span class="c1"># too long)</span>
+        <span class="k">return</span> <span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">(</span><span class="n">deviation_in_cents</span> <span class="o">/</span> <span class="mi">200</span><span class="p">)</span><span class="o">.</span><span class="n">limit_denominator</span><span class="p">(</span>
+            <span class="n">max_denominator</span>
+        <span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_alteration_fraction_to_deviation_in_cents</span><span class="p">(</span>
+        <span class="n">alteration_fraction</span><span class="p">:</span> <span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">alteration_fraction</span> <span class="o">*</span> <span class="mi">200</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_accidental_index_to_alteration_code</span><span class="p">(</span><span class="n">accidental_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="c1"># convert index of accidental to hex code in a format that is</span>
+        <span class="c1"># readable by Lilypond</span>
+        <span class="k">return</span> <span class="s2">&quot;#x</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">hex</span><span class="p">(</span><span class="n">accidental_index</span><span class="p">))[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_find_and_group_accidentals_by_specific_deviation_in_cents</span><span class="p">(</span>
+        <span class="n">ekmelily_accidental_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">EkmelilyAccidental</span><span class="p">],</span>
+        <span class="n">deviation_in_cents</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">EkmelilyAccidental</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">EkmelilyAccidental</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
+        <span class="n">positive_list</span><span class="p">,</span> <span class="n">negative_list</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">accidental</span> <span class="ow">in</span> <span class="n">ekmelily_accidental_sequence</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">accidental</span><span class="o">.</span><span class="n">deviation_in_cents</span> <span class="o">==</span> <span class="n">deviation_in_cents</span><span class="p">:</span>
+                <span class="n">positive_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">accidental</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="p">(</span>
+                <span class="n">accidental</span><span class="o">.</span><span class="n">deviation_in_cents</span> <span class="o">==</span> <span class="o">-</span><span class="n">deviation_in_cents</span>
+                <span class="ow">and</span> <span class="n">deviation_in_cents</span> <span class="o">!=</span> <span class="mi">0</span>
+            <span class="p">):</span>
+                <span class="n">negative_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">accidental</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">positive_list</span><span class="p">),</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">negative_list</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_group_accidentals_by_deviations_in_cents</span><span class="p">(</span>
+        <span class="n">ekmelily_accidental_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">EkmelilyAccidental</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">EkmelilyAccidental</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">]],</span> <span class="o">...</span><span class="p">,]:</span>
+        <span class="sd">&quot;&quot;&quot;Put all accidentals with the same absolute deviation to the same tuple.</span>
+
+<span class="sd">        The first element of each tuple is the absolute deviation in cents,</span>
+<span class="sd">        the second element is tuple with two elements where the first element</span>
+<span class="sd">        contains all positive accidentals and the second tuple all negative</span>
+<span class="sd">        accidentals.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">available_deviations_in_cents</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="nb">set</span><span class="p">(</span>
+                <span class="nb">map</span><span class="p">(</span>
+                    <span class="k">lambda</span> <span class="n">accidental</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">accidental</span><span class="o">.</span><span class="n">deviation_in_cents</span><span class="p">),</span>
+                    <span class="n">ekmelily_accidental_sequence</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">accidentals_grouped_by_deviations_in_cents</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="n">deviation_in_cents</span><span class="p">,</span>
+                <span class="n">EkmelilyTuningFileConverter</span><span class="o">.</span><span class="n">_find_and_group_accidentals_by_specific_deviation_in_cents</span><span class="p">(</span>
+                    <span class="n">ekmelily_accidental_sequence</span><span class="p">,</span> <span class="n">deviation_in_cents</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">deviation_in_cents</span> <span class="ow">in</span> <span class="n">available_deviations_in_cents</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">accidentals_grouped_by_deviations_in_cents</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_process_single_accidental</span><span class="p">(</span>
+        <span class="n">accidental_to_alteration_code_mapping</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">EkmelilyAccidental</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">alteration_code_to_alteration_fraction_mapping</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">],</span>
+        <span class="n">accidental</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">EkmelilyAccidental</span><span class="p">],</span>
+        <span class="n">accidental_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">is_positive</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">absolute_deviation_in_cents</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">alteration_code</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">EkmelilyTuningFileConverter</span><span class="o">.</span><span class="n">_accidental_index_to_alteration_code</span><span class="p">(</span>
+                <span class="n">accidental_index</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">accidental</span><span class="p">:</span>
+            <span class="n">accidental_to_alteration_code_mapping</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">accidental</span><span class="p">:</span> <span class="n">alteration_code</span><span class="p">})</span>
+
+        <span class="k">if</span> <span class="n">is_positive</span><span class="p">:</span>
+            <span class="n">alteration_fraction</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">EkmelilyTuningFileConverter</span><span class="o">.</span><span class="n">_deviation_in_cents_to_alteration_fraction</span><span class="p">(</span>
+                    <span class="n">absolute_deviation_in_cents</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">alteration_code_to_alteration_fraction_mapping</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="p">{</span><span class="n">alteration_code</span><span class="p">:</span> <span class="n">alteration_fraction</span><span class="p">}</span>
+            <span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_process_accidental_pair</span><span class="p">(</span>
+        <span class="n">accidental_to_alteration_code_mapping</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">EkmelilyAccidental</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">alteration_code_to_alteration_fraction_mapping</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">],</span>
+        <span class="n">positive_accidental</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">EkmelilyAccidental</span><span class="p">],</span>
+        <span class="n">positive_alteration_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">negative_accidental</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">EkmelilyAccidental</span><span class="p">],</span>
+        <span class="n">negative_alteration_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">absolute_deviation_in_cents</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Add accidental data to accidental_to_alteration_code_mapping</span>
+        <span class="c1"># and alteration_code_to_alteration_fraction_mapping.</span>
+
+        <span class="k">for</span> <span class="n">is_positive</span><span class="p">,</span> <span class="n">accidental</span><span class="p">,</span> <span class="n">accidental_index</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">positive_accidental</span><span class="p">,</span> <span class="n">positive_alteration_index</span><span class="p">),</span>
+            <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">negative_accidental</span><span class="p">,</span> <span class="n">negative_alteration_index</span><span class="p">),</span>
+        <span class="p">):</span>
+            <span class="n">EkmelilyTuningFileConverter</span><span class="o">.</span><span class="n">_process_single_accidental</span><span class="p">(</span>
+                <span class="n">accidental_to_alteration_code_mapping</span><span class="p">,</span>
+                <span class="n">alteration_code_to_alteration_fraction_mapping</span><span class="p">,</span>
+                <span class="n">accidental</span><span class="p">,</span>
+                <span class="n">accidental_index</span><span class="p">,</span>
+                <span class="n">is_positive</span><span class="p">,</span>
+                <span class="n">absolute_deviation_in_cents</span><span class="p">,</span>
+            <span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_accidental_from_accidental_iterator</span><span class="p">(</span>
+        <span class="n">accidental_iterator</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Iterator</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">EkmelilyAccidental</span><span class="p">]:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">accidental</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">accidental_iterator</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+            <span class="n">accidental</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="n">accidental</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_process_accidental_group</span><span class="p">(</span>
+        <span class="n">accidental_to_alteration_code_mapping</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">EkmelilyAccidental</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">alteration_code_to_alteration_fraction_mapping</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">],</span>
+        <span class="n">nth_alteration</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">accidental_group</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">EkmelilyAccidental</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">],</span>
+        <span class="n">absolute_deviation_in_cents</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="c1"># Define alteration codes and alteration fractions for accidentals</span>
+        <span class="c1"># in one accidental group and add the calculated data to both mappings.</span>
+
+        <span class="n">positive_accidentals</span><span class="p">,</span> <span class="n">negative_accidentals</span> <span class="o">=</span> <span class="n">accidental_group</span>
+        <span class="n">positive_accidentals_iterator</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">positive_accidentals</span><span class="p">)</span>
+        <span class="n">negative_accidentals_iterator</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">negative_accidentals</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">max</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">positive_accidentals</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">negative_accidentals</span><span class="p">)))):</span>
+            <span class="n">positive_alteration_index</span><span class="p">,</span> <span class="n">negative_alteration_index</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">nth_alteration</span><span class="p">,</span>
+                <span class="n">nth_alteration</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">positive_accidental</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">EkmelilyTuningFileConverter</span><span class="o">.</span><span class="n">_get_accidental_from_accidental_iterator</span><span class="p">(</span>
+                    <span class="n">positive_accidentals_iterator</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">negative_accidental</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">EkmelilyTuningFileConverter</span><span class="o">.</span><span class="n">_get_accidental_from_accidental_iterator</span><span class="p">(</span>
+                    <span class="n">negative_accidentals_iterator</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="n">EkmelilyTuningFileConverter</span><span class="o">.</span><span class="n">_process_accidental_pair</span><span class="p">(</span>
+                <span class="n">accidental_to_alteration_code_mapping</span><span class="p">,</span>
+                <span class="n">alteration_code_to_alteration_fraction_mapping</span><span class="p">,</span>
+                <span class="n">positive_accidental</span><span class="p">,</span>
+                <span class="n">positive_alteration_index</span><span class="p">,</span>
+                <span class="n">negative_accidental</span><span class="p">,</span>
+                <span class="n">negative_alteration_index</span><span class="p">,</span>
+                <span class="n">absolute_deviation_in_cents</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">nth_alteration</span> <span class="o">+=</span> <span class="mi">2</span>
+
+        <span class="k">return</span> <span class="n">nth_alteration</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_make_accidental_to_alteration_code_mapping_and_alteration_code_to_alteration_fraction_mapping</span><span class="p">(</span>
+        <span class="n">ekmelily_accidental_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">EkmelilyAccidental</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="n">EkmelilyAccidental</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">]]:</span>
+        <span class="n">accidentals_grouped_by_deviations_in_cents</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">EkmelilyTuningFileConverter</span><span class="o">.</span><span class="n">_group_accidentals_by_deviations_in_cents</span><span class="p">(</span>
+                <span class="n">ekmelily_accidental_sequence</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">accidental_to_alteration_code_mapping</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">EkmelilyAccidental</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">alteration_code_to_alteration_fraction_mapping</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span>
+            <span class="nb">str</span><span class="p">,</span> <span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">nth_alteration</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="p">(</span>
+            <span class="n">absolute_deviation_in_cents</span><span class="p">,</span>
+            <span class="n">accidental_group</span><span class="p">,</span>
+        <span class="p">)</span> <span class="ow">in</span> <span class="n">accidentals_grouped_by_deviations_in_cents</span><span class="p">:</span>
+            <span class="n">nth_alteration</span> <span class="o">=</span> <span class="n">EkmelilyTuningFileConverter</span><span class="o">.</span><span class="n">_process_accidental_group</span><span class="p">(</span>
+                <span class="n">accidental_to_alteration_code_mapping</span><span class="p">,</span>
+                <span class="n">alteration_code_to_alteration_fraction_mapping</span><span class="p">,</span>
+                <span class="n">nth_alteration</span><span class="p">,</span>
+                <span class="n">accidental_group</span><span class="p">,</span>
+                <span class="n">absolute_deviation_in_cents</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">accidental_to_alteration_code_mapping</span><span class="p">,</span>
+            <span class="n">alteration_code_to_alteration_fraction_mapping</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                          private methods                               #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="k">def</span> <span class="nf">_make_tuning_table</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">tuning_table_entries</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;  (-1 </span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="nb">str</span><span class="p">(</span><span class="n">ratio</span><span class="p">)</span> <span class="k">for</span> <span class="n">ratio</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_global_scale</span><span class="p">)))</span>
+        <span class="p">]</span>
+        <span class="k">for</span> <span class="p">(</span>
+            <span class="n">alteration_code</span><span class="p">,</span>
+            <span class="n">alteration_fraction</span><span class="p">,</span>
+        <span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_alteration_code_to_alteration_fraction_mapping</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">alteration</span> <span class="o">=</span> <span class="s2">&quot;(</span><span class="si">{}</span><span class="s2"> . </span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">alteration_code</span><span class="p">,</span> <span class="n">alteration_fraction</span><span class="p">)</span>
+            <span class="n">tuning_table_entries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">alteration</span><span class="p">)</span>
+
+        <span class="n">tuning_table</span> <span class="o">=</span> <span class="s2">&quot;ekmTuning = #&#39;(</span><span class="se">\n</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">  &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tuning_table_entries</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">tuning_table</span>
+
+    <span class="k">def</span> <span class="nf">_get_pitch_entry_from_accidental_and_diatonic_pitch</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">accidental</span><span class="p">:</span> <span class="n">EkmelilyAccidental</span><span class="p">,</span>
+        <span class="n">nth_diatonic_pitch</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">diatonic_pitch</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="n">is_addable</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">accidental</span><span class="o">.</span><span class="n">available_diatonic_pitch_index_tuple</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">is_addable</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">nth_diatonic_pitch</span> <span class="ow">in</span> <span class="n">accidental</span><span class="o">.</span><span class="n">available_diatonic_pitch_index_tuple</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">is_addable</span><span class="p">:</span>
+            <span class="n">pitch_name</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">diatonic_pitch</span><span class="p">,</span> <span class="n">accidental</span><span class="o">.</span><span class="n">accidental_name</span><span class="p">)</span>
+            <span class="n">alteration_code</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accidental_to_alteration_code_mapping</span><span class="p">[</span><span class="n">accidental</span><span class="p">]</span>
+            <span class="n">pitch_entry</span> <span class="o">=</span> <span class="s2">&quot;(</span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2"> . </span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">pitch_name</span><span class="p">,</span> <span class="n">nth_diatonic_pitch</span><span class="p">,</span> <span class="n">alteration_code</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">pitch_entry</span>
+
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_make_languages_table</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">language_table_entries</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">accidental</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ekmelily_accidental_sequence</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">nth_diatonic_pitch</span><span class="p">,</span> <span class="n">diatonic_pitch</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+                <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">DIATONIC_PITCH_CLASS_CONTAINER</span>
+            <span class="p">):</span>
+                <span class="n">pitch_entry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pitch_entry_from_accidental_and_diatonic_pitch</span><span class="p">(</span>
+                    <span class="n">accidental</span><span class="p">,</span> <span class="n">nth_diatonic_pitch</span><span class="p">,</span> <span class="n">diatonic_pitch</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">pitch_entry</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">language_table_entries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pitch_entry</span><span class="p">)</span>
+
+        <span class="c1"># for now: only support english language</span>
+        <span class="n">languages_table</span> <span class="o">=</span> <span class="s2">&quot;ekmLanguages = #&#39;(</span><span class="se">\n</span><span class="s2">(english . (</span><span class="se">\n</span><span class="s2">  </span><span class="si">{}</span><span class="s2">)))&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">  &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">language_table_entries</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">languages_table</span>
+
+    <span class="k">def</span> <span class="nf">_make_notations_table</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">notations_table_entries</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">accidental</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ekmelily_accidental_sequence</span><span class="p">:</span>
+            <span class="n">alteration_code</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accidental_to_alteration_code_mapping</span><span class="p">[</span><span class="n">accidental</span><span class="p">]</span>
+            <span class="n">accidental_notation</span> <span class="o">=</span> <span class="s2">&quot;(</span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">alteration_code</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">accidental</span><span class="o">.</span><span class="n">accidental_glyph_tuple</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">notations_table_entries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">accidental_notation</span><span class="p">)</span>
+
+        <span class="n">notations_table</span> <span class="o">=</span> <span class="s2">&quot;ekmNotations = #&#39;(</span><span class="se">\n</span><span class="s2">(default .(</span><span class="se">\n</span><span class="s2">  </span><span class="si">{}</span><span class="s2">)))&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">  &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">notations_table_entries</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">notations_table</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                          public api                                    #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+<div class="viewcode-block" id="EkmelilyTuningFileConverter.convert"><a class="viewcode-back" href="../../../api/mutwo.ekmelily_converters.html#mutwo.ekmelily_converters.EkmelilyTuningFileConverter.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Render tuning file to :attr:`path`.&quot;&quot;&quot;</span>
+
+        <span class="n">ekmelily_tuning_file</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_make_tuning_table</span><span class="p">(),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_make_languages_table</span><span class="p">(),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_make_notations_table</span><span class="p">(),</span>
+            <span class="sa">r</span><span class="s1">&#39;\include &quot;ekmel-main.ily&quot;&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">ekmelily_tuning_file</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ekmelily_tuning_file</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ekmelily_tuning_file</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="HEJIEkmelilyTuningFileConverter"><a class="viewcode-back" href="../../../api/mutwo.ekmelily_converters.html#mutwo.ekmelily_converters.HEJIEkmelilyTuningFileConverter">[docs]</a><span class="k">class</span> <span class="nc">HEJIEkmelilyTuningFileConverter</span><span class="p">(</span><span class="n">EkmelilyTuningFileConverter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Build Ekmelily tuning files for `Helmholtz-Ellis JI Pitch Notation &lt;https://marsbat.space/pdfs/notation.pdf&gt;`_.</span>
+
+<span class="sd">    :param path: Path where the new Ekmelily tuning file shall be written.</span>
+<span class="sd">        The suffix &#39;.ily&#39; is recommended, but not necessary.</span>
+<span class="sd">    :type path: str</span>
+<span class="sd">    :param prime_to_highest_allowed_exponent: Mapping of prime number to</span>
+<span class="sd">        highest exponent that should occur. Take care not to add</span>
+<span class="sd">        higher exponents than the HEJI Notation supports. See</span>
+<span class="sd">        :const:`~mutwo.ekmelily_converters.configurations.DEFAULT_PRIME_TO_HIGHEST_ALLOWED_EXPONENT_DICT`</span>
+<span class="sd">        for the default mapping.</span>
+<span class="sd">    :type prime_to_highest_allowed_exponent: dict[int, int], optional</span>
+<span class="sd">    :param reference_pitch: The reference pitch (1/1). Should be a diatonic</span>
+<span class="sd">        pitch name (see</span>
+<span class="sd">        :const:`~mutwo.parameters.music_parameters.constants.DIATONIC_PITCH_CLASS_CONTAINER`)</span>
+<span class="sd">        in English nomenclature. For any other reference pitch than &#39;c&#39;, Lilyponds</span>
+<span class="sd">        midi rendering for music_parameters with the diatonic pitch &#39;c&#39; will be slightly</span>
+<span class="sd">        out of tune (because the first value of `global_scale`</span>
+<span class="sd">        always have to be 0).</span>
+<span class="sd">    :type reference_pitch: str, optional</span>
+<span class="sd">    :param prime_to_heji_accidental_name: Mapping of a prime number</span>
+<span class="sd">        to a string which indicates the respective prime number in the resulting</span>
+<span class="sd">        accidental name. See</span>
+<span class="sd">        :const:`~mutwo.ekmelily_converters.configurations.DEFAULT_PRIME_TO_HEJI_ACCIDENTAL_NAME_DICT`</span>
+<span class="sd">        for the default mapping.</span>
+<span class="sd">    :type prime_to_heji_accidental_name: dict[int, str], optional</span>
+<span class="sd">    :param otonality_indicator: String which indicates that the</span>
+<span class="sd">        respective prime alteration is otonal. See</span>
+<span class="sd">        :const:`~mutwo.ekmelily_converters.configurations.DEFAULT_OTONALITY_INDICATOR`</span>
+<span class="sd">        for the default value.</span>
+<span class="sd">    :type otonality_indicator: str, optional</span>
+<span class="sd">    :param utonality_indicator: String which indicates that the</span>
+<span class="sd">        respective prime alteration is utonal. See</span>
+<span class="sd">        :const:`~mutwo.ekmelily_converters.configurations.DEFAULT_OTONALITY_INDICATOR`</span>
+<span class="sd">        for the default value.</span>
+<span class="sd">    :type utonality_indicator: str, optional</span>
+<span class="sd">    :param exponent_to_exponent_indicator: Function to convert the</span>
+<span class="sd">        exponent of a prime number to string which indicates the respective</span>
+<span class="sd">        exponent. See</span>
+<span class="sd">        :func:`~mutwo.ekmelily_converters.configurations.DEFAULT_EXPONENT_TO_EXPONENT_INDICATOR`</span>
+<span class="sd">        for the default function.</span>
+<span class="sd">    :type exponent_to_exponent_indicator: typing.Callable[[int], str], optional</span>
+<span class="sd">    :param tempered_pitch_indicator: String which indicates that the</span>
+<span class="sd">        respective accidental is tempered (12 EDO). See</span>
+<span class="sd">        :const:`~mutwo.ekmelily_converters.configurations.DEFAULT_TEMPERED_PITCH_INDICATOR`</span>
+<span class="sd">        for the default value.</span>
+<span class="sd">    :type tempered_pitch_indicator: str, optional</span>
+<span class="sd">    :param set_microtonal_tuning: If set to ``False`` the converter won&#39;t apply any</span>
+<span class="sd">        microtonal music_parameters. In this case all chromatic music_parameters will return normal</span>
+<span class="sd">        12EDO music_parameters. Default to ``True``.</span>
+<span class="sd">    :type set_microtonal_tuning: bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">prime_to_highest_allowed_exponent</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">reference_pitch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;c&quot;</span><span class="p">,</span>
+        <span class="n">prime_to_heji_accidental_name</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">otonality_indicator</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">utonality_indicator</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">exponent_to_exponent_indicator</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">tempered_pitch_indicator</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">set_microtonal_tuning</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="c1"># set default values</span>
+        <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;ekme-heji-ref-</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">reference_pitch</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">set_microtonal_tuning</span><span class="p">:</span>
+                <span class="n">path</span> <span class="o">+=</span> <span class="s2">&quot;-not-tuned&quot;</span>
+            <span class="n">path</span> <span class="o">+=</span> <span class="s2">&quot;.ily&quot;</span>
+
+        <span class="k">if</span> <span class="n">prime_to_highest_allowed_exponent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">prime_to_highest_allowed_exponent</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">ekmelily_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_PRIME_TO_HIGHEST_ALLOWED_EXPONENT_DICT</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">prime_to_heji_accidental_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">prime_to_heji_accidental_name</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">ekmelily_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_PRIME_TO_HEJI_ACCIDENTAL_NAME_DICT</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">otonality_indicator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">otonality_indicator</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">ekmelily_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_OTONALITY_INDICATOR</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">utonality_indicator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">utonality_indicator</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">ekmelily_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_UTONALITY_INDICATOR</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">exponent_to_exponent_indicator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">exponent_to_exponent_indicator</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">ekmelily_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_EXPONENT_TO_EXPONENT_INDICATOR</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">tempered_pitch_indicator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">tempered_pitch_indicator</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">ekmelily_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_TEMPERED_PITCH_INDICATOR</span>
+            <span class="p">)</span>
+
+        <span class="n">difference_in_cents_from_tempered_pitch_class_for_diatonic_pitches</span> <span class="o">=</span> <span class="n">HEJIEkmelilyTuningFileConverter</span><span class="o">.</span><span class="n">_find_difference_in_cents_from_tempered_pitch_class_for_diatonic_pitches</span><span class="p">(</span>
+            <span class="n">reference_pitch</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">set_microtonal_tuning</span><span class="p">:</span>
+            <span class="n">global_scale</span> <span class="o">=</span> <span class="n">HEJIEkmelilyTuningFileConverter</span><span class="o">.</span><span class="n">_make_global_scale</span><span class="p">(</span>
+                <span class="n">difference_in_cents_from_tempered_pitch_class_for_diatonic_pitches</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">global_scale</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">ekmelily_accidental_sequence</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">HEJIEkmelilyTuningFileConverter</span><span class="o">.</span><span class="n">_make_ekmelily_accidental_sequence</span><span class="p">(</span>
+                <span class="n">difference_in_cents_from_tempered_pitch_class_for_diatonic_pitches</span><span class="p">,</span>
+                <span class="n">prime_to_highest_allowed_exponent</span><span class="p">,</span>
+                <span class="n">prime_to_heji_accidental_name</span><span class="p">,</span>
+                <span class="n">otonality_indicator</span><span class="p">,</span>
+                <span class="n">utonality_indicator</span><span class="p">,</span>
+                <span class="n">exponent_to_exponent_indicator</span><span class="p">,</span>
+                <span class="n">tempered_pitch_indicator</span><span class="p">,</span>
+                <span class="n">set_microtonal_tuning</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">ekmelily_accidental_sequence</span><span class="p">,</span> <span class="n">global_scale</span><span class="o">=</span><span class="n">global_scale</span><span class="p">)</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                          static methods                                #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_find_difference_in_cents_from_tempered_pitch_class_for_diatonic_pitches</span><span class="p">(</span>
+        <span class="n">reference_pitch</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="n">difference_in_cents_from_tempered_pitch_class_for_diatonic_pitches</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">reference_pitch_index</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">DIATONIC_PITCH_NAME_CYCLE_OF_FIFTH_TUPLE</span><span class="o">.</span><span class="n">index</span><span class="p">(</span>
+                <span class="n">reference_pitch</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="p">(</span>
+            <span class="n">diatonic_pitch_name</span>
+        <span class="p">)</span> <span class="ow">in</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">DIATONIC_PITCH_CLASS_CONTAINER</span><span class="p">:</span>
+            <span class="n">pitch_index</span> <span class="o">=</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">DIATONIC_PITCH_NAME_CYCLE_OF_FIFTH_TUPLE</span><span class="o">.</span><span class="n">index</span><span class="p">(</span>
+                <span class="n">diatonic_pitch_name</span>
+            <span class="p">)</span>
+            <span class="n">n_exponents_difference_from_reference</span> <span class="o">=</span> <span class="n">pitch_index</span> <span class="o">-</span> <span class="n">reference_pitch_index</span>
+            <span class="n">difference_from_tempered_diatonic_pitch</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">ekmelily_converters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">DIFFERENCE_BETWEEN_PYTHAGOREAN_AND_TEMPERED_FIFTH</span>
+                <span class="o">*</span> <span class="n">n_exponents_difference_from_reference</span>
+            <span class="p">)</span>
+            <span class="n">difference_in_cents_from_tempered_pitch_class_for_diatonic_pitches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">difference_from_tempered_diatonic_pitch</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">difference_in_cents_from_tempered_pitch_class_for_diatonic_pitches</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_make_global_scale</span><span class="p">(</span>
+        <span class="n">difference_in_cents_from_tempered_pitch_class_for_diatonic_pitches</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span>
+            <span class="nb">float</span><span class="p">,</span> <span class="o">...</span>
+        <span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="n">new_global_scale</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="p">(</span>
+            <span class="n">nth_diatonic_pitch</span><span class="p">,</span>
+            <span class="n">difference_in_cents_from_tempered_pitch_class</span><span class="p">,</span>
+        <span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+            <span class="n">difference_in_cents_from_tempered_pitch_class_for_diatonic_pitches</span>
+        <span class="p">):</span>
+            <span class="n">default_cents_for_diatonic_pitch</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">EkmelilyTuningFileConverter</span><span class="o">.</span><span class="n">_alteration_fraction_to_deviation_in_cents</span><span class="p">(</span>
+                    <span class="n">ekmelily_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_GLOBAL_SCALE</span><span class="p">[</span>
+                        <span class="n">nth_diatonic_pitch</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">n_cents</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">default_cents_for_diatonic_pitch</span>
+                <span class="o">+</span> <span class="n">difference_in_cents_from_tempered_pitch_class</span>
+            <span class="p">)</span>
+            <span class="n">alteration_fraction</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">EkmelilyTuningFileConverter</span><span class="o">.</span><span class="n">_deviation_in_cents_to_alteration_fraction</span><span class="p">(</span>
+                    <span class="n">n_cents</span><span class="p">,</span> <span class="n">max_denominator</span><span class="o">=</span><span class="mi">1000</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">new_global_scale</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">alteration_fraction</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">new_global_scale</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_make_pythagorean_accidentals</span><span class="p">(</span>
+        <span class="n">set_microtonal_tuning</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">EkmelilyAccidental</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="n">accidentals</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="p">(</span>
+            <span class="n">alteration_name</span>
+        <span class="p">)</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="n">ekmelily_converters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">PYTHAGOREAN_ACCIDENTAL_TO_CENT_DEVIATION_DICT</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="p">):</span>
+            <span class="n">glyph</span> <span class="o">=</span> <span class="n">ekmelily_converters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">PRIME_AND_EXPONENT_AND_TRADITIONAL_ACCIDENTAL_TO_ACCIDENTAL_GLYPH_DICT</span><span class="p">[</span>
+                <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">alteration_name</span>
+            <span class="p">]</span>
+            <span class="k">if</span> <span class="n">set_microtonal_tuning</span><span class="p">:</span>
+                <span class="n">cents_deviation</span> <span class="o">=</span> <span class="n">ekmelily_converters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">PYTHAGOREAN_ACCIDENTAL_TO_CENT_DEVIATION_DICT</span><span class="p">[</span>
+                    <span class="n">alteration_name</span>
+                <span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cents_deviation</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
+                    <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">ACCIDENTAL_NAME_TO_PITCH_CLASS_MODIFICATION_DICT</span><span class="p">[</span>
+                        <span class="n">alteration_name</span>
+                    <span class="p">]</span>
+                    <span class="o">*</span> <span class="mi">200</span>
+                <span class="p">)</span>
+            <span class="n">accidental</span> <span class="o">=</span> <span class="n">EkmelilyAccidental</span><span class="p">(</span><span class="n">alteration_name</span><span class="p">,</span> <span class="p">(</span><span class="n">glyph</span><span class="p">,),</span> <span class="n">cents_deviation</span><span class="p">)</span>
+            <span class="n">accidentals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">accidental</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">accidentals</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_process_prime</span><span class="p">(</span>
+        <span class="n">prime_to_heji_accidental_name</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">pythagorean_accidental</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">prime</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">exponent</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">otonality_indicator</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">utonality_indicator</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">exponent_to_exponent_indicator</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">str</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="n">glyph_key</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">(</span><span class="n">prime</span><span class="p">,</span> <span class="n">exponent</span><span class="p">,</span> <span class="n">pythagorean_accidental</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">prime</span> <span class="o">==</span> <span class="mi">5</span>
+            <span class="k">else</span> <span class="p">(</span><span class="n">prime</span><span class="p">,</span> <span class="n">exponent</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">glyph</span> <span class="o">=</span> <span class="n">ekmelily_converters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">PRIME_AND_EXPONENT_AND_TRADITIONAL_ACCIDENTAL_TO_ACCIDENTAL_GLYPH_DICT</span><span class="p">[</span>
+            <span class="n">glyph_key</span>
+        <span class="p">]</span>
+
+        <span class="n">accidental_name</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}{}{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">otonality_indicator</span><span class="p">,</span> <span class="n">utonality_indicator</span><span class="p">)[</span><span class="n">exponent</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="n">prime_to_heji_accidental_name</span><span class="p">[</span><span class="n">prime</span><span class="p">],</span>
+            <span class="n">exponent_to_exponent_indicator</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">exponent</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="n">cents_deviation</span> <span class="o">=</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">JustIntonationPitch</span><span class="p">(</span>
+            <span class="n">music_parameters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_PRIME_TO_COMMA_DICT</span><span class="p">[</span><span class="n">prime</span><span class="p">]</span><span class="o">.</span><span class="n">ratio</span>
+            <span class="o">**</span> <span class="n">exponent</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">interval</span>
+        <span class="k">return</span> <span class="n">accidental_name</span><span class="p">,</span> <span class="n">glyph</span><span class="p">,</span> <span class="n">cents_deviation</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_make_higher_prime_accidental</span><span class="p">(</span>
+        <span class="n">pythagorean_accidental</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">pythagorean_accidental_cents_deviation</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">exponents</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+        <span class="n">prime_to_highest_allowed_exponent</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+        <span class="n">prime_to_heji_accidental_name</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">otonality_indicator</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">utonality_indicator</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">exponent_to_exponent_indicator</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">set_microtonal_tuning</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EkmelilyAccidental</span><span class="p">:</span>
+        <span class="n">accidental_parts</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pythagorean_accidental</span><span class="p">)]</span>
+        <span class="n">cents_deviation</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">pythagorean_accidental_cents_deviation</span><span class="p">)</span>
+        <span class="n">glyphs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">prime</span><span class="p">,</span> <span class="n">exponent</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+            <span class="n">prime_to_highest_allowed_exponent</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span>
+            <span class="n">exponents</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="n">exponent</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="p">(</span>
+                    <span class="n">accidental_change</span><span class="p">,</span>
+                    <span class="n">glyph</span><span class="p">,</span>
+                    <span class="n">cents_deviation_change</span><span class="p">,</span>
+                <span class="p">)</span> <span class="o">=</span> <span class="n">HEJIEkmelilyTuningFileConverter</span><span class="o">.</span><span class="n">_process_prime</span><span class="p">(</span>
+                    <span class="n">prime_to_heji_accidental_name</span><span class="p">,</span>
+                    <span class="n">pythagorean_accidental</span><span class="p">,</span>
+                    <span class="n">prime</span><span class="p">,</span>
+                    <span class="n">exponent</span><span class="p">,</span>
+                    <span class="n">otonality_indicator</span><span class="p">,</span>
+                    <span class="n">utonality_indicator</span><span class="p">,</span>
+                    <span class="n">exponent_to_exponent_indicator</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">accidental_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">accidental_change</span><span class="p">)</span>
+                <span class="n">glyphs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">glyph</span><span class="p">)</span>
+                <span class="n">cents_deviation</span> <span class="o">+=</span> <span class="n">cents_deviation_change</span>
+
+        <span class="c1"># add traditional accidentals (sharp, flat, etc.) if no syntonic</span>
+        <span class="c1"># comma is available (if there is any syntonic comma there is</span>
+        <span class="c1"># already the necessary pythagorean accidental)</span>
+        <span class="k">if</span> <span class="n">exponents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">glyphs</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+                <span class="mi">0</span><span class="p">,</span>
+                <span class="n">ekmelily_converters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">PRIME_AND_EXPONENT_AND_TRADITIONAL_ACCIDENTAL_TO_ACCIDENTAL_GLYPH_DICT</span><span class="p">[</span>
+                    <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">pythagorean_accidental</span><span class="p">)</span>
+                <span class="p">],</span>
+            <span class="p">)</span>
+
+        <span class="c1"># start with highest primes</span>
+        <span class="n">glyphs</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+
+        <span class="n">accidental_name</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">accidental_parts</span><span class="p">)</span>
+
+        <span class="n">cents_deviation</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">cents_deviation</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+
+        <span class="n">new_accidental</span> <span class="o">=</span> <span class="n">EkmelilyAccidental</span><span class="p">(</span>
+            <span class="n">accidental_name</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">glyphs</span><span class="p">),</span> <span class="n">cents_deviation</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_accidental</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_make_accidentals_for_higher_primes</span><span class="p">(</span>
+        <span class="n">prime_to_highest_allowed_exponent</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+        <span class="n">prime_to_heji_accidental_name</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">otonality_indicator</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">utonality_indicator</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">exponent_to_exponent_indicator</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">set_microtonal_tuning</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">EkmelilyAccidental</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="n">allowed_exponents</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="nb">tuple</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">maxima_exponent</span><span class="p">,</span> <span class="n">maxima_exponent</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">maxima_exponent</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span>
+                <span class="n">prime_to_highest_allowed_exponent</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span>
+                <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">prime_to_maxima_exponent</span><span class="p">:</span> <span class="n">prime_to_maxima_exponent</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">accidentals</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">exponents</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">allowed_exponents</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">exp</span> <span class="o">!=</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">exponents</span><span class="p">)):</span>
+                <span class="k">for</span> <span class="p">(</span>
+                    <span class="n">pythagorean_accidental</span><span class="p">,</span>
+                    <span class="n">pythagorean_accidental_cents_deviation</span><span class="p">,</span>
+                <span class="p">)</span> <span class="ow">in</span> <span class="p">(</span>
+                    <span class="n">ekmelily_converters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">PYTHAGOREAN_ACCIDENTAL_TO_CENT_DEVIATION_DICT</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                <span class="p">):</span>
+                    <span class="n">accidental</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">HEJIEkmelilyTuningFileConverter</span><span class="o">.</span><span class="n">_make_higher_prime_accidental</span><span class="p">(</span>
+                            <span class="n">pythagorean_accidental</span><span class="p">,</span>
+                            <span class="n">pythagorean_accidental_cents_deviation</span><span class="p">,</span>
+                            <span class="n">exponents</span><span class="p">,</span>
+                            <span class="n">prime_to_highest_allowed_exponent</span><span class="p">,</span>
+                            <span class="n">prime_to_heji_accidental_name</span><span class="p">,</span>
+                            <span class="n">otonality_indicator</span><span class="p">,</span>
+                            <span class="n">utonality_indicator</span><span class="p">,</span>
+                            <span class="n">exponent_to_exponent_indicator</span><span class="p">,</span>
+                            <span class="n">set_microtonal_tuning</span><span class="p">,</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="n">accidentals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">accidental</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">accidentals</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_make_tempered_accidentals</span><span class="p">(</span>
+        <span class="n">difference_in_cents_from_tempered_pitch_class_for_diatonic_pitches</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span>
+            <span class="nb">float</span><span class="p">,</span> <span class="o">...</span>
+        <span class="p">],</span>
+        <span class="n">tempered_pitch_indicator</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">EkmelilyAccidental</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="n">accidentals</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="p">(</span>
+            <span class="n">nth_diatonic_pitch</span><span class="p">,</span>
+            <span class="n">difference_in_cents_from_tempered_pitch_class</span><span class="p">,</span>
+        <span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+            <span class="n">difference_in_cents_from_tempered_pitch_class_for_diatonic_pitches</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="k">for</span> <span class="p">(</span>
+                <span class="n">tempered_accidental</span><span class="p">,</span>
+                <span class="n">accidental_glyph</span><span class="p">,</span>
+            <span class="p">)</span> <span class="ow">in</span> <span class="p">(</span>
+                <span class="n">ekmelily_converters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">TEMPERED_ACCIDENTAL_TO_ACCIDENTAL_GLYPH_DICT</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="p">):</span>
+
+                <span class="n">accidental_name</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">tempered_accidental</span><span class="p">,</span> <span class="n">tempered_pitch_indicator</span>
+                <span class="p">)</span>
+                <span class="n">deviation_in_cents</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">ekmelily_converters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">TEMPERED_ACCIDENTAL_TO_CENT_DEVIATION_DICT</span><span class="p">[</span>
+                        <span class="n">tempered_accidental</span>
+                    <span class="p">]</span>
+                    <span class="o">-</span> <span class="n">difference_in_cents_from_tempered_pitch_class</span>
+                <span class="p">)</span>
+
+                <span class="n">accidental</span> <span class="o">=</span> <span class="n">EkmelilyAccidental</span><span class="p">(</span>
+                    <span class="n">accidental_name</span><span class="p">,</span>
+                    <span class="p">(</span><span class="n">accidental_glyph</span><span class="p">,),</span>
+                    <span class="n">deviation_in_cents</span><span class="p">,</span>
+                    <span class="n">available_diatonic_pitch_index_tuple</span><span class="o">=</span><span class="p">(</span><span class="n">nth_diatonic_pitch</span><span class="p">,),</span>
+                <span class="p">)</span>
+                <span class="n">accidentals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">accidental</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">accidentals</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_make_ekmelily_accidental_sequence</span><span class="p">(</span>
+        <span class="n">difference_in_cents_from_tempered_pitch_class_for_diatonic_pitches</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span>
+            <span class="nb">float</span><span class="p">,</span> <span class="o">...</span>
+        <span class="p">],</span>
+        <span class="n">prime_to_highest_allowed_exponent</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+        <span class="n">prime_to_heji_accidental_name</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">otonality_indicator</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">utonality_indicator</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">exponent_to_exponent_indicator</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">tempered_pitch_indicator</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">set_microtonal_tuning</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">EkmelilyAccidental</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+
+        <span class="n">pythagorean_accidentals</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">HEJIEkmelilyTuningFileConverter</span><span class="o">.</span><span class="n">_make_pythagorean_accidentals</span><span class="p">(</span>
+                <span class="n">set_microtonal_tuning</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">accidentals_for_higher_primes</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">HEJIEkmelilyTuningFileConverter</span><span class="o">.</span><span class="n">_make_accidentals_for_higher_primes</span><span class="p">(</span>
+                <span class="n">prime_to_highest_allowed_exponent</span><span class="p">,</span>
+                <span class="n">prime_to_heji_accidental_name</span><span class="p">,</span>
+                <span class="n">otonality_indicator</span><span class="p">,</span>
+                <span class="n">utonality_indicator</span><span class="p">,</span>
+                <span class="n">exponent_to_exponent_indicator</span><span class="p">,</span>
+                <span class="n">set_microtonal_tuning</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">tempered_accidentals</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">HEJIEkmelilyTuningFileConverter</span><span class="o">.</span><span class="n">_make_tempered_accidentals</span><span class="p">(</span>
+                <span class="n">difference_in_cents_from_tempered_pitch_class_for_diatonic_pitches</span><span class="p">,</span>
+                <span class="n">tempered_pitch_indicator</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">pythagorean_accidentals</span>
+            <span class="o">+</span> <span class="n">accidentals_for_higher_primes</span>
+            <span class="o">+</span> <span class="n">tempered_accidentals</span>
+        <span class="p">)</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.ekmelily_converters.ekmelily</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Levin Eric Zimmermann.
+    </div>
+  </body>
+</html>

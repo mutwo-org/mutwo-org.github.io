@@ -1,0 +1,308 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mutwo.music_parameters.pitches.EqualDividedOctavePitch &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css" />
+    
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.music_parameters.pitches.EqualDividedOctavePitch</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mutwo.music_parameters.pitches.EqualDividedOctavePitch</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+
+
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_constants</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_utilities</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_parameters</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;EqualDividedOctavePitch&quot;</span><span class="p">,)</span>
+
+<span class="n">ConcertPitch</span> <span class="o">=</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span> <span class="o">|</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span>
+
+
+<div class="viewcode-block" id="EqualDividedOctavePitch"><a class="viewcode-back" href="../../../../api/mutwo.music_parameters.html#mutwo.music_parameters.EqualDividedOctavePitch">[docs]</a><span class="k">class</span> <span class="nc">EqualDividedOctavePitch</span><span class="p">(</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Pitch that is tuned to an Equal divided octave tuning system.</span>
+
+<span class="sd">    :param n_pitch_classes_per_octave: how many pitch classes in each octave</span>
+<span class="sd">        occur (for instance 12 for a chromatic system, 24 for quartertones, etc.)</span>
+<span class="sd">    :param pitch_class: The pitch class of the new :class:`EqualDividedOctavePitch` object.</span>
+<span class="sd">    :param octave: The octave of the new :class:`EqualDividedOctavePitch` object (where 0 is</span>
+<span class="sd">        the middle octave, 1 is one octave higher and -1 is one octave lower).</span>
+<span class="sd">    :param concert_pitch_pitch_class: The pitch class of the reference pitch (for</span>
+<span class="sd">        instance 9 in a chromatic 12 tone system where `a` should be the reference</span>
+<span class="sd">        pitch).</span>
+<span class="sd">    :param concert_pitch_octave: The octave of the reference pitch.</span>
+<span class="sd">    :param concert_pitch: The frequency of the reference pitch (for instance 440 for a).</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import music_parameters</span>
+<span class="sd">    &gt;&gt;&gt; # making a middle `a`</span>
+<span class="sd">    &gt;&gt;&gt; pitch = music_parameters.EqualDividedOctavePitch(12, 9, 4, 9, 4, 440)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">n_pitch_classes_per_octave</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">pitch_class</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span>
+        <span class="n">octave</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">concert_pitch_pitch_class</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span>
+        <span class="n">concert_pitch_octave</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">concert_pitch</span><span class="p">:</span> <span class="n">ConcertPitch</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">concert_pitch</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">concert_pitch</span> <span class="ow">or</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_CONCERT_PITCH</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_pitch_classes_per_octave</span> <span class="o">=</span> <span class="n">n_pitch_classes_per_octave</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pitch_class</span> <span class="o">=</span> <span class="n">pitch_class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">octave</span> <span class="o">=</span> <span class="n">octave</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">concert_pitch_pitch_class</span> <span class="o">=</span> <span class="n">concert_pitch_pitch_class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">concert_pitch_octave</span> <span class="o">=</span> <span class="n">concert_pitch_octave</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">concert_pitch</span> <span class="o">=</span> <span class="n">concert_pitch</span>  <span class="c1"># type: ignore</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                          magic methods                                 #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="k">def</span> <span class="fm">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">EqualDividedOctavePitch</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Calculates the interval between two ``EqualDividedOctave`` pitches.&quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_pitch_classes_per_octave</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">n_pitch_classes_per_octave</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Can&#39;t calculate the interval between to different&quot;</span>
+                <span class="s2">&quot; EqualDividedOctavePitch objects with different value for&quot;</span>
+                <span class="s2">&quot; &#39;n_pitch_classes_per_octave&#39;.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">n_pitch_classes_difference</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pitch_class</span> <span class="o">-</span> <span class="n">other</span><span class="o">.</span><span class="n">pitch_class</span>
+        <span class="n">n_octaves_difference</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">octave</span> <span class="o">-</span> <span class="n">other</span><span class="o">.</span><span class="n">octave</span>
+        <span class="k">return</span> <span class="n">n_pitch_classes_difference</span> <span class="o">+</span> <span class="p">(</span>
+            <span class="n">n_octaves_difference</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_pitch_classes_per_octave</span>
+        <span class="p">)</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                          private methods                               #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="k">def</span> <span class="nf">_assert_correct_pitch_class</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pitch_class</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Makes sure the respective pitch_class is within the allowed range.&quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">pitch_class</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_pitch_classes_per_octave</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pitch_class</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Invalid pitch class </span><span class="si">{</span><span class="n">pitch_class</span><span class="si">}</span><span class="s2">!. &quot;</span>
+                <span class="s2">&quot;Pitch_class has to be in range (min = 0, max&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_pitch_classes_per_octave</span> <span class="o">-</span> <span class="mi">1</span><span class="si">}</span><span class="s2">).&quot;</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_fetch_n_pitch_classes_difference</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">pitch_interval</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PitchInterval</span> <span class="o">|</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">pitch_interval</span><span class="p">,</span>
+            <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PitchInterval</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="n">pitch_interval</span><span class="o">.</span><span class="n">interval</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_cents_per_step</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">pitch_interval</span>
+
+    <span class="k">def</span> <span class="nf">_math</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">n_pitch_classes_difference</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span>
+        <span class="n">operator</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">],</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span>
+        <span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">new_pitch_class</span> <span class="o">=</span> <span class="n">operator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pitch_class</span><span class="p">,</span> <span class="n">n_pitch_classes_difference</span><span class="p">)</span>
+        <span class="n">n_octaves_difference</span> <span class="o">=</span> <span class="n">new_pitch_class</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_pitch_classes_per_octave</span>
+        <span class="n">new_pitch_class</span> <span class="o">=</span> <span class="n">new_pitch_class</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_pitch_classes_per_octave</span>
+        <span class="n">new_octave</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">octave</span> <span class="o">+</span> <span class="n">n_octaves_difference</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pitch_class</span> <span class="o">=</span> <span class="n">new_pitch_class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">octave</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">new_octave</span><span class="p">)</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                          public properties                             #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_pitch_classes_per_octave</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Defines in how many different pitch classes one octave get divided.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_pitch_classes_per_octave</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">concert_pitch</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;The referential concert pitch for the respective pitch object.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_concert_pitch</span>
+
+    <span class="nd">@concert_pitch</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">concert_pitch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">concert_pitch</span><span class="p">:</span> <span class="n">ConcertPitch</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">concert_pitch</span><span class="p">,</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">):</span>
+            <span class="n">concert_pitch</span> <span class="o">=</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">DirectPitch</span><span class="p">(</span><span class="n">concert_pitch</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_concert_pitch</span> <span class="o">=</span> <span class="n">concert_pitch</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">concert_pitch_pitch_class</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;The pitch class of the referential concert pitch.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_concert_pitch_pitch_class</span>
+
+    <span class="nd">@concert_pitch_pitch_class</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">concert_pitch_pitch_class</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pitch_class</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_correct_pitch_class</span><span class="p">(</span><span class="n">pitch_class</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_concert_pitch_pitch_class</span> <span class="o">=</span> <span class="n">pitch_class</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pitch_class</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;The pitch class of the pitch.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pitch_class</span>
+
+    <span class="nd">@pitch_class</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">pitch_class</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pitch_class</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_correct_pitch_class</span><span class="p">(</span><span class="n">pitch_class</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pitch_class</span> <span class="o">=</span> <span class="n">pitch_class</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">step_factor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The factor with which to multiply a frequency to reach the next pitch.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_pitch_classes_per_octave</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_cents_per_step</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;This property describes how many cents are between two adjacent pitches.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ratio_to_cents</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">step_factor</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">frequency</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">n_octaves_distant_to_concert_pitch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">octave</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">concert_pitch_octave</span>
+        <span class="n">n_pitch_classes_distant_to_concert_pitch</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pitch_class</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">concert_pitch_pitch_class</span>
+        <span class="p">)</span>
+        <span class="n">distance_to_concert_pitch_in_cents</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">n_octaves_distant_to_concert_pitch</span>
+            <span class="o">*</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">OCTAVE_IN_CENTS</span>
+        <span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_cents_per_step</span> <span class="o">*</span> <span class="n">n_pitch_classes_distant_to_concert_pitch</span><span class="p">)</span>
+        <span class="n">distance_to_concert_pitch_as_factor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cents_to_ratio</span><span class="p">(</span>
+            <span class="n">distance_to_concert_pitch_in_cents</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">round_floats</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">concert_pitch</span><span class="o">.</span><span class="n">frequency</span> <span class="o">*</span> <span class="n">distance_to_concert_pitch_as_factor</span><span class="p">,</span>
+            <span class="n">music_parameters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">EQUAL_DIVIDED_OCTAVE_PITCH_ROUND_FREQUENCY_DIGIT_COUNT</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                          public methods                                #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+<div class="viewcode-block" id="EqualDividedOctavePitch.add"><a class="viewcode-back" href="../../../../api/mutwo.music_parameters.html#mutwo.music_parameters.EqualDividedOctavePitch.add">[docs]</a>    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">pitch_interval</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PitchInterval</span> <span class="o">|</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EqualDividedOctavePitch</span><span class="p">:</span>  <span class="c1"># type: ignore</span>
+        <span class="sd">&quot;&quot;&quot;Transposes the ``EqualDividedOctavePitch`` by n_pitch_classes_difference.&quot;&quot;&quot;</span>
+
+        <span class="n">n_pitch_classes_difference</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_n_pitch_classes_difference</span><span class="p">(</span>
+            <span class="n">pitch_interval</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_math</span><span class="p">(</span><span class="n">n_pitch_classes_difference</span><span class="p">,</span> <span class="n">operator</span><span class="o">.</span><span class="n">add</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="EqualDividedOctavePitch.subtract"><a class="viewcode-back" href="../../../../api/mutwo.music_parameters.html#mutwo.music_parameters.EqualDividedOctavePitch.subtract">[docs]</a>    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">subtract</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">pitch_interval</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PitchInterval</span> <span class="o">|</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EqualDividedOctavePitch</span><span class="p">:</span>  <span class="c1"># type: ignore</span>
+        <span class="sd">&quot;&quot;&quot;Transposes the ``EqualDividedOctavePitch`` by n_pitch_classes_difference.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">pitch_interval</span><span class="p">,</span>
+            <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PitchInterval</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">pitch_interval</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="o">-</span><span class="n">pitch_interval</span><span class="p">)</span></div></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.music_parameters.pitches.EqualDividedOctavePitch</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Levin Eric Zimmermann.
+    </div>
+  </body>
+</html>

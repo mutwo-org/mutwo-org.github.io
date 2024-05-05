@@ -1,0 +1,87 @@
+
+.. currentmodule:: mutwo.core_converters
+
+mutwo.core_converters
+=====================
+
+.. contents:: Table of content
+   :depth: 3
+
+.. automodule:: mutwo.core_converters
+   :members:
+
+
+.. list-table::
+   :align: center
+   :width: 95%
+   :header-rows: 1
+
+   * - Object
+     - Documentation
+   * - :class:`mutwo.core_converters.ChrononToAttribute`
+     - Extract from a chronon an attribute.
+   * - :class:`mutwo.core_converters.dict`
+     - dict() -> new empty dictionary
+   * - :class:`mutwo.core_converters.MutwoParameterDictToKeywordArgument`
+     - Extract from a dict of mutwo parameters specific objects.
+   * - :class:`mutwo.core_converters.MutwoParameterDictToDuration`
+     - Extract from a dict of mutwo parameters the duration.
+   * - :class:`mutwo.core_converters.MutwoParameterDictToChronon`
+     - Convert a dict of mutwo parameters to a :class:`mutwo.core_events.Chronon`
+   * - :class:`mutwo.core_converters.TempoConverter`
+     - Apply tempo on an :class:`~mutwo.core_events.abc.Event`.
+   * - :class:`mutwo.core_converters.EventToMetrizedEvent`
+     - Apply tempo of event on copy of itself
+
+
+
+
+.. autoclass:: mutwo.core_converters.ChrononToAttribute
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.core_converters.dict
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.core_converters.MutwoParameterDictToKeywordArgument
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.core_converters.MutwoParameterDictToDuration
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.core_converters.MutwoParameterDictToChronon
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.core_converters.TempoConverter
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.core_converters.EventToMetrizedEvent
+
+        .. autoclasstoc::
+    
+
+
+mutwo.core_converters.abc
+-------------------------
+
+.. automodule:: mutwo.core_converters.abc
+   :members:
+
+
+mutwo.core_converters.configurations
+------------------------------------
+
+.. automodule:: mutwo.core_converters.configurations
+   :members:
+

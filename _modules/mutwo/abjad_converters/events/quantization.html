@@ -1,0 +1,993 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mutwo.abjad_converters.events.quantization &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css" />
+    
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.abjad_converters.events.quantization</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mutwo.abjad_converters.events.quantization</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module to quantize free :class:`Consecution` to notation based abjad :class:`Container`&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">abc</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">quicktions</span> <span class="k">as</span> <span class="nn">fractions</span>  <span class="c1"># type: ignore</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">fractions</span>  <span class="c1"># type: ignore</span>
+
+<span class="kn">import</span> <span class="nn">abjad</span>  <span class="c1"># type: ignore</span>
+<span class="kn">from</span> <span class="nn">abjadext</span> <span class="kn">import</span> <span class="n">nauert</span>  <span class="c1"># type: ignore</span>
+<span class="kn">import</span> <span class="nn">ranges</span>  <span class="c1"># type: ignore</span>
+
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_converters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_events</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_parameters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_utilities</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;ConsecutionToQuantizedAbjadContainer&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;NauertConsecutionToQuantizedAbjadContainer&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;NauertConsecutionToDurationLineBasedQuantizedAbjadContainer&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;LeafMakerConsecutionToQuantizedAbjadContainer&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;LeafMakerConsecutionToDurationLineBasedQuantizedAbjadContainer&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">NoTimeSignatureError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+
+<span class="c1"># XXX: In the future `default_tempo_envelope` should be set to `None` and</span>
+<span class="c1"># `mutwo` should, by default, use `event_to_tempo_envelope`. Then</span>
+<span class="c1"># `default_tempo_envelope` should be removed completely.</span>
+<div class="viewcode-block" id="ConsecutionToQuantizedAbjadContainer"><a class="viewcode-back" href="../../../../api/mutwo.abjad_converters.html#mutwo.abjad_converters.ConsecutionToQuantizedAbjadContainer">[docs]</a><span class="k">class</span> <span class="nc">ConsecutionToQuantizedAbjadContainer</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Converter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Quantize :class:`~mutwo.core_events.Consecution` objects.</span>
+
+<span class="sd">    :param default_time_signature_sequence: Set time signatures to divide the quantized abjad data</span>
+<span class="sd">        in desired bar sizes. If the converted :class:`~mutwo.core_events.Consecution`</span>
+<span class="sd">        is longer than the sum of all passed time signatures, the last time signature</span>
+<span class="sd">        will be repeated for the remaining bars.</span>
+<span class="sd">    :type default_time_signature_sequence: typing.Sequence[abjad.TimeSignature]</span>
+<span class="sd">    :param event_to_time_signature_tuple: Function which extracts a</span>
+<span class="sd">        `tuple[abjad.TimeSignature, ...]` from a :class:`mutwo.core_events.abc.Event`.</span>
+<span class="sd">        If set to `None` `mutwo` falls back to `default_time_signature_sequence`.</span>
+<span class="sd">        Default to `None`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">default_time_signature_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">TimeSignature</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">abjad</span><span class="o">.</span><span class="n">TimeSignature</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">)),</span>
+        <span class="p">),</span>
+        <span class="n">event_to_time_signature_tuple</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+            <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+                <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">],</span>
+                <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">TimeSignature</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span>
+            <span class="p">]</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">default_time_signature_sequence_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">default_time_signature_sequence</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">default_time_signature_sequence_count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NoTimeSignatureError</span><span class="p">(</span>
+                <span class="s2">&quot;Found empty sequence for argument &quot;</span>
+                <span class="s2">&quot;&#39;default_time_signature_sequence_count&#39;. &quot;</span>
+                <span class="s2">&quot;Specify at least one time signature!&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">default_time_signature_tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">default_time_signature_sequence</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_default_time_signature_tuple</span> <span class="o">=</span> <span class="n">default_time_signature_tuple</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_event_to_time_signature_tuple</span> <span class="o">=</span> <span class="n">event_to_time_signature_tuple</span>
+
+    <span class="k">def</span> <span class="nf">_get_time_signature_tuple</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">TimeSignature</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_to_time_signature_tuple</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">time_signature_tuple</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_to_time_signature_tuple</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">time_signature_tuple</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_time_signature_tuple</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#               public methods for interaction with the user             #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+<div class="viewcode-block" id="ConsecutionToQuantizedAbjadContainer.convert"><a class="viewcode-back" href="../../../../api/mutwo.abjad_converters.html#mutwo.abjad_converters.ConsecutionToQuantizedAbjadContainer.convert">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">consecution_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">Container</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">]]:</span>
+        <span class="o">...</span></div></div>
+
+
+<div class="viewcode-block" id="NauertConsecutionToQuantizedAbjadContainer"><a class="viewcode-back" href="../../../../api/mutwo.abjad_converters.html#mutwo.abjad_converters.NauertConsecutionToQuantizedAbjadContainer">[docs]</a><span class="k">class</span> <span class="nc">NauertConsecutionToQuantizedAbjadContainer</span><span class="p">(</span>
+    <span class="n">ConsecutionToQuantizedAbjadContainer</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Quantize :class:`~mutwo.core_events.Consecution` objects via :mod:`abjadext.nauert`.</span>
+
+<span class="sd">    :param time_signature_sequence: Set time signatures to divide the quantized abjad data</span>
+<span class="sd">        in desired bar sizes. If the converted :class:`~mutwo.core_events.Consecution`</span>
+<span class="sd">        is longer than the sum of all passed time signatures, the last time signature</span>
+<span class="sd">        will be repeated for the remaining bars.</span>
+<span class="sd">    :param duration_unit: This defines the `duration_unit` of the passed</span>
+<span class="sd">        :class:`~mutwo.core_events.Consecution` (how the</span>
+<span class="sd">        :attr:`~mutwo.core_events.abc.Event.duration` attribute will be</span>
+<span class="sd">        interpreted). Can either be &#39;beats&#39; (default) or &#39;miliseconds&#39;.</span>
+<span class="sd">        WARNING: &#39;miliseconds&#39; isn&#39;t working properly yet!</span>
+<span class="sd">    :param attack_point_optimizer: Optionally the user can pass a</span>
+<span class="sd">        :class:`nauert.AttackPointOptimizer` object. Attack point optimizer help to</span>
+<span class="sd">        split events and tie them for better looking notation. The default attack point</span>
+<span class="sd">        optimizer is :class:`nauert.MeasurewiseAttackPointOptimizer` which splits events</span>
+<span class="sd">        to better represent metrical structures within bars. If no optimizer is desired</span>
+<span class="sd">        this argument can be set to ``None``.</span>
+
+<span class="sd">    Unlike :class:`LeafMakerConsecutionToQuantizedAbjadContainer` this converter</span>
+<span class="sd">    supports nested tuplets and ties across tuplets. But this converter is much slower</span>
+<span class="sd">    than the :class:`LeafMakerConsecutionToQuantizedAbjadContainer`. Because the</span>
+<span class="sd">    converter depends on the abjad extension `nauert` its quality is dependent on the</span>
+<span class="sd">    inner mechanism of the used package. Because the quantization made by the `nauert`</span>
+<span class="sd">    package can be somewhat indeterministic a lot of tweaking may be necessary for</span>
+<span class="sd">    complex musical structures.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># TODO(add proper miliseconds conversion: you will have to add the tempo_envelope</span>
+    <span class="c1"># when building the QEventSequence. Furthermore you should auto write down the</span>
+    <span class="c1"># metronome marks when initialising from miliseconds?)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">default_time_signature_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">TimeSignature</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">abjad</span><span class="o">.</span><span class="n">TimeSignature</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">)),</span>
+        <span class="p">),</span>
+        <span class="n">duration_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;beats&quot;</span><span class="p">,</span>  <span class="c1"># for future: typing.Literal[&quot;beats&quot;, &quot;miliseconds&quot;]</span>
+        <span class="n">attack_point_optimizer</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+            <span class="n">nauert</span><span class="o">.</span><span class="n">AttackPointOptimizer</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">nauert</span><span class="o">.</span><span class="n">MeasurewiseAttackPointOptimizer</span><span class="p">(),</span>
+        <span class="n">search_tree</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">nauert</span><span class="o">.</span><span class="n">SearchTree</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">duration_unit</span> <span class="o">==</span> <span class="s2">&quot;miliseconds&quot;</span><span class="p">:</span>
+            <span class="c1"># warning for not well implemented miliseconds conversion</span>
+
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;The current implementation can&#39;t apply tempo changes for duration unit&quot;</span>
+                <span class="s2">&quot; &#39;miliseconds&#39; yet! Furthermore to quantize via duration_unit&quot;</span>
+                <span class="s2">&quot; &#39;miliseconds&#39; isn&#39;t well tested yet and may return unexpected&quot;</span>
+                <span class="s2">&quot; results.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">default_time_signature_tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">default_time_signature_sequence</span><span class="p">)</span>
+        <span class="c1"># nauert will raise an error if there is only one time signature</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">default_time_signature_tuple</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">default_time_signature_tuple</span> <span class="o">+=</span> <span class="n">default_time_signature_tuple</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">default_time_signature_tuple</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_duration_unit</span> <span class="o">=</span> <span class="n">duration_unit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_attack_point_optimizer</span> <span class="o">=</span> <span class="n">attack_point_optimizer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_search_tree</span> <span class="o">=</span> <span class="n">search_tree</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                          static methods                                #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_respective_q_event_from_abjad_leaf</span><span class="p">(</span>
+        <span class="n">abjad_leaf</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">Rest</span><span class="p">,</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Note</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">nauert</span><span class="o">.</span><span class="n">QEvent</span><span class="p">]:</span>
+        <span class="c1"># TODO(improve ugly, heuristic, unreliable code)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">abjad</span><span class="o">.</span><span class="n">get</span><span class="o">.</span><span class="n">indicators</span><span class="p">(</span><span class="n">abjad_leaf</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;q_events&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_process_abjad_leaf</span><span class="p">(</span>
+        <span class="n">indices</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+        <span class="n">abjad_leaf</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">,</span>
+        <span class="n">related_abjad_leaves_per_chronon</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]]],</span>
+        <span class="n">q_event_sequence</span><span class="p">:</span> <span class="n">nauert</span><span class="o">.</span><span class="n">QEventSequence</span><span class="p">,</span>
+        <span class="n">has_tie</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">index_of_previous_q_event</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+        <span class="n">q_event</span> <span class="o">=</span> <span class="n">NauertConsecutionToQuantizedAbjadContainer</span><span class="o">.</span><span class="n">_get_respective_q_event_from_abjad_leaf</span><span class="p">(</span>
+            <span class="n">abjad_leaf</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">q_event</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">q_event</span><span class="p">)</span> <span class="o">!=</span> <span class="n">nauert</span><span class="o">.</span><span class="n">TerminalQEvent</span><span class="p">:</span>
+            <span class="n">nth_q_event</span> <span class="o">=</span> <span class="n">q_event_sequence</span><span class="o">.</span><span class="n">sequence</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">q_event</span><span class="p">)</span>
+            <span class="n">related_abjad_leaves_per_chronon</span><span class="p">[</span><span class="n">nth_q_event</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">indices</span><span class="p">))</span>
+            <span class="n">index_of_previous_q_event</span> <span class="o">=</span> <span class="n">nth_q_event</span>
+        <span class="k">elif</span> <span class="n">has_tie</span><span class="p">:</span>
+            <span class="n">related_abjad_leaves_per_chronon</span><span class="p">[</span><span class="n">index_of_previous_q_event</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="nb">tuple</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="c1"># skip leaves without any links</span>
+        <span class="c1"># else:</span>
+        <span class="c1">#     related_abjad_leaves_per_chronon.append([tuple(indices)])</span>
+
+        <span class="n">has_tie</span> <span class="o">=</span> <span class="n">abjad</span><span class="o">.</span><span class="n">get</span><span class="o">.</span><span class="n">has_indicator</span><span class="p">(</span><span class="n">abjad_leaf</span><span class="p">,</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Tie</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">has_tie</span><span class="p">,</span> <span class="n">index_of_previous_q_event</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_process_tuplet</span><span class="p">(</span>
+        <span class="n">indices</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+        <span class="n">tuplet</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Tuplet</span><span class="p">,</span>
+        <span class="n">related_abjad_leaves_per_chronon</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]]],</span>
+        <span class="n">q_event_sequence</span><span class="p">:</span> <span class="n">nauert</span><span class="o">.</span><span class="n">QEventSequence</span><span class="p">,</span>
+        <span class="n">has_tie</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">index_of_previous_q_event</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="p">(</span>
+            <span class="n">nth_abjad_leaf_or_tuplet</span><span class="p">,</span>
+            <span class="n">abjad_leaf_or_tuplet</span><span class="p">,</span>
+        <span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tuplet</span><span class="p">):</span>
+            <span class="p">(</span>
+                <span class="n">has_tie</span><span class="p">,</span>
+                <span class="n">index_of_previous_q_event</span><span class="p">,</span>
+            <span class="p">)</span> <span class="o">=</span> <span class="n">NauertConsecutionToQuantizedAbjadContainer</span><span class="o">.</span><span class="n">_process_abjad_leaf_or_tuplet</span><span class="p">(</span>
+                <span class="n">indices</span> <span class="o">+</span> <span class="p">[</span><span class="n">nth_abjad_leaf_or_tuplet</span><span class="p">],</span>
+                <span class="n">abjad_leaf_or_tuplet</span><span class="p">,</span>
+                <span class="n">related_abjad_leaves_per_chronon</span><span class="p">,</span>
+                <span class="n">q_event_sequence</span><span class="p">,</span>
+                <span class="n">has_tie</span><span class="p">,</span>
+                <span class="n">index_of_previous_q_event</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">has_tie</span><span class="p">,</span> <span class="n">index_of_previous_q_event</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_process_abjad_leaf_or_tuplet</span><span class="p">(</span>
+        <span class="n">index_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+        <span class="n">abjad_leaf_or_tuplet</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">Tuplet</span><span class="p">,</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">],</span>
+        <span class="n">related_abjad_leaves_per_chronon</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]]],</span>
+        <span class="n">q_event_sequence</span><span class="p">:</span> <span class="n">nauert</span><span class="o">.</span><span class="n">QEventSequence</span><span class="p">,</span>
+        <span class="n">has_tie</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">index_of_previous_q_event</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">abjad_leaf_or_tuplet</span><span class="p">,</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Tuplet</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">NauertConsecutionToQuantizedAbjadContainer</span><span class="o">.</span><span class="n">_process_tuplet</span><span class="p">(</span>
+                <span class="n">index_list</span><span class="p">,</span>
+                <span class="n">abjad_leaf_or_tuplet</span><span class="p">,</span>
+                <span class="n">related_abjad_leaves_per_chronon</span><span class="p">,</span>
+                <span class="n">q_event_sequence</span><span class="p">,</span>
+                <span class="n">has_tie</span><span class="p">,</span>
+                <span class="n">index_of_previous_q_event</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">NauertConsecutionToQuantizedAbjadContainer</span><span class="o">.</span><span class="n">_process_abjad_leaf</span><span class="p">(</span>
+                <span class="n">index_list</span><span class="p">,</span>
+                <span class="n">abjad_leaf_or_tuplet</span><span class="p">,</span>
+                <span class="n">related_abjad_leaves_per_chronon</span><span class="p">,</span>
+                <span class="n">q_event_sequence</span><span class="p">,</span>
+                <span class="n">has_tie</span><span class="p">,</span>
+                <span class="n">index_of_previous_q_event</span><span class="p">,</span>
+            <span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_make_related_abjad_leaves_per_chronon</span><span class="p">(</span>
+        <span class="n">consecution</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">,</span>
+        <span class="n">q_event_sequence</span><span class="p">:</span> <span class="n">nauert</span><span class="o">.</span><span class="n">QEventSequence</span><span class="p">,</span>
+        <span class="n">quanitisized_abjad_leaf_voice</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Voice</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">,]:</span>
+        <span class="n">has_tie</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">index_of_previous_q_event</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">related_abjad_leaves_per_chronon</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">consecution</span>
+        <span class="p">]</span>
+        <span class="k">for</span> <span class="n">nth_bar</span><span class="p">,</span> <span class="n">bar</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">quanitisized_abjad_leaf_voice</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">nth_abjad_leaf_or_tuplet</span><span class="p">,</span> <span class="n">abjad_leaf_or_tuplet</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bar</span><span class="p">):</span>
+                <span class="p">(</span>
+                    <span class="n">has_tie</span><span class="p">,</span>
+                    <span class="n">index_of_previous_q_event</span><span class="p">,</span>
+                <span class="p">)</span> <span class="o">=</span> <span class="n">NauertConsecutionToQuantizedAbjadContainer</span><span class="o">.</span><span class="n">_process_abjad_leaf_or_tuplet</span><span class="p">(</span>
+                    <span class="p">[</span><span class="n">nth_bar</span><span class="p">,</span> <span class="n">nth_abjad_leaf_or_tuplet</span><span class="p">],</span>
+                    <span class="n">abjad_leaf_or_tuplet</span><span class="p">,</span>
+                    <span class="n">related_abjad_leaves_per_chronon</span><span class="p">,</span>
+                    <span class="n">q_event_sequence</span><span class="p">,</span>
+                    <span class="n">has_tie</span><span class="p">,</span>
+                    <span class="n">index_of_previous_q_event</span><span class="p">,</span>
+                <span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="nb">tuple</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">pair</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">related_abjad_leaves_per_chronon</span>
+        <span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_make_q_schema</span><span class="p">(</span>
+        <span class="n">time_signature_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">TimeSignature</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+        <span class="n">search_tree</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">nauert</span><span class="o">.</span><span class="n">SearchTree</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nauert</span><span class="o">.</span><span class="n">QSchema</span><span class="p">:</span>
+        <span class="n">formated_time_signature_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">time_signature</span> <span class="ow">in</span> <span class="n">time_signature_tuple</span><span class="p">:</span>
+            <span class="n">formated_time_signature_list</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;time_signature&quot;</span><span class="p">:</span> <span class="n">time_signature</span><span class="p">})</span>
+
+        <span class="n">keyword_arguments</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;use_full_measure&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;tempo&quot;</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">MetronomeMark</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="mi">60</span><span class="p">),</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="n">search_tree</span><span class="p">:</span>
+            <span class="n">keyword_arguments</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;search_tree&quot;</span><span class="p">:</span> <span class="n">search_tree</span><span class="p">})</span>
+
+        <span class="k">return</span> <span class="n">nauert</span><span class="o">.</span><span class="n">MeasurewiseQSchema</span><span class="p">(</span>
+            <span class="o">*</span><span class="n">formated_time_signature_list</span><span class="p">,</span> <span class="o">**</span><span class="n">keyword_arguments</span>
+        <span class="p">)</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                         private methods                                #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="k">def</span> <span class="nf">_get_q_schema</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nauert</span><span class="o">.</span><span class="n">MeasurewiseQSchema</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">NauertConsecutionToQuantizedAbjadContainer</span><span class="o">.</span><span class="n">_make_q_schema</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_get_time_signature_tuple</span><span class="p">(</span><span class="n">event</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_search_tree</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_consecution_to_q_event_sequence</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">consecution</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nauert</span><span class="o">.</span><span class="n">QEventSequence</span><span class="p">:</span>
+        <span class="n">duration_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">consecution</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s2">&quot;duration&quot;</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">nth_chronon</span><span class="p">,</span> <span class="n">chronon</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">consecution</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">chronon</span><span class="o">.</span><span class="n">is_rest</span><span class="p">:</span>
+                <span class="n">duration_list</span><span class="p">[</span><span class="n">nth_chronon</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">core_parameters</span><span class="o">.</span><span class="n">DirectDuration</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="n">duration_list</span><span class="p">[</span><span class="n">nth_chronon</span><span class="p">]</span>
+                <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_duration_unit</span> <span class="o">==</span> <span class="s2">&quot;beats&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">nauert</span><span class="o">.</span><span class="n">QEventSequence</span><span class="o">.</span><span class="n">from_tempo_scaled_durations</span><span class="p">(</span>
+                <span class="n">duration_list</span><span class="p">,</span> <span class="n">tempo</span><span class="o">=</span><span class="n">abjad</span><span class="o">.</span><span class="n">MetronomeMark</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="mi">60</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_duration_unit</span> <span class="o">==</span> <span class="s2">&quot;miliseconds&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">nauert</span><span class="o">.</span><span class="n">QEventSequence</span><span class="o">.</span><span class="n">from_millisecond_durations</span><span class="p">(</span><span class="n">duration_list</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;Unknown duration unit &#39;</span><span class="si">{}</span><span class="s2">&#39;. Use duration unit &#39;beats&#39; or&quot;</span>
+                <span class="s2">&quot; &#39;miliseconds&#39;.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_duration_unit</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_q_event_sequence_to_quanitisized_abjad_leaf_voice</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">q_event_sequence</span><span class="p">:</span> <span class="n">nauert</span><span class="o">.</span><span class="n">QEventSequence</span><span class="p">,</span>
+        <span class="n">q_schema</span><span class="p">:</span> <span class="n">nauert</span><span class="o">.</span><span class="n">MeasurewiseQSchema</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Voice</span><span class="p">:</span>
+        <span class="n">quantizer</span> <span class="o">=</span> <span class="n">nauert</span><span class="o">.</span><span class="n">Quantizer</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">quantizer</span><span class="p">(</span>
+            <span class="n">q_event_sequence</span><span class="p">,</span>
+            <span class="n">q_schema</span><span class="o">=</span><span class="n">q_schema</span><span class="p">,</span>
+            <span class="n">attach_tempos</span><span class="o">=</span><span class="kc">True</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_duration_unit</span> <span class="o">==</span> <span class="s2">&quot;miliseconds&quot;</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">attack_point_optimizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_attack_point_optimizer</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#               public methods for interaction with the user             #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+<div class="viewcode-block" id="NauertConsecutionToQuantizedAbjadContainer.convert"><a class="viewcode-back" href="../../../../api/mutwo.abjad_converters.html#mutwo.abjad_converters.NauertConsecutionToQuantizedAbjadContainer.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">consecution_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">Container</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">],]:</span>
+        <span class="n">q_event_sequence</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_consecution_to_q_event_sequence</span><span class="p">(</span>
+            <span class="n">consecution_to_convert</span>
+        <span class="p">)</span>
+        <span class="n">q_schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_q_schema</span><span class="p">(</span><span class="n">consecution_to_convert</span><span class="p">)</span>
+        <span class="n">quanitisized_abjad_leaf_voice</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_q_event_sequence_to_quanitisized_abjad_leaf_voice</span><span class="p">(</span>
+                <span class="n">q_event_sequence</span><span class="p">,</span> <span class="n">q_schema</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">related_abjad_leaves_per_chronon</span> <span class="o">=</span> <span class="n">NauertConsecutionToQuantizedAbjadContainer</span><span class="o">.</span><span class="n">_make_related_abjad_leaves_per_chronon</span><span class="p">(</span>
+            <span class="n">consecution_to_convert</span><span class="p">,</span> <span class="n">q_event_sequence</span><span class="p">,</span> <span class="n">quanitisized_abjad_leaf_voice</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">quanitisized_abjad_leaf_voice</span><span class="p">,</span>
+            <span class="n">related_abjad_leaves_per_chronon</span><span class="p">,</span>
+        <span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="LeafMakerConsecutionToQuantizedAbjadContainer"><a class="viewcode-back" href="../../../../api/mutwo.abjad_converters.html#mutwo.abjad_converters.LeafMakerConsecutionToQuantizedAbjadContainer">[docs]</a><span class="k">class</span> <span class="nc">LeafMakerConsecutionToQuantizedAbjadContainer</span><span class="p">(</span>
+    <span class="n">ConsecutionToQuantizedAbjadContainer</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Quantize :class:`~mutwo.core_events.Consecution` object via :mod:`abjad.LeafMaker`.</span>
+
+<span class="sd">    :param time_signature_sequence: Set time signatures to divide the quantized abjad data</span>
+<span class="sd">        in desired bar sizes. If the converted</span>
+<span class="sd">        :class:`~mutwo.core_events.Consecution` is longer than the sum of</span>
+<span class="sd">        all passed time signatures, the last time signature</span>
+<span class="sd">        will be repeated for the remaining bars.</span>
+
+<span class="sd">    This method is significantly faster than the</span>
+<span class="sd">    :class:`NauertConsecutionToQuantizedAbjadContainer`. But it also</span>
+<span class="sd">    has several known limitations:</span>
+
+<span class="sd">        1. :class:`LeafMakerConsecutionToQuantizedAbjadContainer` doesn&#39;t</span>
+<span class="sd">           support nested tuplets.</span>
+<span class="sd">        2. :class:`LeafMakerConsecutionToQuantizedAbjadContainer` doesn&#39;t</span>
+<span class="sd">           support ties across tuplets with different prolation (or across tuplets</span>
+<span class="sd">           and not-tuplet notation). If ties are desired the user has to build them</span>
+<span class="sd">           manually before passing the :class:`~mutwo.core_events.Consecution`</span>
+<span class="sd">           to the converter.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_maximum_dot_count</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">do_rewrite_meter</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">add_beams</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_leaf_maker</span> <span class="o">=</span> <span class="n">abjad</span><span class="o">.</span><span class="n">LeafMaker</span><span class="p">(</span>
+            <span class="n">forbidden_note_duration</span><span class="o">=</span><span class="n">abjad</span><span class="o">.</span><span class="n">Duration</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="n">forbidden_rest_duration</span><span class="o">=</span><span class="n">abjad</span><span class="o">.</span><span class="n">Duration</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_do_rewrite_meter</span> <span class="o">=</span> <span class="n">do_rewrite_meter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_beams</span> <span class="o">=</span> <span class="n">add_beams</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                       static private methods                           #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_find_offset_inventory</span><span class="p">(</span><span class="n">meter</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Meter</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">Offset</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">nth_offset_inventory</span><span class="p">,</span> <span class="n">offset_inventory</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+            <span class="n">depthwise_offset_inventory</span> <span class="o">:=</span> <span class="n">meter</span><span class="o">.</span><span class="n">depthwise_offset_inventory</span>
+        <span class="p">):</span>
+            <span class="n">difference</span> <span class="o">=</span> <span class="n">offset_inventory</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">offset_inventory</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">difference</span> <span class="o">==</span> <span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">offset_inventory</span>
+            <span class="k">elif</span> <span class="n">difference</span> <span class="o">&lt;=</span> <span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">depthwise_offset_inventory</span><span class="p">[</span><span class="n">nth_offset_inventory</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">offset_inventory</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_add_explicit_beams</span><span class="p">(</span>
+        <span class="n">bar</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Container</span><span class="p">,</span> <span class="n">meter</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Meter</span><span class="p">,</span> <span class="n">global_offset</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Offset</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">offset_inventory</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">LeafMakerConsecutionToQuantizedAbjadContainer</span><span class="o">.</span><span class="n">_find_offset_inventory</span><span class="p">(</span>
+                <span class="n">meter</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">leaf_offset_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># don&#39;t attach beams on tuplets</span>
+        <span class="n">relevant_bar_items</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">leaf_or_tuplet</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">leaf_or_tuplet</span><span class="p">,</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="n">leaf_or_tuplet</span><span class="o">.</span><span class="n">written_duration</span> <span class="o">&lt;</span> <span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+            <span class="n">bar</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">leaf_selection</span> <span class="o">=</span> <span class="n">abjad</span><span class="o">.</span><span class="n">select</span><span class="o">.</span><span class="n">leaves</span><span class="p">(</span><span class="n">relevant_bar_items</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">leaf</span> <span class="ow">in</span> <span class="n">leaf_selection</span><span class="p">:</span>
+            <span class="n">offset</span> <span class="o">=</span> <span class="n">abjad</span><span class="o">.</span><span class="n">get</span><span class="o">.</span><span class="n">timespan</span><span class="p">(</span><span class="n">leaf</span><span class="p">)</span><span class="o">.</span><span class="n">start_offset</span> <span class="o">-</span> <span class="n">global_offset</span>
+            <span class="n">leaf_offset_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span>
+
+        <span class="n">beam_range_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">offset_inventory</span><span class="p">,</span> <span class="n">offset_inventory</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+            <span class="n">area</span> <span class="o">=</span> <span class="n">ranges</span><span class="o">.</span><span class="n">Range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+            <span class="n">offset_tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+                <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">offset</span><span class="p">:</span> <span class="n">offset</span> <span class="ow">in</span> <span class="n">area</span><span class="p">,</span> <span class="n">leaf_offset_list</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">n_elements</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">offset_tuple</span><span class="p">)</span>
+            <span class="n">is_start_in_leaves</span> <span class="o">=</span> <span class="n">start</span> <span class="ow">in</span> <span class="n">offset_tuple</span>
+
+            <span class="c1"># make new beam range</span>
+            <span class="k">if</span> <span class="n">is_start_in_leaves</span> <span class="ow">and</span> <span class="n">n_elements</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">new_beam_range</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">leaf_offset_list</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">offset_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                    <span class="n">leaf_offset_list</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">offset_tuple</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span>
+                <span class="p">]</span>
+                <span class="n">beam_range_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_beam_range</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">beam_range</span> <span class="ow">in</span> <span class="n">beam_range_list</span><span class="p">:</span>
+            <span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="o">=</span> <span class="n">beam_range</span>
+            <span class="n">abjad</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">abjad</span><span class="o">.</span><span class="n">StartBeam</span><span class="p">(),</span> <span class="n">leaf_selection</span><span class="p">[</span><span class="n">start</span><span class="p">])</span>
+            <span class="n">abjad</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">abjad</span><span class="o">.</span><span class="n">StopBeam</span><span class="p">(),</span> <span class="n">leaf_selection</span><span class="p">[</span><span class="n">stop</span><span class="p">])</span>
+
+        <span class="n">global_offset</span> <span class="o">+=</span> <span class="n">offset_inventory</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">global_offset</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_find_tuplet_indices</span><span class="p">(</span><span class="n">bar</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Container</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="n">tuplet_index_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">leaf_or_tuplet</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bar</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">leaf_or_tuplet</span><span class="p">,</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Tuplet</span><span class="p">):</span>
+                <span class="n">tuplet_index_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">tuplet_index_list</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_group_tuplet_indices</span><span class="p">(</span><span class="n">tuplet_index_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;Put adjacent tuplet indices into groups.&quot;&quot;&quot;</span>
+
+        <span class="n">grouped_tuplet_index_list</span> <span class="o">=</span> <span class="p">[[]]</span>
+        <span class="n">last_tuplet_index</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">tuplet_index</span> <span class="ow">in</span> <span class="n">tuplet_index_tuple</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">last_tuplet_index</span><span class="p">:</span>
+                <span class="n">difference</span> <span class="o">=</span> <span class="n">tuplet_index</span> <span class="o">-</span> <span class="n">last_tuplet_index</span>
+                <span class="k">if</span> <span class="n">difference</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">grouped_tuplet_index_list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tuplet_index</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">grouped_tuplet_index_list</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">tuplet_index</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">grouped_tuplet_index_list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tuplet_index</span><span class="p">)</span>
+            <span class="n">last_tuplet_index</span> <span class="o">=</span> <span class="n">tuplet_index</span>
+        <span class="k">return</span> <span class="n">grouped_tuplet_index_list</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_concatenate_adjacent_tuplets_for_one_group</span><span class="p">(</span>
+        <span class="n">bar</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Container</span><span class="p">,</span> <span class="n">group</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
+    <span class="p">):</span>
+        <span class="n">implied_prolation_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">bar</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">implied_prolation</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">group</span><span class="p">]</span>
+        <span class="n">common_prolation_group_list</span> <span class="o">=</span> <span class="p">[[</span><span class="n">implied_prolation_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="n">group</span><span class="p">[</span><span class="mi">0</span><span class="p">]]]]</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">prolation</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">implied_prolation_list</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+            <span class="k">if</span> <span class="n">prolation</span> <span class="o">==</span> <span class="n">common_prolation_group_list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">common_prolation_group_list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">common_prolation_group_list</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">prolation</span><span class="p">,</span> <span class="p">[</span><span class="n">index</span><span class="p">]])</span>
+
+        <span class="n">tuplet_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">prolation</span><span class="p">,</span> <span class="n">tuplet_index_list</span> <span class="ow">in</span> <span class="n">common_prolation_group_list</span><span class="p">:</span>
+            <span class="n">tuplet</span> <span class="o">=</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Tuplet</span><span class="p">(</span><span class="n">prolation</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">tuplet_index</span> <span class="ow">in</span> <span class="n">tuplet_index_list</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">bar</span><span class="p">[</span><span class="n">tuplet_index</span><span class="p">]:</span>
+                    <span class="n">tuplet</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">abjad</span><span class="o">.</span><span class="n">mutate</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">component</span><span class="p">))</span>
+            <span class="n">tuplet_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tuplet</span><span class="p">)</span>
+
+        <span class="n">bar</span><span class="p">[</span><span class="n">group</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="n">group</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">tuplet_list</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                       private methods                                  #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="k">def</span> <span class="nf">_make_note_tuple</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">consecution_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="n">pitch_list</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="kc">None</span> <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">is_rest</span> <span class="k">else</span> <span class="s2">&quot;c&quot;</span> <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">consecution_to_convert</span>
+        <span class="p">]</span>
+        <span class="c1"># It has to be a list! Otherwise abjad will raise an exception.</span>
+        <span class="n">duration_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+            <span class="nb">map</span><span class="p">(</span>
+                <span class="k">lambda</span> <span class="n">duration</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Duration</span><span class="p">(</span><span class="n">duration</span><span class="p">),</span>
+                <span class="n">consecution_to_convert</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s2">&quot;duration&quot;</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">note_tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_leaf_maker</span><span class="p">(</span><span class="n">pitch_list</span><span class="p">,</span> <span class="n">duration_list</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">note_tuple</span>
+
+    <span class="k">def</span> <span class="nf">_concatenate_adjacent_tuplets_for_one_bar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bar</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Container</span><span class="p">):</span>
+        <span class="n">tuplet_index_tuple</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">LeafMakerConsecutionToQuantizedAbjadContainer</span><span class="o">.</span><span class="n">_find_tuplet_indices</span><span class="p">(</span><span class="n">bar</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">tuplet_index_tuple</span><span class="p">:</span>
+            <span class="n">grouped_tuplet_index_list_list</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">LeafMakerConsecutionToQuantizedAbjadContainer</span><span class="o">.</span><span class="n">_group_tuplet_indices</span><span class="p">(</span>
+                    <span class="n">tuplet_index_tuple</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">tuplet_index_list</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">grouped_tuplet_index_list_list</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tuplet_index_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">LeafMakerConsecutionToQuantizedAbjadContainer</span><span class="o">.</span><span class="n">_concatenate_adjacent_tuplets_for_one_group</span><span class="p">(</span>
+                        <span class="n">bar</span><span class="p">,</span> <span class="n">tuplet_index_list</span>
+                    <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_concatenate_adjacent_tuplets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">voice</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Voice</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Voice</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">bar</span> <span class="ow">in</span> <span class="n">voice</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_concatenate_adjacent_tuplets_for_one_bar</span><span class="p">(</span><span class="n">bar</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_rewrite_meter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">voice</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Voice</span><span class="p">):</span>
+        <span class="n">time_signature_iter</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_time_signature_tuple</span><span class="p">)</span>
+        <span class="n">last_time_signature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_signature_tuple</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="c1"># rewrite by meter</span>
+        <span class="n">global_offset</span> <span class="o">=</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Offset</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">previous_time_signature</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">bar</span> <span class="ow">in</span> <span class="n">voice</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">time_signature</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">time_signature_iter</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+                <span class="n">time_signature</span> <span class="o">=</span> <span class="n">last_time_signature</span>
+            <span class="k">if</span> <span class="n">time_signature</span> <span class="o">!=</span> <span class="n">previous_time_signature</span><span class="p">:</span>
+                <span class="n">abjad</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">time_signature</span><span class="p">,</span> <span class="n">abjad</span><span class="o">.</span><span class="n">get</span><span class="o">.</span><span class="n">leaf</span><span class="p">(</span><span class="n">bar</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+            <span class="n">meter</span> <span class="o">=</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Meter</span><span class="p">(</span><span class="n">time_signature</span><span class="p">)</span>
+            <span class="n">abjad</span><span class="o">.</span><span class="n">Meter</span><span class="o">.</span><span class="n">rewrite_meter</span><span class="p">(</span>
+                <span class="n">bar</span><span class="p">[:],</span> <span class="n">time_signature</span><span class="p">,</span> <span class="n">maximum_dot_count</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_maximum_dot_count</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_beams</span><span class="p">:</span>
+                <span class="n">global_offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_explicit_beams</span><span class="p">(</span><span class="n">bar</span><span class="p">,</span> <span class="n">meter</span><span class="p">,</span> <span class="n">global_offset</span><span class="p">)</span>
+            <span class="n">previous_time_signature</span> <span class="o">=</span> <span class="n">time_signature</span>
+
+        <span class="n">last_bar</span> <span class="o">=</span> <span class="n">bar</span>
+        <span class="n">difference</span> <span class="o">=</span> <span class="n">time_signature</span><span class="o">.</span><span class="n">duration</span> <span class="o">-</span> <span class="n">abjad</span><span class="o">.</span><span class="n">get</span><span class="o">.</span><span class="n">duration</span><span class="p">(</span><span class="n">last_bar</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">difference</span><span class="p">:</span>
+            <span class="n">last_bar</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_leaf_maker</span><span class="p">([</span><span class="kc">None</span><span class="p">],</span> <span class="p">[</span><span class="n">difference</span><span class="p">]))</span>
+            <span class="n">abjad</span><span class="o">.</span><span class="n">Meter</span><span class="o">.</span><span class="n">rewrite_meter</span><span class="p">(</span>
+                <span class="n">last_bar</span><span class="p">[:],</span> <span class="n">time_signature</span><span class="p">,</span> <span class="n">maximum_dot_count</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_maximum_dot_count</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_make_voice</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">consecution_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Voice</span><span class="p">:</span>
+        <span class="c1"># first build notes</span>
+        <span class="n">note_tuple</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_note_tuple</span><span class="p">(</span><span class="n">consecution_to_convert</span><span class="p">)</span>
+
+        <span class="c1"># split notes by time signatures</span>
+        <span class="n">notes_split_by_time_signature_sequence</span> <span class="o">=</span> <span class="n">abjad</span><span class="o">.</span><span class="n">mutate</span><span class="o">.</span><span class="n">split</span><span class="p">(</span>
+            <span class="n">note_tuple</span><span class="p">,</span>
+            <span class="p">[</span><span class="n">time_signature</span><span class="o">.</span><span class="n">duration</span> <span class="k">for</span> <span class="n">time_signature</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_signature_tuple</span><span class="p">],</span>
+            <span class="n">cyclic</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">bar_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">selection</span> <span class="ow">in</span> <span class="n">notes_split_by_time_signature_sequence</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">bar</span> <span class="o">=</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Container</span><span class="p">(</span><span class="n">selection</span><span class="p">,</span> <span class="n">simultaneous</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="n">bar</span> <span class="o">=</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Container</span><span class="p">(</span><span class="n">abjad</span><span class="o">.</span><span class="n">mutate</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">selection</span><span class="p">),</span> <span class="n">simultaneous</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">bar_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bar</span><span class="p">)</span>
+        <span class="n">voice</span> <span class="o">=</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Voice</span><span class="p">(</span><span class="n">bar_list</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_do_rewrite_meter</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rewrite_meter</span><span class="p">(</span><span class="n">voice</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_concatenate_adjacent_tuplets</span><span class="p">(</span><span class="n">voice</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">voice</span>
+
+    <span class="k">def</span> <span class="nf">_get_data_for_leaf</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">index_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">leaf</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+        <span class="n">has_tie</span> <span class="o">=</span> <span class="n">abjad</span><span class="o">.</span><span class="n">get</span><span class="o">.</span><span class="n">indicator</span><span class="p">(</span><span class="n">leaf</span><span class="p">,</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Tie</span><span class="p">())</span>
+        <span class="n">is_rest</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">isinstance</span><span class="p">(</span><span class="n">leaf</span><span class="p">,</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Rest</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">leaf</span><span class="p">,</span> <span class="n">abjad</span><span class="o">.</span><span class="n">MultimeasureRest</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">leaf</span><span class="p">,</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Skip</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">index_tuple</span><span class="p">,</span> <span class="n">has_tie</span><span class="p">,</span> <span class="n">is_rest</span>
+
+    <span class="k">def</span> <span class="nf">_get_data_for_tuplet_or_leaf</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">index_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+        <span class="n">leaf_or_tuplet</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">,</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Tuplet</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="nb">bool</span><span class="p">],</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">leaf_or_tuplet</span><span class="p">,</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_data_for_leaf</span><span class="p">(</span><span class="n">index_tuple</span><span class="p">,</span> <span class="n">leaf_or_tuplet</span><span class="p">),)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data_per_leaf_or_tuplet_list</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">nth_leaf_or_tuplet_of_tuplet</span><span class="p">,</span> <span class="n">sub_leaf_or_tuplet</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+                <span class="n">leaf_or_tuplet</span>
+            <span class="p">):</span>
+                <span class="n">data_per_leaf_or_tuplet_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_get_data_for_tuplet_or_leaf</span><span class="p">(</span>
+                        <span class="n">index_tuple</span> <span class="o">+</span> <span class="p">(</span><span class="n">nth_leaf_or_tuplet_of_tuplet</span><span class="p">,),</span>
+                        <span class="n">sub_leaf_or_tuplet</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">data_per_leaf_or_tuplet_list</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_make_related_abjad_leaves_per_chronon</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">voice</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Voice</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="n">data_per_tuplet_or_leaf_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">nth_bar</span><span class="p">,</span> <span class="n">bar</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">voice</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">nth_leaf_or_tuplet</span><span class="p">,</span> <span class="n">leaf_or_tuplet</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bar</span><span class="p">):</span>
+                <span class="n">data_per_tuplet_or_leaf_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_get_data_for_tuplet_or_leaf</span><span class="p">(</span>
+                        <span class="p">(</span><span class="n">nth_bar</span><span class="p">,</span> <span class="n">nth_leaf_or_tuplet</span><span class="p">),</span> <span class="n">leaf_or_tuplet</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+
+        <span class="n">related_abjad_leaves_per_chronon</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">related_abjad_leaves</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">was_previous_note_rest</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">has_previous_tie</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">index_tuple</span><span class="p">,</span> <span class="n">has_tie</span><span class="p">,</span> <span class="n">is_rest</span> <span class="ow">in</span> <span class="n">data_per_tuplet_or_leaf_list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">has_previous_tie</span> <span class="ow">or</span> <span class="nb">all</span><span class="p">((</span><span class="n">was_previous_note_rest</span><span class="p">,</span> <span class="n">is_rest</span><span class="p">)):</span>
+                <span class="n">related_abjad_leaves</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index_tuple</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">related_abjad_leaves</span><span class="p">:</span>
+                    <span class="n">related_abjad_leaves_per_chronon</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="nb">tuple</span><span class="p">(</span><span class="n">related_abjad_leaves</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="n">related_abjad_leaves</span> <span class="o">=</span> <span class="p">[</span><span class="n">index_tuple</span><span class="p">]</span>
+
+            <span class="n">has_previous_tie</span> <span class="o">=</span> <span class="n">has_tie</span>
+            <span class="n">was_previous_note_rest</span> <span class="o">=</span> <span class="n">is_rest</span>
+
+        <span class="k">if</span> <span class="n">related_abjad_leaves</span><span class="p">:</span>
+            <span class="n">related_abjad_leaves_per_chronon</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">related_abjad_leaves</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">related_abjad_leaves_per_chronon</span><span class="p">)</span>
+
+<div class="viewcode-block" id="LeafMakerConsecutionToQuantizedAbjadContainer.convert"><a class="viewcode-back" href="../../../../api/mutwo.abjad_converters.html#mutwo.abjad_converters.LeafMakerConsecutionToQuantizedAbjadContainer.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">consecution_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">Container</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">],]:</span>
+        <span class="c1"># FIXME(bad style)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_time_signature_tuple</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_time_signature_tuple</span><span class="p">(</span>
+            <span class="n">consecution_to_convert</span>
+        <span class="p">)</span>
+
+        <span class="n">voice</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_voice</span><span class="p">(</span><span class="n">consecution_to_convert</span><span class="p">)</span>
+        <span class="n">related_abjad_leaves_per_chronon</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_make_related_abjad_leaves_per_chronon</span><span class="p">(</span><span class="n">voice</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">voice</span><span class="p">,</span> <span class="n">related_abjad_leaves_per_chronon</span></div></div>
+
+
+<span class="k">class</span> <span class="nc">_DurationLineBasedQuantizedAbjadContainerMixin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Mixin for duration-line based quantization.</span>
+
+<span class="sd">    :param duration_line_minimum_length: The minimum length of a duration line.</span>
+<span class="sd">    :type duration_line_minimum_length: int</span>
+<span class="sd">    :param duration_line_thickness: The thickness of a duration line.</span>
+<span class="sd">    :type duration_line_thickness: int</span>
+
+<span class="sd">    This converter differs from its parent class through</span>
+<span class="sd">    the usage of duration lines for indicating rhythm instead of using</span>
+<span class="sd">    flags, beams, dots and note head colors.</span>
+
+<span class="sd">    **Note**:</span>
+
+<span class="sd">    Don&#39;t forget to add the &#39;Duration_line_engraver&#39; to the resulting</span>
+<span class="sd">    abjad Voice, otherwise Lilypond won&#39;t be able to render the desired output.</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; import abjad</span>
+<span class="sd">    &gt;&gt;&gt; from mutwo import abjad_converters</span>
+<span class="sd">    &gt;&gt;&gt; from mutwo import core_events</span>
+<span class="sd">    &gt;&gt;&gt; converter = abjad_converters.ConsecutionToAbjadVoiceConverter(</span>
+<span class="sd">    &gt;&gt;&gt;     abjad_converters.LeafMakerConsecutionToDurationLineBasedQuantizedAbjadContainer(</span>
+<span class="sd">    &gt;&gt;&gt;        )</span>
+<span class="sd">    &gt;&gt;&gt;    )</span>
+<span class="sd">    &gt;&gt;&gt; consecution_to_convert = core_events.Consecution(</span>
+<span class="sd">    &gt;&gt;&gt;     [</span>
+<span class="sd">    &gt;&gt;&gt;         music_events.NoteLike(&quot;c&quot;, 0.125),</span>
+<span class="sd">    &gt;&gt;&gt;         music_events.NoteLike(&quot;d&quot;, 1),</span>
+<span class="sd">    &gt;&gt;&gt;         music_events.NoteLike([], 0.125),</span>
+<span class="sd">    &gt;&gt;&gt;         music_events.NoteLike(&quot;e&quot;, 0.16666),</span>
+<span class="sd">    &gt;&gt;&gt;         music_events.NoteLike(&quot;e&quot;, 0.08333333333333333)</span>
+<span class="sd">    &gt;&gt;&gt;     ]</span>
+<span class="sd">    &gt;&gt;&gt; )</span>
+<span class="sd">    &gt;&gt;&gt; converted_consecution = converter.convert(consecution_to_convert)</span>
+<span class="sd">    &gt;&gt;&gt; converted_consecution.consists_commands.append(&quot;Duration_line_engraver&quot;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">duration_line_minimum_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">6</span><span class="p">,</span>
+        <span class="n">duration_line_thickness</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_duration_line_minimum_length</span> <span class="o">=</span> <span class="n">duration_line_minimum_length</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_duration_line_thickness</span> <span class="o">=</span> <span class="n">duration_line_thickness</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_set_docs</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="nb">type</span><span class="p">):</span>
+        <span class="n">doc_base</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="vm">__doc__</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">doc_mixin</span> <span class="o">=</span> <span class="n">_DurationLineBasedQuantizedAbjadContainerMixin</span><span class="o">.</span><span class="vm">__doc__</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="bp">cls</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">doc_base</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">doc_base</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">doc_mixin</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">+</span> <span class="n">doc_mixin</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_prepare_first_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">first_element</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">):</span>
+        <span class="c1"># set duration line properties</span>
+        <span class="n">abjad</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span>
+            <span class="n">abjad</span><span class="o">.</span><span class="n">LilyPondLiteral</span><span class="p">(</span>
+                <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">override Staff.DurationLine.minimum-length = </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_duration_line_minimum_length</span>
+                <span class="p">)</span>
+            <span class="p">),</span>
+            <span class="n">first_element</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">abjad</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span>
+            <span class="n">abjad</span><span class="o">.</span><span class="n">LilyPondLiteral</span><span class="p">(</span>
+                <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">override Staff.DurationLine.thickness = </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_duration_line_thickness</span>
+                <span class="p">)</span>
+            <span class="p">),</span>
+            <span class="n">first_element</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_adjust_quantisized_abjad_leaves</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">quanitisized_abjad_leaf_voice</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Container</span><span class="p">,</span>
+        <span class="n">related_abjad_leaves_per_chronon</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">],</span>
+    <span class="p">):</span>
+        <span class="n">is_first</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">for</span> <span class="n">abjad_leaves_indices</span> <span class="ow">in</span> <span class="n">related_abjad_leaves_per_chronon</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">abjad_leaves_indices</span><span class="p">:</span>
+                <span class="n">first_element</span> <span class="o">=</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">get_nested_item_from_index_sequence</span><span class="p">(</span>
+                    <span class="n">abjad_leaves_indices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">quanitisized_abjad_leaf_voice</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">is_first</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_first_element</span><span class="p">(</span><span class="n">first_element</span><span class="p">)</span>
+                    <span class="n">is_first</span> <span class="o">=</span> <span class="kc">False</span>
+
+                <span class="n">is_active</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">abjad</span><span class="o">.</span><span class="n">get</span><span class="o">.</span><span class="n">pitches</span><span class="p">(</span><span class="n">first_element</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">is_active</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">abjad_leaves_indices</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">abjad</span><span class="o">.</span><span class="n">detach</span><span class="p">(</span><span class="n">abjad</span><span class="o">.</span><span class="n">Tie</span><span class="p">(),</span> <span class="n">first_element</span><span class="p">)</span>
+
+                    <span class="n">abjad</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span>
+                        <span class="n">abjad</span><span class="o">.</span><span class="n">LilyPondLiteral</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">-&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;after&quot;</span><span class="p">),</span> <span class="n">first_element</span>
+                    <span class="p">)</span>
+
+                    <span class="k">for</span> <span class="n">indices</span> <span class="ow">in</span> <span class="n">abjad_leaves_indices</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                        <span class="n">element</span> <span class="o">=</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">get_nested_item_from_index_sequence</span><span class="p">(</span>
+                            <span class="n">indices</span><span class="p">,</span> <span class="n">quanitisized_abjad_leaf_voice</span>
+                        <span class="p">)</span>
+                        <span class="n">core_utilities</span><span class="o">.</span><span class="n">set_nested_item_from_index_sequence</span><span class="p">(</span>
+                            <span class="n">indices</span><span class="p">,</span>
+                            <span class="n">quanitisized_abjad_leaf_voice</span><span class="p">,</span>
+                            <span class="n">abjad</span><span class="o">.</span><span class="n">Skip</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">written_duration</span><span class="p">),</span>
+                        <span class="p">)</span>
+
+
+<div class="viewcode-block" id="NauertConsecutionToDurationLineBasedQuantizedAbjadContainer"><a class="viewcode-back" href="../../../../api/mutwo.abjad_converters.html#mutwo.abjad_converters.NauertConsecutionToDurationLineBasedQuantizedAbjadContainer">[docs]</a><span class="k">class</span> <span class="nc">NauertConsecutionToDurationLineBasedQuantizedAbjadContainer</span><span class="p">(</span>
+    <span class="n">NauertConsecutionToQuantizedAbjadContainer</span><span class="p">,</span>
+    <span class="n">_DurationLineBasedQuantizedAbjadContainerMixin</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="n">duration_line_minimum_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">6</span><span class="p">,</span>
+        <span class="n">duration_line_thickness</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">_DurationLineBasedQuantizedAbjadContainerMixin</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">duration_line_minimum_length</span><span class="o">=</span><span class="n">duration_line_minimum_length</span><span class="p">,</span>
+            <span class="n">duration_line_thickness</span><span class="o">=</span><span class="n">duration_line_thickness</span><span class="p">,</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="NauertConsecutionToDurationLineBasedQuantizedAbjadContainer.convert"><a class="viewcode-back" href="../../../../api/mutwo.abjad_converters.html#mutwo.abjad_converters.NauertConsecutionToDurationLineBasedQuantizedAbjadContainer.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">consecution_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">Container</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">],]:</span>
+
+        <span class="p">(</span>
+            <span class="n">quanitisized_abjad_leaf_voice</span><span class="p">,</span>
+            <span class="n">related_abjad_leaves_per_chronon</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">consecution_to_convert</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_adjust_quantisized_abjad_leaves</span><span class="p">(</span>
+            <span class="n">quanitisized_abjad_leaf_voice</span><span class="p">,</span> <span class="n">related_abjad_leaves_per_chronon</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">quanitisized_abjad_leaf_voice</span><span class="p">,</span> <span class="n">related_abjad_leaves_per_chronon</span></div></div>
+
+
+<div class="viewcode-block" id="LeafMakerConsecutionToDurationLineBasedQuantizedAbjadContainer"><a class="viewcode-back" href="../../../../api/mutwo.abjad_converters.html#mutwo.abjad_converters.LeafMakerConsecutionToDurationLineBasedQuantizedAbjadContainer">[docs]</a><span class="k">class</span> <span class="nc">LeafMakerConsecutionToDurationLineBasedQuantizedAbjadContainer</span><span class="p">(</span>
+    <span class="n">LeafMakerConsecutionToQuantizedAbjadContainer</span><span class="p">,</span>
+    <span class="n">_DurationLineBasedQuantizedAbjadContainerMixin</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="n">duration_line_minimum_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">6</span><span class="p">,</span>
+        <span class="n">duration_line_thickness</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">_DurationLineBasedQuantizedAbjadContainerMixin</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">duration_line_thickness</span><span class="o">=</span><span class="n">duration_line_thickness</span><span class="p">,</span>
+            <span class="n">duration_line_minimum_length</span><span class="o">=</span><span class="n">duration_line_minimum_length</span><span class="p">,</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="LeafMakerConsecutionToDurationLineBasedQuantizedAbjadContainer.convert"><a class="viewcode-back" href="../../../../api/mutwo.abjad_converters.html#mutwo.abjad_converters.LeafMakerConsecutionToDurationLineBasedQuantizedAbjadContainer.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">consecution_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">Container</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">],]:</span>
+
+        <span class="p">(</span>
+            <span class="n">quanitisized_abjad_leaf_voice</span><span class="p">,</span>
+            <span class="n">related_abjad_leaves_per_chronon</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">consecution_to_convert</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_adjust_quantisized_abjad_leaves</span><span class="p">(</span>
+            <span class="n">quanitisized_abjad_leaf_voice</span><span class="p">,</span> <span class="n">related_abjad_leaves_per_chronon</span>
+        <span class="p">)</span>
+
+        <span class="c1"># only assign first item to abjad leaves</span>
+        <span class="n">post_processed_releated_abjad_leaves_per_chronon</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">related_abjad_leaves</span> <span class="ow">in</span> <span class="n">related_abjad_leaves_per_chronon</span><span class="p">:</span>
+            <span class="n">post_processed_releated_abjad_leaves_per_chronon</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">related_abjad_leaves</span><span class="p">[</span><span class="mi">0</span><span class="p">],)</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">quanitisized_abjad_leaf_voice</span><span class="p">,</span>
+            <span class="n">post_processed_releated_abjad_leaves_per_chronon</span><span class="p">,</span>
+        <span class="p">)</span></div></div>
+
+
+<span class="n">NauertConsecutionToDurationLineBasedQuantizedAbjadContainer</span><span class="o">.</span><span class="n">_set_docs</span><span class="p">(</span>
+    <span class="n">NauertConsecutionToQuantizedAbjadContainer</span>
+<span class="p">)</span>
+<span class="n">LeafMakerConsecutionToDurationLineBasedQuantizedAbjadContainer</span><span class="o">.</span><span class="n">_set_docs</span><span class="p">(</span>
+    <span class="n">LeafMakerConsecutionToQuantizedAbjadContainer</span>
+<span class="p">)</span>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.abjad_converters.events.quantization</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Levin Eric Zimmermann.
+    </div>
+  </body>
+</html>

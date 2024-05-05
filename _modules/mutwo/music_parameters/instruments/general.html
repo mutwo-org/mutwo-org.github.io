@@ -1,0 +1,661 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mutwo.music_parameters.instruments.general &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css" />
+    
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.music_parameters.instruments.general</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mutwo.music_parameters.instruments.general</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">dataclasses</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="kn">import</span> <span class="nn">quicktions</span> <span class="k">as</span> <span class="nn">fractions</span>
+
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_utilities</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_parameters</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;NaturalHarmonic&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;String&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;UnpitchedInstrument&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ContinuousPitchedInstrument&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;DiscreetPitchedInstrument&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ContinuousPitchedStringInstrument&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;DiscreetPitchedStringInstrument&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Orchestration&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;OrchestrationMixin&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="NaturalHarmonic"><a class="viewcode-back" href="../../../../api/mutwo.music_parameters.html#mutwo.music_parameters.NaturalHarmonic">[docs]</a><span class="k">class</span> <span class="nc">NaturalHarmonic</span><span class="p">(</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">Partial</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Model the natural harmonic of a :class:`String`.</span>
+
+<span class="sd">    :param index: The partials index.</span>
+<span class="sd">    :type index: int</span>
+<span class="sd">    :param string: The :class:`String` on which this harmonic</span>
+<span class="sd">        shall be played.</span>
+<span class="sd">    :type string: String</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="NaturalHarmonic.Node"><a class="viewcode-back" href="../../../../api/mutwo.music_parameters.html#mutwo.music_parameters.NaturalHarmonic.Node">[docs]</a>    <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">class</span> <span class="nc">Node</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;A position on a string which, if touched, produces a harmonic.</span>
+
+<span class="sd">        :param interval: The `interval` remarks the position on the string</span>
+<span class="sd">            where the player needs to press in order to produce a harmonic.</span>
+<span class="sd">            The interval needs to be added to the :class:`String` tuning</span>
+<span class="sd">            in order to gain a pitch. The position where this pitch is played</span>
+<span class="sd">            normally on the given string is the node position where the</span>
+<span class="sd">            harmonic can be produced.</span>
+<span class="sd">        :type interval: music_parameters.abc.PitchInterval</span>
+<span class="sd">        :param natural_harmonic: The natural harmonic which is produced when</span>
+<span class="sd">            pressing at the nodes position.</span>
+<span class="sd">        :type natural_harmonic: NaturalHarmonic</span>
+<span class="sd">        :param string: The string on which to play the node,</span>
+<span class="sd">        :type string: String</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">interval</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PitchInterval</span>
+        <span class="n">natural_harmonic</span><span class="p">:</span> <span class="n">NaturalHarmonic</span>
+        <span class="n">string</span><span class="p">:</span> <span class="n">String</span>
+
+        <span class="nd">@functools</span><span class="o">.</span><span class="n">cached_property</span>
+        <span class="k">def</span> <span class="nf">pitch</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">:</span>
+            <span class="sd">&quot;&quot;&quot;At which position to press the string to produce the harmonic.&quot;&quot;&quot;</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">string</span><span class="o">.</span><span class="n">tuning_original</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval</span></div>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">string</span><span class="p">:</span> <span class="n">String</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_string</span> <span class="o">=</span> <span class="n">string</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">tonality</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># We can&#39;t play undertones</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">string</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">String</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;The :class:`String` on which the harmonic is played.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_string</span>
+
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">cached_property</span>
+    <span class="k">def</span> <span class="nf">pitch</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">JustIntonationPitch</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;The resulting sounding pitch of a :class:`NaturalHarmonic`.</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo import music_parameters</span>
+<span class="sd">        &gt;&gt;&gt; string = music_parameters.String(0, music_parameters.WesternPitch(&quot;g&quot;, 3))</span>
+<span class="sd">        &gt;&gt;&gt; natural_harmonic = music_parameters.NaturalHarmonic(3, string)</span>
+<span class="sd">        &gt;&gt;&gt; natural_harmonic.pitch</span>
+<span class="sd">        WesternPitch(&#39;d&#39;, 5)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">string</span><span class="o">.</span><span class="n">tuning</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval</span>
+
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">cached_property</span>
+    <span class="k">def</span> <span class="nf">node_tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NaturalHarmonic</span><span class="o">.</span><span class="n">Node</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Find all :class:`NaturalHarmonic.Node` on which harmonic is playable.</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo import music_parameters</span>
+<span class="sd">        &gt;&gt;&gt; natural_harmonic = music_parameters.NaturalHarmonic(</span>
+<span class="sd">        ...     2,</span>
+<span class="sd">        ...     music_parameters.String(0, music_parameters.WesternPitch(&#39;g&#39;, 3)),</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &gt;&gt;&gt; natural_harmonic.node_tuple</span>
+<span class="sd">        (NaturalHarmonic.Node(interval=JustIntonationPitch(&#39;2/1&#39;), natural_harmonic=NaturalHarmonic(index=2, tonality=True), string=String(0, WesternPitch(&#39;g&#39;, 3))),)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">node_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">node_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">):</span>
+            <span class="n">ratio</span> <span class="o">=</span> <span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">node_index</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ratio</span><span class="o">.</span><span class="n">numerator</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+                <span class="n">node_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
+                        <span class="n">music_parameters</span><span class="o">.</span><span class="n">JustIntonationPitch</span><span class="p">(</span><span class="n">ratio</span><span class="p">),</span> <span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">string</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">node_list</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="String"><a class="viewcode-back" href="../../../../api/mutwo.music_parameters.html#mutwo.music_parameters.String">[docs]</a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">String</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;:class:`String` represents a string of an instrument.</span>
+
+<span class="sd">    :param index: The index of a :class:`String`. This is important</span>
+<span class="sd">        in order to differentiate how far two strings are from</span>
+<span class="sd">        each other.</span>
+<span class="sd">    :type index: int</span>
+<span class="sd">    :param tuning: The pitch to which the string is tuned to.</span>
+<span class="sd">    :type tuning: music_parameters.abc.Pitch</span>
+<span class="sd">    :param tuning_original: If the standard tuning of a string</span>
+<span class="sd">        differs from its current tuning (e.g. if a scordatura</span>
+<span class="sd">        is used) this parameter can be set to the standard tuning.</span>
+<span class="sd">        This is useful in case one wants to notate the fingering</span>
+<span class="sd">        of a harmonic and not the sounding result. The ``pitch``</span>
+<span class="sd">        attribute of :class:`NaturalHarmonic.Node` uses `tuning_original`</span>
+<span class="sd">        for calculation instead of `tuning. If `tuning_original`</span>
+<span class="sd">        is ``None`` it is auto-set to `tuning`. Default to ``None``.</span>
+<span class="sd">    :type tuning_original: typing.Optional[music_parameters.abc.Pitch]</span>
+<span class="sd">    :param max_natural_harmonic_index: Although we can imagine infinite</span>
+<span class="sd">        number of natural harmonics, in the real world it&#39;s not so</span>
+<span class="sd">        easy to play higher flageolet. It&#39;s therefore a good idea</span>
+<span class="sd">        to denote a limit of the highest natural harmonic. This</span>
+<span class="sd">        limit defines the highest :class:`NaturalHarmonic` which is</span>
+<span class="sd">        returned when accessing :class:`String`s</span>
+<span class="sd">        ``natural_harmonic_tuple`` property. No matter what is</span>
+<span class="sd">        set to ``max_natural_harmonic_index``, you can still get</span>
+<span class="sd">        infinitely high :class:`NaturalHarmonic` of a :class:`String`</span>
+<span class="sd">        with its ``index_to_natural_harmonic`` method. Default to 6.</span>
+<span class="sd">    :type max_natural_harmonic_index: int</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import music_parameters</span>
+<span class="sd">    &gt;&gt;&gt; g_string = music_parameters.String(0, music_parameters.WesternPitch(&#39;g&#39;, 3))</span>
+<span class="sd">    &gt;&gt;&gt; g_string</span>
+<span class="sd">    String(WesternPitch(&#39;g&#39;, 3))</span>
+<span class="sd">    &gt;&gt;&gt; retuned_g_string = music_parameters.String(</span>
+<span class="sd">    ...     0,</span>
+<span class="sd">    ...     music_parameters.WesternPitch(&#39;g&#39;, 3),</span>
+<span class="sd">    ...     tuning_original=music_parameters.JustIntonationPitch(&#39;8/11&#39;),</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; retuned_g_string</span>
+<span class="sd">    String(WesternPitch(&#39;g&#39;, 3))</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">index</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">tuning</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span>
+    <span class="n">tuning_original</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">max_natural_harmonic_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">6</span>
+
+    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;tuning_original&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tuning_original</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">tuning</span><span class="p">)</span>
+        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_index_to_natural_harmonic&quot;</span><span class="p">,</span> <span class="p">{})</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">tuning</span><span class="si">}</span><span class="s2">)&quot;</span>
+
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">cached_property</span>
+    <span class="k">def</span> <span class="nf">natural_harmonic_tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NaturalHarmonic</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;All :class:`NaturalHarmonic` with index from 2 until ``max_natural_harmonic_index``.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">index_to_natural_harmonic</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_natural_harmonic_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="String.index_to_natural_harmonic"><a class="viewcode-back" href="../../../../api/mutwo.music_parameters.html#mutwo.music_parameters.String.index_to_natural_harmonic">[docs]</a>    <span class="k">def</span> <span class="nf">index_to_natural_harmonic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">natural_harmonic_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NaturalHarmonic</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Find natural harmonic with given partial index.</span>
+
+<span class="sd">        :param natural_harmonic_index: The partial index; e.g. 2 is the first</span>
+<span class="sd">            overtone (an octave above the root), 3 the second overtone (octave</span>
+<span class="sd">            plus fifth), etc.</span>
+<span class="sd">        :type natural_harmonic_index: int</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo import music_parameters</span>
+<span class="sd">        &gt;&gt;&gt; g_string = music_parameters.String(</span>
+<span class="sd">        ...     0, music_parameters.WesternPitch(&#39;g&#39;, 3)</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &gt;&gt;&gt; g_string.index_to_natural_harmonic(5)</span>
+<span class="sd">        NaturalHarmonic(index=5, tonality=True)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_index_to_natural_harmonic</span><span class="p">[</span><span class="n">natural_harmonic_index</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_index_to_natural_harmonic</span><span class="p">[</span>
+                <span class="n">natural_harmonic_index</span>
+            <span class="p">]</span> <span class="o">=</span> <span class="n">NaturalHarmonic</span><span class="p">(</span><span class="n">natural_harmonic_index</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">h</span></div></div>
+
+
+<div class="viewcode-block" id="StringInstrumentMixin"><a class="viewcode-back" href="../../../../api/mutwo.music_parameters.html#mutwo.music_parameters.StringInstrumentMixin">[docs]</a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">StringInstrumentMixin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Mixin to model instrument with strings.</span>
+
+<span class="sd">    :param string_tuple: All strings which the instrument has.</span>
+<span class="sd">    :type string_tuple: tuple[String, ...]</span>
+
+<span class="sd">    This class provides additional attributes and methods for</span>
+<span class="sd">    an instrument with strings.</span>
+
+<span class="sd">    The class itself is not an :class:`Instrument`, but only a mixin.</span>
+<span class="sd">    In order to use it with an :class:`Instrument`, you need to</span>
+<span class="sd">    inherit from both and explicitly call &#39;__init__&#39; of both</span>
+<span class="sd">    super classes inside your &#39;__init__&#39; method.</span>
+
+<span class="sd">    It&#39;s recommended to simply use builtin :class:`ContinuousPitchedStringInstrument`</span>
+<span class="sd">    or :class:`DiscreetPitchedStringInstrument`.</span>
+
+<span class="sd">    Harmonic pitches have no effect on the `__contains__`</span>
+<span class="sd">    method of an `Instrument`. This means the expression</span>
+
+<span class="sd">        ``pitch in instrument``</span>
+
+<span class="sd">    ignores all pitches returned by the `harmonic_pitch_tuple`</span>
+<span class="sd">    property. This is because it is assumed that the user needs</span>
+<span class="sd">    an explicit additional test to check if a pitch can be played</span>
+<span class="sd">    by harmonics (because often we may find ourselves in a situation</span>
+<span class="sd">    where we don&#39;t want a harmonic).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">string_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">String</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">cached_property</span>
+    <span class="k">def</span> <span class="nf">harmonic_pitch_tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;List all pitches which can be played with natural harmonics.</span>
+
+<span class="sd">        This tuple depends on ``max_natural_harmonic_index`` attribute of</span>
+<span class="sd">        :class:`String`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pitch_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">string_tuple</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">s</span><span class="o">.</span><span class="n">natural_harmonic_tuple</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">p</span> <span class="o">:=</span> <span class="n">h</span><span class="o">.</span><span class="n">pitch</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pitch_list</span><span class="p">:</span>
+                    <span class="n">pitch_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">pitch_list</span><span class="p">))</span>
+
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">cached_property</span>
+    <span class="k">def</span> <span class="nf">harmonic_pitch_ambitus</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PitchAmbitus</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get flageolet :class:`music_parameters.abc.PitchAmbitus`.&quot;&quot;&quot;</span>
+        <span class="n">hp_tuple</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">harmonic_pitch_tuple</span>
+        <span class="k">return</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">OctaveAmbitus</span><span class="p">(</span><span class="n">hp_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">hp_tuple</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+<div class="viewcode-block" id="StringInstrumentMixin.get_harmonic_pitch_variant_tuple"><a class="viewcode-back" href="../../../../api/mutwo.music_parameters.html#mutwo.music_parameters.StringInstrumentMixin.get_harmonic_pitch_variant_tuple">[docs]</a>    <span class="k">def</span> <span class="nf">get_harmonic_pitch_variant_tuple</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">pitch</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">,</span>
+        <span class="n">period</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PitchInterval</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">tolerance</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PitchInterval</span> <span class="o">=</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">DirectPitchInterval</span><span class="p">(</span>
+            <span class="mi">2</span>
+        <span class="p">),</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Find natural harmonic pitch variants (in all registers) of ``pitch``</span>
+
+<span class="sd">        :param pitch: The pitch which variants shall be found.</span>
+<span class="sd">        :type pitch: music_parameters.abc.Pitch</span>
+<span class="sd">        :param period: The repeating period (usually an octave). If the</span>
+<span class="sd">            period is set to `None` the function will fallback to the</span>
+<span class="sd">            objects method :meth:`~mutwo.music_parameters.abc.PitchAmbitus.pitch_to_period`.</span>
+<span class="sd">            Default to `None`.</span>
+<span class="sd">        :type period: typing.Optional[music_parameters.abc.PitchInterval]</span>
+<span class="sd">        :param tolerance: Because harmonics are just tuned they may</span>
+<span class="sd">            differ from tempered pitches. In order to still fetch harmonics</span>
+<span class="sd">            the ``tolerance`` parameter can help. This is a</span>
+<span class="sd">            :class:`music_parameters.abc.PitchInterval`: if the difference</span>
+<span class="sd">            is within the intervals range, it is still considered as equal</span>
+<span class="sd">            and the harmonic is returned. Default to `DirectPitchInterval`</span>
+<span class="sd">            with 2 cents.</span>
+<span class="sd">        :type tolerance: music_parameters.abc.PitchInterval</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">t_interval</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">tolerance</span><span class="o">.</span><span class="n">interval</span><span class="p">)</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">harmonic_pitch_ambitus</span><span class="o">.</span><span class="n">get_pitch_variant_tuple</span>
+        <span class="n">h_t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">harmonic_pitch_tuple</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="n">p</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">g</span><span class="p">(</span><span class="n">pitch</span><span class="p">,</span> <span class="n">period</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span>
+                <span class="p">[</span><span class="nb">abs</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">get_pitch_interval</span><span class="p">(</span><span class="n">h_p</span><span class="p">)</span><span class="o">.</span><span class="n">interval</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">t_interval</span> <span class="k">for</span> <span class="n">h_p</span> <span class="ow">in</span> <span class="n">h_t</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="StringInstrumentMixin.pitch_to_natural_harmonic_tuple"><a class="viewcode-back" href="../../../../api/mutwo.music_parameters.html#mutwo.music_parameters.StringInstrumentMixin.pitch_to_natural_harmonic_tuple">[docs]</a>    <span class="k">def</span> <span class="nf">pitch_to_natural_harmonic_tuple</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">pitch</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">,</span>
+        <span class="n">tolerance</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PitchInterval</span> <span class="o">=</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">DirectPitchInterval</span><span class="p">(</span>
+            <span class="mi">2</span>
+        <span class="p">),</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NaturalHarmonic</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Find all :class:`NaturalHarmonic` which produces ``pitch``.</span>
+
+<span class="sd">        :param pitch: The pitch which shall be equal to the returned</span>
+<span class="sd">            harmonics pitch.</span>
+<span class="sd">        :type pitch: music_parameters.abc.Pitch</span>
+<span class="sd">        :param tolerance: Because harmonics are just tuned they may</span>
+<span class="sd">            differ from tempered pitches. In order to still fetch harmonics</span>
+<span class="sd">            the ``tolerance`` parameter can help. This is a</span>
+<span class="sd">            :class:`music_parameters.abc.PitchInterval`: if the difference</span>
+<span class="sd">            is within the intervals range, it is still considered as equal</span>
+<span class="sd">            and the harmonic is returned. Default to `DirectPitchInterval`</span>
+<span class="sd">            with 2 cents.</span>
+<span class="sd">        :type tolerance: music_parameters.abc.PitchInterval</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">t_interval</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">tolerance</span><span class="o">.</span><span class="n">interval</span><span class="p">)</span>
+        <span class="n">natural_harmonic_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">string_tuple</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">s</span><span class="o">.</span><span class="n">natural_harmonic_tuple</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">abs</span><span class="p">((</span><span class="n">h</span><span class="o">.</span><span class="n">pitch</span><span class="o">.</span><span class="n">get_pitch_interval</span><span class="p">(</span><span class="n">pitch</span><span class="p">))</span><span class="o">.</span><span class="n">interval</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">t_interval</span><span class="p">:</span>
+                    <span class="n">natural_harmonic_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">natural_harmonic_list</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="UnpitchedInstrument"><a class="viewcode-back" href="../../../../api/mutwo.music_parameters.html#mutwo.music_parameters.UnpitchedInstrument">[docs]</a><span class="k">class</span> <span class="nc">UnpitchedInstrument</span><span class="p">(</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Instrument</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Model a musical instruments without any clear pitches.</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import music_parameters</span>
+<span class="sd">    &gt;&gt;&gt; bass_drum = music_parameters.UnpitchedInstrument(&quot;bass drum&quot;, &quot;bd.&quot;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_pitched</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="ContinuousPitchedInstrument"><a class="viewcode-back" href="../../../../api/mutwo.music_parameters.html#mutwo.music_parameters.ContinuousPitchedInstrument">[docs]</a><span class="k">class</span> <span class="nc">ContinuousPitchedInstrument</span><span class="p">(</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PitchedInstrument</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Model a musical instrument with continuous pitches (e.g. not fretted).</span>
+
+<span class="sd">    :param pitch_ambitus: The pitch ambitus of the instrument.</span>
+<span class="sd">    :type pitch_ambitus: music_parameters.abc.PitchAmbitus</span>
+<span class="sd">    :param name: The name of the instrument.</span>
+<span class="sd">    :type name: str</span>
+<span class="sd">    :param short_name: The abbreviation of the instrument.</span>
+<span class="sd">        If set to ``None`` it will be the same like `name`.</span>
+<span class="sd">        Default to ``None``.</span>
+<span class="sd">    :type short_name: typing.Optional[str]</span>
+<span class="sd">    :param pitch_count_range: Set how many simultaneous</span>
+<span class="sd">        pitches the instrument can play. Default to</span>
+<span class="sd">        `ranges.Range(1, 2)`, which means that the instrument</span>
+<span class="sd">        is monophonic.</span>
+<span class="sd">    :type pitch_count_range: ranges.Range</span>
+<span class="sd">    :param transposition_pitch_interval: Some instruments are</span>
+<span class="sd">        written with a transposition (so sounding pitch and</span>
+<span class="sd">        written pitch differs). This parameter can be used</span>
+<span class="sd">        to set the transposition interval in case sounding</span>
+<span class="sd">        and written differs. The `transposition_pitch_interval`</span>
+<span class="sd">        is added to the sounding pitches in order to reach the</span>
+<span class="sd">        written pitches. If set to ``None`` this will be</span>
+<span class="sd">        set to `DirectPitchInterval(0)` which is no transposition.</span>
+<span class="sd">        Default to ``None``.</span>
+<span class="sd">    :type transposition_pitch_interval: typing.Optional[PitchInterval]</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import music_parameters</span>
+<span class="sd">    &gt;&gt;&gt; vl = music_parameters.ContinuousPitchedInstrument(</span>
+<span class="sd">    ...     music_parameters.OctaveAmbitus(</span>
+<span class="sd">    ...         music_parameters.WesternPitch(&#39;g&#39;, 3),</span>
+<span class="sd">    ...         music_parameters.WesternPitch(&#39;e&#39;, 7),</span>
+<span class="sd">    ...     ),</span>
+<span class="sd">    ...     &quot;violin&quot;,</span>
+<span class="sd">    ...     &quot;vl.&quot;,</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">pitch_ambitus</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PitchAmbitus</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pitch_ambitus</span> <span class="o">=</span> <span class="n">pitch_ambitus</span>
+
+    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pitch</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Test if pitch is playable by instrument.</span>
+
+<span class="sd">        :param pitch: Pitch to test.</span>
+<span class="sd">        :type pitch: typing.Any</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo import music_parameters</span>
+<span class="sd">        &gt;&gt;&gt; music_parameters.WesternPitch(&#39;c&#39;, 1) in music_parameters.BfClarinet()</span>
+<span class="sd">        False</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">pitch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pitch_ambitus</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pitch_ambitus</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PitchAmbitus</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pitch_ambitus</span>
+
+<div class="viewcode-block" id="ContinuousPitchedInstrument.get_pitch_variant_tuple"><a class="viewcode-back" href="../../../../api/mutwo.music_parameters.html#mutwo.music_parameters.ContinuousPitchedInstrument.get_pitch_variant_tuple">[docs]</a>    <span class="k">def</span> <span class="nf">get_pitch_variant_tuple</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">pitch</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">,</span>
+        <span class="n">period</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PitchInterval</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pitch_ambitus</span><span class="o">.</span><span class="n">get_pitch_variant_tuple</span><span class="p">(</span><span class="n">pitch</span><span class="p">,</span> <span class="n">period</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="DiscreetPitchedInstrument"><a class="viewcode-back" href="../../../../api/mutwo.music_parameters.html#mutwo.music_parameters.DiscreetPitchedInstrument">[docs]</a><span class="k">class</span> <span class="nc">DiscreetPitchedInstrument</span><span class="p">(</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PitchedInstrument</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Model a musical instrument with discreet pitches (e.g. fretted).</span>
+
+<span class="sd">    :param pitch_tuple: A tuple of all playable pitches of the instrument.</span>
+<span class="sd">    :type pitch_tuple: tuple[music_parameters.abc.Pitch, ...]</span>
+<span class="sd">    :param name: The name of the instrument.</span>
+<span class="sd">    :type name: str</span>
+<span class="sd">    :param short_name: The abbreviation of the instrument.</span>
+<span class="sd">        If set to ``None`` it will be the same like `name`.</span>
+<span class="sd">        Default to ``None``.</span>
+<span class="sd">    :type short_name: typing.Optional[str]</span>
+<span class="sd">    :param pitch_count_range: Set how many simultaneous</span>
+<span class="sd">        pitches the instrument can play. Default to</span>
+<span class="sd">        `ranges.Range(1, 2)`, which means that the instrument</span>
+<span class="sd">        is monophonic.</span>
+<span class="sd">    :type pitch_count_range: ranges.Range</span>
+<span class="sd">    :param transposition_pitch_interval: Some instruments are</span>
+<span class="sd">        written with a transposition (so sounding pitch and</span>
+<span class="sd">        written pitch differs). This parameter can be used</span>
+<span class="sd">        to set the transposition interval in case sounding</span>
+<span class="sd">        and written differs. The `transposition_pitch_interval`</span>
+<span class="sd">        is added to the sounding pitches in order to reach the</span>
+<span class="sd">        written pitches. If set to ``None`` this will be</span>
+<span class="sd">        set to `DirectPitchInterval(0)` which is no transposition.</span>
+<span class="sd">        Default to ``None``.</span>
+<span class="sd">    :type transposition_pitch_interval: typing.Optional[PitchInterval]</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import music_parameters</span>
+<span class="sd">    &gt;&gt;&gt; pentatonic_idiophone = music_parameters.DiscreetPitchedInstrument(</span>
+<span class="sd">    ...     (</span>
+<span class="sd">    ...         music_parameters.JustIntonationPitch(&#39;1/1&#39;),</span>
+<span class="sd">    ...         music_parameters.JustIntonationPitch(&#39;9/8&#39;),</span>
+<span class="sd">    ...         music_parameters.JustIntonationPitch(&#39;5/4&#39;),</span>
+<span class="sd">    ...         music_parameters.JustIntonationPitch(&#39;3/2&#39;),</span>
+<span class="sd">    ...         music_parameters.JustIntonationPitch(&#39;7/4&#39;),</span>
+<span class="sd">    ...     ),</span>
+<span class="sd">    ...     &quot;idiophone&quot;,</span>
+<span class="sd">    ...     &quot;id.&quot;,</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">pitch_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pitch_tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">core_utilities</span><span class="o">.</span><span class="n">uniqify_sequence</span><span class="p">(</span><span class="n">pitch_tuple</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pitch_ambitus</span> <span class="o">=</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">OctaveAmbitus</span><span class="p">(</span>
+            <span class="n">pitch_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pitch_tuple</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pitch</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">pitch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pitch_tuple</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pitch_ambitus</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PitchAmbitus</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pitch_ambitus</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pitch_tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pitch_tuple</span>
+
+<div class="viewcode-block" id="DiscreetPitchedInstrument.get_pitch_variant_tuple"><a class="viewcode-back" href="../../../../api/mutwo.music_parameters.html#mutwo.music_parameters.DiscreetPitchedInstrument.get_pitch_variant_tuple">[docs]</a>    <span class="k">def</span> <span class="nf">get_pitch_variant_tuple</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">pitch</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">,</span>
+        <span class="n">period</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PitchInterval</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="nb">filter</span><span class="p">(</span>
+                <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pitch_tuple</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pitch_ambitus</span><span class="o">.</span><span class="n">get_pitch_variant_tuple</span><span class="p">(</span><span class="n">pitch</span><span class="p">,</span> <span class="n">period</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="ContinuousPitchedStringInstrument"><a class="viewcode-back" href="../../../../api/mutwo.music_parameters.html#mutwo.music_parameters.ContinuousPitchedStringInstrument">[docs]</a><span class="k">class</span> <span class="nc">ContinuousPitchedStringInstrument</span><span class="p">(</span>
+    <span class="n">ContinuousPitchedInstrument</span><span class="p">,</span> <span class="n">StringInstrumentMixin</span>
+<span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">string_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">String</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">ContinuousPitchedInstrument</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">StringInstrumentMixin</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">string_tuple</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DiscreetPitchedStringInstrument"><a class="viewcode-back" href="../../../../api/mutwo.music_parameters.html#mutwo.music_parameters.DiscreetPitchedStringInstrument">[docs]</a><span class="k">class</span> <span class="nc">DiscreetPitchedStringInstrument</span><span class="p">(</span><span class="n">DiscreetPitchedInstrument</span><span class="p">,</span> <span class="n">StringInstrumentMixin</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">string_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">String</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">DiscreetPitchedInstrument</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">StringInstrumentMixin</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">string_tuple</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="OrchestrationMixin"><a class="viewcode-back" href="../../../../api/mutwo.music_parameters.html#mutwo.music_parameters.OrchestrationMixin">[docs]</a><span class="k">class</span> <span class="nc">OrchestrationMixin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Helper base class from which adhoc created `Orchestration` object inherits.</span>
+
+<span class="sd">    This class has some methods which extend the functionality of</span>
+<span class="sd">    Pythons builtin `collections.namedtuple`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="OrchestrationMixin.get_subset"><a class="viewcode-back" href="../../../../api/mutwo.music_parameters.html#mutwo.music_parameters.OrchestrationMixin.get_subset">[docs]</a>    <span class="k">def</span> <span class="nf">get_subset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">instrument_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return a sub-Orchestration of `Orchestration`.</span>
+
+<span class="sd">        :param \*instrument_name: Name of the instrument which should be</span>
+<span class="sd">            included in the subset.</span>
+<span class="sd">        :type \*instrument_name: str</span>
+
+<span class="sd">        This method doesn&#39;t change the original `Orchestration`</span>
+<span class="sd">        but creates a new object.</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo import music_parameters</span>
+<span class="sd">        &gt;&gt;&gt; orch = music_parameters.Orchestration(</span>
+<span class="sd">        ...   oboe0=music_parameters.Oboe(),</span>
+<span class="sd">        ...   oboe1=music_parameters.Oboe(),</span>
+<span class="sd">        ...   oboe2=music_parameters.Oboe(),</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &gt;&gt;&gt; orch.get_subset(&#39;oboe0&#39;, &#39;oboe2&#39;)</span>
+<span class="sd">        Orchestration(oboe0=Oboe(name=&#39;oboe&#39;, short_name=&#39;ob.&#39;, pitch_count_range=Range[1, 2), transposition_pitch_interval=DirectPitchInterval(interval = 0)), oboe2=Oboe(name=&#39;oboe&#39;, short_name=&#39;ob.&#39;, pitch_count_range=Range[1, 2), transposition_pitch_interval=DirectPitchInterval(interval = 0)))</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Orchestration</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">instrument_name</span><span class="p">})</span></div></div>
+
+
+<div class="viewcode-block" id="Orchestration"><a class="viewcode-back" href="../../../../api/mutwo.music_parameters.html#mutwo.music_parameters.Orchestration">[docs]</a><span class="k">def</span> <span class="nf">Orchestration</span><span class="p">(</span><span class="o">**</span><span class="n">instrument_name_to_instrument</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Instrument</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Create a name space for the instrumentation of a composition.</span>
+
+<span class="sd">    :param \**instrument_name_to_instrument: Pick any instrument name</span>
+<span class="sd">        and map it to a specific instrument.</span>
+<span class="sd">    :type \**instrument_name_to_instrument: music_parameters.abc.Instrument</span>
+
+<span class="sd">    This returns an adapted `namedtuple instance &lt;https://docs.python.org/3/library/collections.html#collections.namedtuple&gt;`_</span>
+<span class="sd">    where the keys are the instrument names and the values are the</span>
+<span class="sd">    :class:`mutwo.music_parameters.abc.Instrument` objects.</span>
+<span class="sd">    The returned `Orchestration` object has some additional methods.</span>
+<span class="sd">    They are documented in the :class`OrchestrationMixin`.</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import music_parameters</span>
+<span class="sd">    &gt;&gt;&gt; music_parameters.Orchestration(</span>
+<span class="sd">    ...   oboe0=music_parameters.Oboe(),</span>
+<span class="sd">    ...   oboe1=music_parameters.Oboe(),</span>
+<span class="sd">    ... )</span>
+<span class="sd">    Orchestration(oboe0=Oboe(name=&#39;oboe&#39;, short_name=&#39;ob.&#39;, pitch_count_range=Range[1, 2), transposition_pitch_interval=DirectPitchInterval(interval = 0)), oboe1=Oboe(name=&#39;oboe&#39;, short_name=&#39;ob.&#39;, pitch_count_range=Range[1, 2), transposition_pitch_interval=DirectPitchInterval(interval = 0)))</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">instrument_name_tuple</span><span class="p">,</span> <span class="n">instrument_tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([]),</span> <span class="nb">tuple</span><span class="p">([])</span>
+    <span class="k">if</span> <span class="n">instrument_name_to_instrument</span><span class="p">:</span>
+        <span class="n">instrument_name_tuple</span><span class="p">,</span> <span class="n">instrument_tuple</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span>
+            <span class="o">*</span><span class="n">instrument_name_to_instrument</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="nb">type</span><span class="p">(</span>
+        <span class="s2">&quot;Orchestration&quot;</span><span class="p">,</span>
+        <span class="p">(</span>
+            <span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;Orchestration&quot;</span><span class="p">,</span> <span class="n">instrument_name_tuple</span><span class="p">),</span>
+            <span class="n">OrchestrationMixin</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="p">{},</span>
+    <span class="p">)(</span><span class="o">*</span><span class="n">instrument_tuple</span><span class="p">)</span></div>
+
+
+<span class="c1"># Helper</span>
+<span class="k">def</span> <span class="nf">_setdefault</span><span class="p">(</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">default_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">default_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">kwargs</span>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.music_parameters.instruments.general</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Levin Eric Zimmermann.
+    </div>
+  </body>
+</html>

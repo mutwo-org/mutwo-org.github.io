@@ -1,0 +1,38 @@
+
+.. currentmodule:: mutwo.music_events
+
+mutwo.music_events
+==================
+
+.. contents:: Table of content
+   :depth: 3
+
+.. automodule:: mutwo.music_events
+   :members:
+
+
+.. list-table::
+   :align: center
+   :width: 95%
+   :header-rows: 1
+
+   * - Object
+     - Documentation
+   * - :class:`mutwo.music_events.NoteLike`
+     - :class:`NoteLike` can be a tone, chord, percussion note or rest.
+
+
+
+
+.. autoclass:: mutwo.music_events.NoteLike
+
+        .. autoclasstoc::
+    
+
+
+mutwo.music_events.configurations
+---------------------------------
+
+.. automodule:: mutwo.music_events.configurations
+   :members:
+

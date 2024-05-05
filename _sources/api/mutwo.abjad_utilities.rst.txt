@@ -1,0 +1,62 @@
+
+.. currentmodule:: mutwo.abjad_utilities
+
+mutwo.abjad_utilities
+=====================
+
+.. contents:: Table of content
+   :depth: 3
+
+.. automodule:: mutwo.abjad_utilities
+   :members:
+
+
+.. list-table::
+   :align: center
+   :width: 95%
+   :header-rows: 1
+
+   * - Object
+     - Documentation
+   * - :class:`mutwo.abjad_utilities.AbjadTestCase`
+     - 
+   * - :class:`mutwo.abjad_utilities.run_if_ekmelily_available`
+     - Decorator which only runs test if ekmelily is found
+   * - :class:`mutwo.abjad_utilities.NoTimeSignatureError`
+     - 
+   * - :class:`mutwo.abjad_utilities.concatenate_adjacent_tuplets`
+     - Rewrite tuplets in voice, so that adjacent tuplets are concatenated if possible.
+   * - :class:`mutwo.abjad_utilities.reduce_multiplier`
+     - Reduces multipliers of tuplets in ``voice``.
+   * - :class:`mutwo.abjad_utilities.group_consecutive_numbers`
+     - Group consecutive numbers into the lists
+
+
+
+
+.. autofunction:: run_if_ekmelily_available
+    
+
+
+.. autofunction:: concatenate_adjacent_tuplets
+    
+
+
+.. autofunction:: reduce_multiplier
+    
+
+
+.. autofunction:: group_consecutive_numbers
+    
+
+.. autoclass:: mutwo.abjad_utilities.AbjadTestCase
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.abjad_utilities.NoTimeSignatureError
+
+        .. autoclasstoc::
+    
+
+

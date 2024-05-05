@@ -1,0 +1,241 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mutwo.abjad_utilities.tests &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.abjad_utilities.tests</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mutwo.abjad_utilities.tests</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+<span class="kn">import</span> <span class="nn">unittest</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span>  <span class="c1"># type: ignore</span>
+    <span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">ImageChops</span>  <span class="c1"># type: ignore</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+<span class="kn">import</span> <span class="nn">abjad</span>
+
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">abjad_converters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_events</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_events</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;AbjadTestCase&quot;</span><span class="p">,</span> <span class="s2">&quot;run_if_ekmelily_available&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="AbjadTestCase"><a class="viewcode-back" href="../../../api/mutwo.abjad_utilities.html#mutwo.abjad_utilities.AbjadTestCase">[docs]</a><span class="k">class</span> <span class="nc">AbjadTestCase</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="n">base_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;tests</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">img&quot;</span>
+
+<div class="viewcode-block" id="AbjadTestCase.t"><a class="viewcode-back" href="../../../api/mutwo.abjad_utilities.html#mutwo.abjad_utilities.AbjadTestCase.t">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">t</span><span class="p">(</span><span class="n">reset_tests</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">remove_ly</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">t</span><span class="p">(</span><span class="n">test_method</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">):</span>
+            <span class="k">return</span> <span class="k">lambda</span> <span class="bp">self</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test</span><span class="p">(</span>
+                <span class="n">test_method</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">reset_tests</span><span class="p">,</span> <span class="n">remove_ly</span><span class="p">,</span> <span class="o">**</span><span class="n">test_method</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">t</span></div>
+
+<div class="viewcode-block" id="AbjadTestCase.assertImagesEqual"><a class="viewcode-back" href="../../../api/mutwo.abjad_utilities.html#mutwo.abjad_utilities.AbjadTestCase.assertImagesEqual">[docs]</a>    <span class="k">def</span> <span class="nf">assertImagesEqual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path0</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">path1</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">image0</span><span class="p">,</span> <span class="n">image1</span> <span class="o">=</span> <span class="p">(</span><span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="p">(</span><span class="n">path0</span><span class="p">,</span> <span class="n">path1</span><span class="p">))</span>
+        <span class="n">difference</span> <span class="o">=</span> <span class="n">ImageChops</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">image1</span><span class="p">,</span> <span class="n">image0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">difference</span><span class="o">.</span><span class="n">getbbox</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Images differ!&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="AbjadTestCase.assertImagesAlmostEqual"><a class="viewcode-back" href="../../../api/mutwo.abjad_utilities.html#mutwo.abjad_utilities.AbjadTestCase.assertImagesAlmostEqual">[docs]</a>    <span class="k">def</span> <span class="nf">assertImagesAlmostEqual</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">image0</span><span class="p">:</span> <span class="n">Image</span><span class="p">,</span> <span class="n">image1</span><span class="p">:</span> <span class="n">Image</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span>
+    <span class="p">):</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">root_mean_square_difference</span><span class="p">(</span><span class="n">image0</span><span class="p">,</span> <span class="n">image1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span>
+            <span class="n">d</span> <span class="o">&lt;</span> <span class="n">tolerance</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Images differ above tolerance: &#39;</span><span class="si">{</span><span class="n">d</span><span class="si">}</span><span class="s2"> &gt;= &#39;</span><span class="si">{</span><span class="n">tolerance</span><span class="si">}</span><span class="s2">&#39;!&quot;</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="AbjadTestCase.setUp"><a class="viewcode-back" href="../../../api/mutwo.abjad_utilities.html#mutwo.abjad_utilities.AbjadTestCase.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">header_block</span> <span class="o">=</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Block</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;header&quot;</span><span class="p">)</span>
+        <span class="n">header_block</span><span class="o">.</span><span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;tagline = &quot;---integration-test---&quot;&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lilypond_file</span> <span class="o">=</span> <span class="n">abjad</span><span class="o">.</span><span class="n">LilyPondFile</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">score_block</span> <span class="o">=</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Block</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;score&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lilypond_file</span><span class="o">.</span><span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="sa">r</span><span class="s1">&#39;\include &quot;lilypond-book-preamble.ly&quot;&#39;</span><span class="p">,</span>
+                    <span class="sa">r</span><span class="s2">&quot;#(ly:set-option &#39;tall-page-formats &#39;png)&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lilypond_file</span><span class="o">.</span><span class="n">items</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">header_block</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">score_block</span><span class="p">])</span></div>
+
+    <span class="k">def</span> <span class="nf">_test</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">reset_tests</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">remove_ly</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">converter</span><span class="p">:</span> <span class="n">abjad_converters</span><span class="o">.</span><span class="n">ConsecutionToAbjadVoice</span> <span class="o">=</span> <span class="n">abjad_converters</span><span class="o">.</span><span class="n">ConsecutionToAbjadVoice</span><span class="p">(),</span>
+        <span class="n">ev</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">(</span><span class="mi">1</span><span class="p">)]</span>
+        <span class="p">),</span>
+        <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+    <span class="p">):</span>
+
+        <span class="n">converted_event</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">_parse_event</span><span class="p">(</span><span class="n">ev</span><span class="p">))</span>
+
+        <span class="n">base_p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_path</span>
+        <span class="n">file_ok_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">base_p</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}{</span><span class="n">name</span><span class="si">}</span><span class="s2">_ok.png&quot;</span>
+        <span class="n">file_test_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">base_p</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}{</span><span class="n">name</span><span class="si">}</span><span class="s2">_test.png&quot;</span>
+
+        <span class="k">if</span> <span class="n">reset_tests</span><span class="p">:</span>
+            <span class="n">file_test_path</span> <span class="o">=</span> <span class="n">file_ok_path</span>
+
+        <span class="k">match</span> <span class="n">converted_event</span><span class="p">:</span>
+            <span class="k">case</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Voice</span><span class="p">():</span>
+                <span class="n">item</span> <span class="o">=</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Staff</span><span class="p">([</span><span class="n">converted_event</span><span class="p">])</span>
+            <span class="k">case</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Score</span><span class="p">():</span>
+                <span class="n">item</span> <span class="o">=</span> <span class="n">converted_event</span>
+            <span class="k">case</span> <span class="k">_</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">converted_event</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">score_block</span><span class="o">.</span><span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+        <span class="n">abjad</span><span class="o">.</span><span class="n">persist</span><span class="o">.</span><span class="n">as_png</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lilypond_file</span><span class="p">,</span> <span class="n">png_file_path</span><span class="o">=</span><span class="n">file_test_path</span><span class="p">,</span> <span class="n">remove_ly</span><span class="o">=</span><span class="n">remove_ly</span>
+        <span class="p">)</span>
+
+        <span class="n">image_ok</span><span class="p">,</span> <span class="n">image_test</span> <span class="o">=</span> <span class="p">(</span><span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">(</span><span class="n">file_ok_path</span><span class="p">,</span> <span class="n">file_test_path</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">tolerance</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertImagesAlmostEqual</span><span class="p">(</span><span class="n">image_ok</span><span class="p">,</span> <span class="n">image_test</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertImagesEqual</span><span class="p">(</span><span class="n">image_ok</span><span class="p">,</span> <span class="n">image_test</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">reset_tests</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">file_test_path</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_parse_event</span><span class="p">(</span><span class="n">ev</span><span class="p">):</span>
+    <span class="k">match</span> <span class="n">ev</span><span class="p">:</span>
+        <span class="k">case</span> <span class="n">music_events</span><span class="o">.</span><span class="n">NoteLike</span><span class="p">():</span>
+            <span class="n">ev</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">([</span><span class="n">ev</span><span class="p">])</span>
+        <span class="k">case</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">():</span>
+            <span class="n">ev</span> <span class="o">=</span> <span class="n">ev</span>
+        <span class="k">case</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Concurrence</span><span class="p">():</span>
+            <span class="n">ev</span> <span class="o">=</span> <span class="n">ev</span>
+        <span class="k">case</span> <span class="k">_</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">ev</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">ev</span>
+
+
+<span class="k">def</span> <span class="nf">root_mean_square_difference</span><span class="p">(</span><span class="n">image0</span><span class="p">:</span> <span class="n">Image</span><span class="p">,</span> <span class="n">image1</span><span class="p">:</span> <span class="n">Image</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate root-mean-square difference between two images.</span>
+
+<span class="sd">    Taken from: http://snipplr.com/view/757/compare-two-pil-images-in-python/</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">h0</span><span class="p">,</span> <span class="n">h1</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">histogram</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">(</span><span class="n">image0</span><span class="p">,</span> <span class="n">image1</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">mean_square</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">a</span><span class="p">:</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">b</span><span class="p">:</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">a</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+
+    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+        <span class="n">functools</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">add</span><span class="p">,</span> <span class="nb">map</span><span class="p">(</span><span class="n">mean_square</span><span class="p">,</span> <span class="n">h0</span><span class="p">,</span> <span class="n">h1</span><span class="p">))</span>
+        <span class="o">/</span> <span class="p">(</span><span class="n">image0</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">image0</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="p">)</span>
+
+
+<div class="viewcode-block" id="run_if_ekmelily_available"><a class="viewcode-back" href="../../../api/mutwo.abjad_utilities.html#mutwo.abjad_utilities.run_if_ekmelily_available">[docs]</a><span class="k">def</span> <span class="nf">run_if_ekmelily_available</span><span class="p">(</span><span class="n">method_to_wrap</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Decorator which only runs test if ekmelily is found&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">ekmelily_converters</span>  <span class="c1"># type: ignore</span>
+
+        <span class="n">ekmelily_found</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="n">ekmelily_found</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">ekmelily_found</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">method_to_wrap</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">test</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.abjad_utilities.tests</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Levin Eric Zimmermann.
+    </div>
+  </body>
+</html>

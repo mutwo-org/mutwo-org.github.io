@@ -1,0 +1,1132 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>mutwo.common_generators &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+    
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="mutwo.common_utilities" href="mutwo.common_utilities.html" />
+    <link rel="prev" title="mutwo.abjad_version" href="mutwo.abjad_version.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mutwo.common_utilities.html" title="mutwo.common_utilities"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="mutwo.abjad_version.html" title="mutwo.abjad_version"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="api_documentation.html" accesskey="U">mutwo API documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.common_generators</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="mutwo-common-generators">
+<h1><a class="toc-backref" href="#id27" role="doc-backlink">mutwo.common_generators</a><a class="headerlink" href="#mutwo-common-generators" title="Permalink to this heading">¶</a></h1>
+<nav class="contents" id="table-of-content">
+<p class="topic-title">Table of content</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#mutwo-common-generators" id="id27">mutwo.common_generators</a></p>
+<ul>
+<li><p><a class="reference internal" href="#module-mutwo.common_generators.constants" id="id28">mutwo.common_generators.constants</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<span class="target" id="module-mutwo.common_generators"></span><table class="docutils align-center" style="width: 95%">
+<thead>
+<tr class="row-odd"><th class="head"><p>Object</p></th>
+<th class="head"><p>Documentation</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.common_generators.random_walk_noise" title="mutwo.common_generators.random_walk_noise"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.common_generators.random_walk_noise</span></code></a></p></td>
+<td><p>Generate an instance of Brownian motion (i.e. the Wiener process).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.common_generators.make_bruns_euclidean_algorithm_generator" title="mutwo.common_generators.make_bruns_euclidean_algorithm_generator"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.common_generators.make_bruns_euclidean_algorithm_generator</span></code></a></p></td>
+<td><p>Make generator which runs Bruns adaption of the Euclidean algorithm.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.common_generators.NonTerminal" title="mutwo.common_generators.NonTerminal"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.common_generators.NonTerminal</span></code></a></p></td>
+<td><p>Can be used as a Mixin to define context-free grammar.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.common_generators.Terminal" title="mutwo.common_generators.Terminal"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.common_generators.Terminal</span></code></a></p></td>
+<td><p>Can be used as a Mixin to define context-free grammar.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.common_generators.ContextFreeGrammarRule" title="mutwo.common_generators.ContextFreeGrammarRule"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.common_generators.ContextFreeGrammarRule</span></code></a></p></td>
+<td><p>Describe a context_free_grammar_rule for a <a class="reference internal" href="#mutwo.common_generators.ContextFreeGrammar" title="mutwo.common_generators.ContextFreeGrammar"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextFreeGrammar</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.common_generators.ContextFreeGrammar" title="mutwo.common_generators.ContextFreeGrammar"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.common_generators.ContextFreeGrammar</span></code></a></p></td>
+<td><p>Describe a context-free grammar and resolve non-terminals</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.common_generators.ActivityLevel" title="mutwo.common_generators.ActivityLevel"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.common_generators.ActivityLevel</span></code></a></p></td>
+<td><p>Python implementation of Michael Edwards activity level algorithm.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.common_generators.DynamicChoice" title="mutwo.common_generators.DynamicChoice"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.common_generators.DynamicChoice</span></code></a></p></td>
+<td><p>Weighted random choices with dynamically changing weights.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.common_generators.reflected_binary_code" title="mutwo.common_generators.reflected_binary_code"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.common_generators.reflected_binary_code</span></code></a></p></td>
+<td><p>Make gray code where each tuple has <cite>length</cite> items with <cite>modulus</cite> different numbers.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.common_generators.Tendency" title="mutwo.common_generators.Tendency"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.common_generators.Tendency</span></code></a></p></td>
+<td><p>Tendency offers an interface for dynamically changing minima / maxima areas.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.common_generators.Backtracking" title="mutwo.common_generators.Backtracking"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.common_generators.Backtracking</span></code></a></p></td>
+<td><p>Abstract base class to implement a backtracking algorithm</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.common_generators.IndexBasedBacktracking" title="mutwo.common_generators.IndexBasedBacktracking"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.common_generators.IndexBasedBacktracking</span></code></a></p></td>
+<td><p>Abstract base class for index based backtracking algorithms</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.common_generators.euclidean" title="mutwo.common_generators.euclidean"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.common_generators.euclidean</span></code></a></p></td>
+<td><p>Return euclidean rhythm as described in a 2005 paper by G. T. Toussaint.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.common_generators.paradiddle" title="mutwo.common_generators.paradiddle"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.common_generators.paradiddle</span></code></a></p></td>
+<td><p>Generates rhythm using the paradiddle method described by G. T. Toussaint.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.common_generators.alternating_hands" title="mutwo.common_generators.alternating_hands"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.common_generators.alternating_hands</span></code></a></p></td>
+<td><p>Generates rhythm using the alternating hands method described by G. T. Toussaint.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py function">
+<dt class="sig sig-object py" id="mutwo.common_generators.random_walk_noise">
+<span class="sig-name descname"><span class="pre">random_walk_noise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/common_generators/brown.html#random_walk_noise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_generators.random_walk_noise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate an instance of Brownian motion (i.e. the Wiener process).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x0</strong> (<em>float</em>) – the initial condition(s) (i.e. position(s)) of the Brownian motion.</p></li>
+<li><p><strong>n</strong> (<em>int</em>) – the number of steps to take</p></li>
+<li><p><strong>dt</strong> (<em>float</em>) – the time step</p></li>
+<li><p><strong>delta</strong> (<em>float</em>) – delta determines the “speed” of the Brownian motion.  The random variable
+of the position at time t, X(t), has a normal distribution whose mean is
+the position at time t=0 and whose variance is delta**2*t.</p></li>
+<li><p><strong>out</strong> (<em>Optional</em><em>[</em><em>array</em><em>]</em>) – If <cite>out</cite> is not None, it specifies the array in which to put the
+result.  If <cite>out</cite> is None, a new numpy array is created and returned.</p></li>
+<li><p><strong>random_state</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – set the random seed of the pseudo-random generator.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A numpy array of floats with shape <cite>x0.shape + (n,)</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>array</em></p>
+</dd>
+</dl>
+<p>X(t) = X(0) + N(0, delta**2 * t; 0, t)</p>
+<p>where N(a,b; t0, t1) is a normally distributed random variable with mean a and
+variance b.  The parameters t0 and t1 make explicit the statistical
+independence of N on different time intervals; that is, if [t0, t1) and
+[t2, t3) are disjoint intervals, then N(a, b; t0, t1) and N(a, b; t2, t3)
+are independent.</p>
+<p>Written as an iteration scheme,</p>
+<blockquote>
+<div><p>X(t + dt) = X(t) + N(0, delta**2 * dt; t, t+dt)</p>
+</div></blockquote>
+<p>If <cite>x0</cite> is an array (or array-like), each value in <cite>x0</cite> is treated as
+an initial condition, and the value returned is a numpy array with one
+more dimension than <cite>x0</cite>.</p>
+<p>Note that the initial value <cite>x0</cite> is not included in the returned array.</p>
+<dl class="simple">
+<dt>This code has been copied from the scipy cookbook:</dt><dd><p><a class="reference external" href="https://scipy-cookbook.readthedocs.io/items/BrownianMotion.html">https://scipy-cookbook.readthedocs.io/items/BrownianMotion.html</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mutwo.common_generators.make_bruns_euclidean_algorithm_generator">
+<span class="sig-name descname"><span class="pre">make_bruns_euclidean_algorithm_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">matrix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([[1,</span> <span class="pre">0,</span> <span class="pre">0],</span> <span class="pre">[0,</span> <span class="pre">1,</span> <span class="pre">0],</span> <span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">1]])</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subtraction_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/common_generators/brun.html#make_bruns_euclidean_algorithm_generator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_generators.make_bruns_euclidean_algorithm_generator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make generator which runs Bruns adaption of the Euclidean algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>element_tuple</strong> (<em>tuple</em><em>[</em><em>_BrunEuclideanElement</em><em>, </em><em>_BrunEuclideanElement</em><em>, </em><em>_BrunEuclideanElement</em><em>]</em>) – The initial elements which gets re-calculated
+after each step. Type doesn’t matter; objects only need to have
+the following magic methods: __sub__, __lt__ and __gt__.</p></li>
+<li><p><strong>matrix</strong> (<em>np.array</em>) – The initial matrix.</p></li>
+<li><p><strong>subtraction_index</strong> (<em>Literal</em><em>[</em><em>1</em><em>, </em><em>2</em><em>]</em>) – This parameter has been added for the adaption of the
+function in
+<code class="xref py py-func docutils literal notranslate"><span class="pre">make_wilsons_brun_euclidean_algorithm_generator()</span></code>
+and is not part of Bruns original algorithm. It describes whether in each step
+the first element gets subtracted by the second (original) or by the third
+(Wilson adaption) element.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Generator</em></p>
+</dd>
+</dl>
+<p>This algorithm has been described by V. Brun in his paper “EUCLIDEAN ALGORITHMS
+AND MUSICAL THEORY” (1964).</p>
+<p><strong>Example:</strong></p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">fractions</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">common_generators</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">common_generators</span><span class="o">.</span><span class="n">make_bruns_euclidean_algorithm_generator</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">(</span>
+<span class="gp">... </span>        <span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+<span class="gp">... </span>        <span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+<span class="gp">... </span>        <span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="p">)</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">next</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+<span class="go">((Fraction(2, 1), Fraction(3, 2), Fraction(5, 4)), array([[1, 0, 0],</span>
+<span class="go">       [0, 1, 0],</span>
+<span class="go">       [0, 0, 1]]), Fraction(2, 1))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mutwo.common_generators.reflected_binary_code">
+<span class="sig-name descname"><span class="pre">reflected_binary_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modulus</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/common_generators/gray.html#reflected_binary_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_generators.reflected_binary_code" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make gray code where each tuple has <cite>length</cite> items with <cite>modulus</cite> different numbers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>length</strong> (<em>int</em>) – how long one code is</p></li>
+<li><p><strong>modulus</strong> (<em>int</em>) – how many different numbers are included</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple[tuple[int, …], …]</p>
+</dd>
+</dl>
+<p><strong>Example:</strong></p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">common_generators</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">common_generators</span><span class="o">.</span><span class="n">reflected_binary_code</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="go">((0, 0), (0, 1), (1, 1), (1, 0))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">common_generators</span><span class="o">.</span><span class="n">reflected_binary_code</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="go">((0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0), (1, 1, 0), (1, 1, 1), (1, 0, 1), (1, 0, 0))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">common_generators</span><span class="o">.</span><span class="n">reflected_binary_code</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="go">((0, 0), (0, 1), (0, 2), (1, 2), (1, 1), (1, 0), (2, 0), (2, 1), (2, 2))</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>Basic code has been copied from:</dt><dd><p><a class="reference external" href="https://yetalengthothermodulusathblog.com/tag/gray-codes/">https://yetalengthothermodulusathblog.com/tag/gray-codes/</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mutwo.common_generators.euclidean">
+<span class="sig-name descname"><span class="pre">euclidean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distribution</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/common_generators/toussaint.html#euclidean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_generators.euclidean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return euclidean rhythm as described in a 2005 paper by G. T. Toussaint.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>size</strong> (<em>int</em>) – how many beats the rhythm contains</p></li>
+<li><p><strong>distribution</strong> (<em>int</em>) – how many beats are played</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The rhythm in relative time.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[int, …]</p>
+</dd>
+</dl>
+<p><strong>Example:</strong></p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">common_generators</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">common_generators</span><span class="o">.</span><span class="n">euclidean</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="go">(2, 2, 2, 2)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">common_generators</span><span class="o">.</span><span class="n">euclidean</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="go">(2, 1, 1, 2, 1)</span>
+</pre></div>
+</div>
+<p>The title of Toussaints paper is
+“The Euclidean Algorithm Generates Traditional Musical Rhythms”.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mutwo.common_generators.paradiddle">
+<span class="sig-name descname"><span class="pre">paradiddle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/common_generators/toussaint.html#paradiddle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_generators.paradiddle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates rhythm using the paradiddle method described by G. T. Toussaint.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>size</strong> (<em>int</em>) – how many beats the resulting rhythm shall last. ‘Size’ has to be
+divisible by 2 because of the symmetrical structure of the generated rhythm.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Return nested tuple that contains two tuple where each tuple represents
+one rhythm (both rhythms are complementary to each other). The rhythms are
+encoded in absolute time values.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[tuple[int, …], …]</p>
+</dd>
+</dl>
+<p><strong>Example:</strong></p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">common_generators</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">common_generators</span><span class="o">.</span><span class="n">paradiddle</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+<span class="go">((0, 2, 3, 5), (1, 4, 6, 7))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">common_generators</span><span class="o">.</span><span class="n">paradiddle</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+<span class="go">((0, 4, 5), (1, 2, 3))</span>
+</pre></div>
+</div>
+<p>The paradiddle algorithm has been described by Godfried T. Toussaint
+in his paper ‘Generating “Good” Musical Rhythms Algorithmically’.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mutwo.common_generators.alternating_hands">
+<span class="sig-name descname"><span class="pre">alternating_hands</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed_rhythm</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/common_generators/toussaint.html#alternating_hands"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_generators.alternating_hands" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates rhythm using the alternating hands method described by G. T. Toussaint.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>seed_rhythm</strong> (<em>tuple</em><em>[</em><em>int</em><em>, </em><em>...</em><em>]</em>) – rhythm that shall be distributed on two hands.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Return nested tuple that contains two tuple where each tuple represents
+one rhythm (both rhythms are complementary to each other). The rhythms are
+encoded in absolute time values.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[tuple[int, …], …]</p>
+</dd>
+</dl>
+<p><strong>Example:</strong></p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">common_generators</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">common_generators</span><span class="o">.</span><span class="n">alternating_hands</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="go">((0, 6), (2, 4))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">common_generators</span><span class="o">.</span><span class="n">alternating_hands</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="go">((0, 5, 10), (3, 7, 12))</span>
+</pre></div>
+</div>
+<p>The alternating hands algorithm has been described by Godfried T. Toussaint
+in his paper ‘Generating “Good” Musical Rhythms Algorithmically’.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.common_generators.NonTerminal">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NonTerminal</span></span><a class="reference internal" href="../_modules/mutwo/common_generators/chomksy.html#NonTerminal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_generators.NonTerminal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Can be used as a Mixin to define context-free grammar.</p>
+</dd></dl>
+
+<hr class="docutils" />
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.common_generators.Terminal">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Terminal</span></span><a class="reference internal" href="../_modules/mutwo/common_generators/chomksy.html#Terminal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_generators.Terminal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Can be used as a Mixin to define context-free grammar.</p>
+</dd></dl>
+
+<hr class="docutils" />
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.common_generators.ContextFreeGrammarRule">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ContextFreeGrammarRule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left_side</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_side</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/common_generators/chomksy.html#ContextFreeGrammarRule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_generators.ContextFreeGrammarRule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Describe a context_free_grammar_rule for a <a class="reference internal" href="#mutwo.common_generators.ContextFreeGrammar" title="mutwo.common_generators.ContextFreeGrammar"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextFreeGrammar</span></code></a></p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Data Attributes:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">left_side</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">right_side</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr class="docutils" />
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>left_side</strong> (<a class="reference internal" href="#mutwo.common_generators.NonTerminal" title="mutwo.common_generators.chomksy.NonTerminal"><em>NonTerminal</em></a>) – </p></li>
+<li><p><strong>right_side</strong> (<em>tuple</em><em>[</em><em>Union</em><em>[</em><a class="reference internal" href="#mutwo.common_generators.NonTerminal" title="mutwo.common_generators.chomksy.NonTerminal"><em>mutwo.common_generators.chomksy.NonTerminal</em></a><em>, </em><a class="reference internal" href="#mutwo.common_generators.Terminal" title="mutwo.common_generators.chomksy.Terminal"><em>mutwo.common_generators.chomksy.Terminal</em></a><em>]</em><em>, </em><em>...</em><em>]</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mutwo.common_generators.ContextFreeGrammarRule.left_side">
+<span class="sig-name descname"><span class="pre">left_side</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#mutwo.common_generators.NonTerminal" title="mutwo.common_generators.chomksy.NonTerminal"><span class="pre">NonTerminal</span></a></em><a class="headerlink" href="#mutwo.common_generators.ContextFreeGrammarRule.left_side" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mutwo.common_generators.ContextFreeGrammarRule.right_side">
+<span class="sig-name descname"><span class="pre">right_side</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#mutwo.common_generators.NonTerminal" title="mutwo.common_generators.chomksy.NonTerminal"><span class="pre">mutwo.common_generators.chomksy.NonTerminal</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#mutwo.common_generators.Terminal" title="mutwo.common_generators.chomksy.Terminal"><span class="pre">mutwo.common_generators.chomksy.Terminal</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#mutwo.common_generators.ContextFreeGrammarRule.right_side" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.common_generators.ContextFreeGrammar">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ContextFreeGrammar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context_free_grammar_rule_sequence</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/common_generators/chomksy.html#ContextFreeGrammar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_generators.ContextFreeGrammar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Describe a context-free grammar and resolve non-terminals</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>context_free_grammar_rule_sequence</strong> (<em>Sequence</em><em>[</em><a class="reference internal" href="#mutwo.common_generators.ContextFreeGrammarRule" title="mutwo.common_generators.ContextFreeGrammarRule"><em>ContextFreeGrammarRule</em></a><em>]</em>) – A sequence of <a class="reference internal" href="#mutwo.common_generators.ContextFreeGrammarRule" title="mutwo.common_generators.ContextFreeGrammarRule"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextFreeGrammarRule</span></code></a> objects. It is
+allowed to provide multiple context_free_grammar_rules with the same <a href="#id1"><span class="problematic" id="id2">:attribute:`left_side`</span></a>.</p>
+</dd>
+</dl>
+<p>This is a very reduced implementation of a context-free grammar
+which only provides the most basic functions. It is not made for
+the purpose of parsing text but rather as a technique to generate
+algorithmic data (for the sake of art creation). Therefore it is
+all about the resolution of start objects to variants of this start.</p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Data Attributes:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">non_terminal_tuple</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">terminal_tuple</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">context_free_grammar_rule_tuple</span></code></p></td>
+<td><p>Get all defined rules</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_context_free_grammar_rule_tuple</span></code>(non_terminal)</p></td>
+<td><p>Find all defined context_free_grammar_rules for the provided <a class="reference internal" href="#mutwo.common_generators.NonTerminal" title="mutwo.common_generators.NonTerminal"><code class="xref py py-class docutils literal notranslate"><span class="pre">NonTerminal</span></code></a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">resolve_one_layer</span></code>(tree)</p></td>
+<td><p>Resolve all leaves of the tree.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">resolve</span></code>(start[, limit])</p></td>
+<td><p>Resolve until only <a class="reference internal" href="#mutwo.common_generators.Terminal" title="mutwo.common_generators.Terminal"><code class="xref py py-class docutils literal notranslate"><span class="pre">Terminal</span></code></a> are left or the limit is reached.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.common_generators.ContextFreeGrammar.get_context_free_grammar_rule_tuple">
+<span class="sig-name descname"><span class="pre">get_context_free_grammar_rule_tuple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">non_terminal</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/common_generators/chomksy.html#ContextFreeGrammar.get_context_free_grammar_rule_tuple"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_generators.ContextFreeGrammar.get_context_free_grammar_rule_tuple" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find all defined context_free_grammar_rules for the provided <a class="reference internal" href="#mutwo.common_generators.NonTerminal" title="mutwo.common_generators.NonTerminal"><code class="xref py py-class docutils literal notranslate"><span class="pre">NonTerminal</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>non_terminal</strong> (<a class="reference internal" href="#mutwo.common_generators.NonTerminal" title="mutwo.common_generators.NonTerminal"><em>NonTerminal</em></a>) – The left side element of the <a class="reference internal" href="#mutwo.common_generators.ContextFreeGrammarRule" title="mutwo.common_generators.ContextFreeGrammarRule"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContextFreeGrammarRule</span></code></a>.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple[<a class="reference internal" href="#mutwo.common_generators.ContextFreeGrammarRule" title="mutwo.common_generators.chomksy.ContextFreeGrammarRule">mutwo.common_generators.chomksy.ContextFreeGrammarRule</a>, …]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.common_generators.ContextFreeGrammar.resolve">
+<span class="sig-name descname"><span class="pre">resolve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/common_generators/chomksy.html#ContextFreeGrammar.resolve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_generators.ContextFreeGrammar.resolve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resolve until only <a class="reference internal" href="#mutwo.common_generators.Terminal" title="mutwo.common_generators.Terminal"><code class="xref py py-class docutils literal notranslate"><span class="pre">Terminal</span></code></a> are left or the limit is reached.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start</strong> (<a class="reference internal" href="#mutwo.common_generators.NonTerminal" title="mutwo.common_generators.NonTerminal"><em>NonTerminal</em></a>) – The start value.</p></li>
+<li><p><strong>limit</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – The maximum node levels until the function returns a tree.
+If it is set to <cite>None</cite> it will only stop once all nodes are
+<a class="reference internal" href="#mutwo.common_generators.Terminal" title="mutwo.common_generators.Terminal"><code class="xref py py-class docutils literal notranslate"><span class="pre">Terminal</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Tree</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.common_generators.ContextFreeGrammar.resolve_one_layer">
+<span class="sig-name descname"><span class="pre">resolve_one_layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/common_generators/chomksy.html#ContextFreeGrammar.resolve_one_layer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_generators.ContextFreeGrammar.resolve_one_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resolve all leaves of the tree.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tree</strong> (<em>treelib.Tree</em>) – The tree from which all leaves should
+be resolved.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><cite>True</cite> if any leaf has been resolved and <cite>False</cite>
+if no resolution has happened (e.g. if there are only
+<a class="reference internal" href="#mutwo.common_generators.Terminal" title="mutwo.common_generators.Terminal"><code class="xref py py-class docutils literal notranslate"><span class="pre">Terminal</span></code></a> left).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mutwo.common_generators.ContextFreeGrammar.context_free_grammar_rule_tuple">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">context_free_grammar_rule_tuple</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#mutwo.common_generators.ContextFreeGrammarRule" title="mutwo.common_generators.chomksy.ContextFreeGrammarRule"><span class="pre">mutwo.common_generators.chomksy.ContextFreeGrammarRule</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#mutwo.common_generators.ContextFreeGrammar.context_free_grammar_rule_tuple" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get all defined rules</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mutwo.common_generators.ContextFreeGrammar.non_terminal_tuple">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">non_terminal_tuple</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#mutwo.common_generators.NonTerminal" title="mutwo.common_generators.chomksy.NonTerminal"><span class="pre">mutwo.common_generators.chomksy.NonTerminal</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#mutwo.common_generators.ContextFreeGrammar.non_terminal_tuple" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mutwo.common_generators.ContextFreeGrammar.terminal_tuple">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">terminal_tuple</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#mutwo.common_generators.Terminal" title="mutwo.common_generators.chomksy.Terminal"><span class="pre">mutwo.common_generators.chomksy.Terminal</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#mutwo.common_generators.ContextFreeGrammar.terminal_tuple" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.common_generators.ActivityLevel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ActivityLevel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_at</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/common_generators/edwards.html#ActivityLevel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_generators.ActivityLevel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Python implementation of Michael Edwards activity level algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>start_at</strong> (<em>int</em>) – from which pattern per level shall be started (can be
+either 0, 1 or 2)</p>
+</dd>
+</dl>
+<p>Activity Levels is a concept derived from Michael Edwards.
+Quoting Michael Edwards, Activity Levels are an <a class="reference external" href="https://michael-edwards.org/sc/robodoc/activity-levels_lsp.html#robo23">“object for determining
+(deterministically) on a call-by-call basis whether a process is active
+or not (boolean).  This is determined by nine 10-element lists
+(actually three versions of each) of hand-coded 1s and 0s, each list
+representing an ‘activity-level’ (how active the process should be).
+The first three 10-element lists have only one 1 in them, the rest being zeros.
+The second three have two 1s, etc. Activity-levels of 0 and 10 would return
+never active and always active respectively.”</a>.</p>
+<p><strong>Example:</strong></p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">common_generators</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">activity_levels</span> <span class="o">=</span> <span class="n">common_generators</span><span class="o">.</span><span class="n">ActivityLevel</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">activity_levels</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># activity level 0 will always return False</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">activity_levels</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>  <span class="c1"># activity level 10 will always return True</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">activity_levels</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>  <span class="c1"># activity level 7 will mostly return True</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">tuple</span><span class="p">(</span><span class="n">activity_levels</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+<span class="go">(True, False, True, True, False, True, True, False, True, True)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<hr class="docutils" />
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.common_generators.DynamicChoice">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DynamicChoice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value_sequence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curve_sequence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/common_generators/generic.html#DynamicChoice"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_generators.DynamicChoice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Weighted random choices with dynamically changing weights.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value_sequence</strong> (<em>Sequence</em><em>[</em><em>Any</em><em>]</em>) – The items to choose from.</p></li>
+<li><p><strong>curve_sequence</strong> (<em>Sequence</em><em>[</em><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Envelope" title="mutwo.core_events.Envelope"><em>core_events.Envelope</em></a><em>]</em>) – The dynamically changing weight for each value.</p></li>
+<li><p><strong>random_seed</strong> (<em>int</em>) – The seed which shall be set at class initialisation.</p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Example:</strong></p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_events</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">common_generators</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dynamic_choice</span> <span class="o">=</span> <span class="n">common_generators</span><span class="o">.</span><span class="n">DynamicChoice</span><span class="p">(</span>
+<span class="gp">... </span>   <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+<span class="gp">... </span>   <span class="p">[</span>
+<span class="gp">... </span>       <span class="n">core_events</span><span class="o">.</span><span class="n">Envelope</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]),</span>
+<span class="gp">... </span>       <span class="n">core_events</span><span class="o">.</span><span class="n">Envelope</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)]),</span>
+<span class="gp">... </span>       <span class="n">core_events</span><span class="o">.</span><span class="n">Envelope</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]),</span>
+<span class="gp">... </span>   <span class="p">],</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dynamic_choice</span><span class="o">.</span><span class="n">gamble_at</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="go">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dynamic_choice</span><span class="o">.</span><span class="n">gamble_at</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="go">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dynamic_choice</span><span class="o">.</span><span class="n">gamble_at</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="go">2</span>
+</pre></div>
+</div>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">items</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">gamble_at</span></code>(time)</p></td>
+<td><p>Return value at requested time.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.common_generators.DynamicChoice.gamble_at">
+<span class="sig-name descname"><span class="pre">gamble_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/common_generators/generic.html#DynamicChoice.gamble_at"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_generators.DynamicChoice.gamble_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return value at requested time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>time</strong> (<em>numbers.Real</em>) – At which position on the x-Axis shall be gambled.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The chosen value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Any</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.common_generators.DynamicChoice.items">
+<span class="sig-name descname"><span class="pre">items</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/common_generators/generic.html#DynamicChoice.items"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_generators.DynamicChoice.items" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[tuple[<em>Any</em>, <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Envelope" title="mutwo.core_events.envelopes.Envelope">mutwo.core_events.envelopes.Envelope</a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.common_generators.Tendency">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Tendency</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">minima_curve</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxima_curve</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/common_generators/koenig.html#Tendency"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_generators.Tendency" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Tendency offers an interface for dynamically changing minima / maxima areas.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>minima_curve</strong> (<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Envelope" title="mutwo.core_events.Envelope"><em>core_events.Envelope</em></a>) – The curve which describes the smallest allowed value over the
+time axis.</p></li>
+<li><p><strong>maxima_curve</strong> (<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Envelope" title="mutwo.core_events.Envelope"><em>core_events.Envelope</em></a>) – The curve which describes the biggest allowed value over the
+time axis.</p></li>
+<li><p><strong>random_seed</strong> (<em>int</em>) – The random seed which shall be set.</p></li>
+</ul>
+</dd>
+</dl>
+<p>The class is based on Gottfried Michael Koenigs algorithm of “Tendenz-Masken” in
+his program “Projekt 2” where those minima / maxima areas represent probability
+fields.</p>
+<p><strong>Example:</strong></p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_events</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">common_generators</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">minima_curve</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Envelope</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">maxima_curve</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Envelope</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">my_tendency</span> <span class="o">=</span> <span class="n">common_generators</span><span class="o">.</span><span class="n">Tendency</span><span class="p">(</span><span class="n">minima_curve</span><span class="p">,</span> <span class="n">maxima_curve</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">my_tendency</span><span class="o">.</span><span class="n">value_at</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="go">1.3349816305020088</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">my_tendency</span><span class="o">.</span><span class="n">value_at</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="go">1.0965540269678873</span>
+</pre></div>
+</div>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Data Attributes:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">minima_curve</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">maxima_curve</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">range_at</span></code>(time)</p></td>
+<td><p>Get minima / maxima range at requested time.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">value_at</span></code>(time)</p></td>
+<td><p>Get value at requested time.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.common_generators.Tendency.range_at">
+<span class="sig-name descname"><span class="pre">range_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/common_generators/koenig.html#Tendency.range_at"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_generators.Tendency.range_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get minima / maxima range at requested time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>time</strong> (<em>float</em>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Range</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.common_generators.Tendency.value_at">
+<span class="sig-name descname"><span class="pre">value_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/common_generators/koenig.html#Tendency.value_at"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_generators.Tendency.value_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get value at requested time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>time</strong> (<em>float</em>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mutwo.common_generators.Tendency.maxima_curve">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">maxima_curve</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Envelope" title="mutwo.core_events.envelopes.Envelope"><span class="pre">Envelope</span></a></em><a class="headerlink" href="#mutwo.common_generators.Tendency.maxima_curve" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mutwo.common_generators.Tendency.minima_curve">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">minima_curve</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Envelope" title="mutwo.core_events.envelopes.Envelope"><span class="pre">Envelope</span></a></em><a class="headerlink" href="#mutwo.common_generators.Tendency.minima_curve" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.common_generators.Backtracking">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Backtracking</span></span><a class="reference internal" href="../_modules/mutwo/common_generators/lehmer.html#Backtracking"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_generators.Backtracking" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Abstract base class to implement a backtracking algorithm</p>
+<p>By inheriting from this class, various backtracking algorithms
+can be implemented. In order to do so the user has to override
+a set of abstract methods. The abstract methods include:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a href="#id3"><span class="problematic" id="id4">:abstractmethod:`Backtracking.is_valid`</span></a></p></li>
+<li><p><a href="#id5"><span class="problematic" id="id6">:abstractmethod:`Backtracking.solution_count`</span></a></p></li>
+<li><p><a href="#id7"><span class="problematic" id="id8">:abstractmethod:`Backtracking.append_new_element`</span></a></p></li>
+<li><p><a href="#id9"><span class="problematic" id="id10">:abstractmethod:`Backtracking.update_last_element`</span></a></p></li>
+<li><p><a href="#id11"><span class="problematic" id="id12">:abstractmethod:`Backtracking.can_last_element_be_updated`</span></a></p></li>
+</ul>
+</div></blockquote>
+<p>Furthermore it may be helpful to override the following method
+(even though there is a valid working implementation):</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a href="#id13"><span class="problematic" id="id14">:method:`Backtracking.element_list_to_solution`</span></a></p></li>
+</ul>
+</div></blockquote>
+<p>Please see the methods documentation for more details.</p>
+<p>The implementation of this backtracking algorithm makes a distinction
+between an element list and a solution. A solution is created by an
+element list. A solution is the output a user wants to get, but
+an element list is an object which is used internally in order to
+solve the problem. When implementing a backtracking algorithm by
+using this interface the user doesn’t have to make the distinction
+between both (and in this case treat both in the same way).</p>
+<p>The most common use case for this distinction is by having a set of
+items which can appear in the solution and a list of indices which
+item of set shall be used. In this  case the element_list is actually
+a list of indices. This use case is implemented in the
+<a class="reference internal" href="#mutwo.common_generators.IndexBasedBacktracking" title="mutwo.common_generators.IndexBasedBacktracking"><code class="xref py py-class docutils literal notranslate"><span class="pre">IndexBasedBacktracking</span></code></a> class.</p>
+<p><a class="reference external" href="https://www.chessprogramming.org/Backtracking">Bitner and Reingold [2] credit Derrick H. Lehmer with first using the
+term ‘backtrack’ in the 1950s.</a>.</p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Data Attributes:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">solution_count</span></code></p></td>
+<td><p>Return expected solution size</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_valid</span></code>(element_list)</p></td>
+<td><p>Checks if an element list provides an acceptable solution.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">append_new_element</span></code>(element_list)</p></td>
+<td><p>Append new element to element list.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_last_element</span></code>(element_list)</p></td>
+<td><p>Increments value of the last element in an element_list.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">can_last_element_be_updated</span></code>(element_list)</p></td>
+<td><p>Checks if the last element of the list can be incremented.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">element_list_to_solution</span></code>(element_list)</p></td>
+<td><p>Converts an element list to the final solution</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve</span></code>([return_element_list])</p></td>
+<td><p>Apply backtracking algorithm.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.common_generators.Backtracking.append_new_element">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">append_new_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/common_generators/lehmer.html#Backtracking.append_new_element"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_generators.Backtracking.append_new_element" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append new element to element list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>element_list</strong> (<em>list</em><em>[</em><em>Any</em><em>]</em>) – The element list to which a new
+element shall be appended.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.common_generators.Backtracking.can_last_element_be_updated">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">can_last_element_be_updated</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/common_generators/lehmer.html#Backtracking.can_last_element_be_updated"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_generators.Backtracking.can_last_element_be_updated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if the last element of the list can be incremented.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>element_list</strong> (<em>list</em><em>[</em><em>Any</em><em>]</em>) – The element list which last value shall
+be checked.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.common_generators.Backtracking.element_list_to_solution">
+<span class="sig-name descname"><span class="pre">element_list_to_solution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/common_generators/lehmer.html#Backtracking.element_list_to_solution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_generators.Backtracking.element_list_to_solution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts an element list to the final solution</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>element_list</strong> (<em>list</em><em>[</em><em>Any</em><em>]</em>) – The element list to be converted.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple[<em>Any</em>, …]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.common_generators.Backtracking.is_valid">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_valid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/common_generators/lehmer.html#Backtracking.is_valid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_generators.Backtracking.is_valid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if an element list provides an acceptable solution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><cite>True</cite> if the solution is acceptable and <cite>False</cite> if
+the solution is rejected.</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>element_list</strong> (<em>list</em><em>[</em><em>Any</em><em>]</em>) – </p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.common_generators.Backtracking.solve">
+<span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">return_element_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/common_generators/lehmer.html#Backtracking.solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_generators.Backtracking.solve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply backtracking algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>return_element_list</strong> (<em>bool</em>) – If set to <cite>True</cite> the function
+will not only return the solution, but also the element
+list.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Union</em>[tuple[<em>Any</em>, …], tuple[tuple[<em>Any</em>, …], list[<em>Any</em>]]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.common_generators.Backtracking.update_last_element">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">update_last_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/common_generators/lehmer.html#Backtracking.update_last_element"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_generators.Backtracking.update_last_element" title="Permalink to this definition">¶</a></dt>
+<dd><p>Increments value of the last element in an element_list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>element_list</strong> (<em>list</em><em>[</em><em>Any</em><em>]</em>) – The element list which last value shall
+be updated.</p>
+</dd>
+</dl>
+<p>This function should raise an Exception in case the last
+element can’t be updated.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mutwo.common_generators.Backtracking.solution_count">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">solution_count</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#mutwo.common_generators.Backtracking.solution_count" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return expected solution size</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.common_generators.IndexBasedBacktracking">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IndexBasedBacktracking</span></span><a class="reference internal" href="../_modules/mutwo/common_generators/lehmer.html#IndexBasedBacktracking"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_generators.IndexBasedBacktracking" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mutwo.common_generators.Backtracking" title="mutwo.common_generators.lehmer.Backtracking"><code class="xref py py-class docutils literal notranslate"><span class="pre">Backtracking</span></code></a></p>
+<p>Abstract base class for index based backtracking algorithms</p>
+<p>This class implements concrete solutions for the following methods
+which are inherited from the parent class <a class="reference internal" href="#mutwo.common_generators.Backtracking" title="mutwo.common_generators.Backtracking"><code class="xref py py-class docutils literal notranslate"><span class="pre">Backtracking</span></code></a>:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a href="#id15"><span class="problematic" id="id16">:abstractmethod:`Backtracking.append_new_element`</span></a></p></li>
+<li><p><a href="#id17"><span class="problematic" id="id18">:abstractmethod:`Backtracking.update_last_element`</span></a></p></li>
+<li><p><a href="#id19"><span class="problematic" id="id20">:abstractmethod:`Backtracking.can_last_element_be_updated`</span></a></p></li>
+</ul>
+</div></blockquote>
+<p>The following methods still have to be implemented:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a href="#id21"><span class="problematic" id="id22">:abstractmethod:`Backtracking.is_valid`</span></a></p></li>
+<li><p><a href="#id23"><span class="problematic" id="id24">:abstractmethod:`Backtracking.solution_count`</span></a></p></li>
+</ul>
+</div></blockquote>
+<p>(Please consult for more information the documentation
+of <a class="reference internal" href="#mutwo.common_generators.Backtracking" title="mutwo.common_generators.Backtracking"><code class="xref py py-class docutils literal notranslate"><span class="pre">Backtracking</span></code></a>).</p>
+<p>Furthermore the class adds new abstract methods to be implemented
+by child classes:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a href="#id25"><span class="problematic" id="id26">:abstractmethod:`IndexBasedBacktracking.element_index_to_item_sequence`</span></a></p></li>
+</ul>
+</div></blockquote>
+<p><strong>Example:</strong></p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">itertools</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">common_generators</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">QueenProblem8</span><span class="p">(</span><span class="n">common_generators</span><span class="o">.</span><span class="n">IndexBasedBacktracking</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">queen_count</span> <span class="o">=</span> <span class="mi">8</span>
+<span class="gp">... </span>    <span class="n">point_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">combinations_with_replacement</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">queen_count</span><span class="p">),</span> <span class="mi">2</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="n">point_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">point</span><span class="p">))</span> <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">point_list</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">point</span><span class="p">))</span> <span class="o">==</span> <span class="mi">2</span><span class="p">]</span>
+<span class="gp">... </span>    <span class="p">)</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">element_index_to_item_sequence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element_index</span><span class="p">,</span> <span class="n">element_list</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">point_list</span>
+<span class="gp">... </span>    <span class="nd">@property</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">solution_count</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="c1"># 8 queens problem!</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="mi">8</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">is_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element_list</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="n">solution</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_list_to_solution</span><span class="p">(</span><span class="n">element_list</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="k">for</span> <span class="n">q0</span><span class="p">,</span> <span class="n">q1</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="n">solution</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+<span class="gp">... </span>            <span class="c1"># x != x, y != y</span>
+<span class="gp">... </span>            <span class="n">is_valid</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span><span class="n">v0</span> <span class="o">!=</span> <span class="n">v1</span> <span class="k">for</span> <span class="n">v0</span><span class="p">,</span> <span class="n">v1</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">q0</span><span class="p">,</span> <span class="n">q1</span><span class="p">))</span>
+<span class="gp">... </span>            <span class="n">diff_x</span><span class="p">,</span> <span class="n">diff_y</span> <span class="o">=</span> <span class="p">(</span><span class="n">v0</span> <span class="o">-</span> <span class="n">v1</span> <span class="k">for</span> <span class="n">v0</span><span class="p">,</span> <span class="n">v1</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">q0</span><span class="p">,</span> <span class="n">q1</span><span class="p">))</span>
+<span class="gp">... </span>            <span class="n">is_valid</span> <span class="o">=</span> <span class="n">is_valid</span> <span class="ow">and</span> <span class="p">(</span><span class="n">diff_x</span> <span class="o">!=</span> <span class="n">diff_y</span><span class="p">)</span>
+<span class="gp">... </span>            <span class="k">if</span> <span class="ow">not</span> <span class="n">is_valid</span><span class="p">:</span> <span class="k">return</span> <span class="kc">False</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="kc">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">queen_problem_8</span> <span class="o">=</span> <span class="n">QueenProblem8</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">queen_problem_8</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+<span class="go">((0, 0), (1, 2), (2, 5), (3, 7), (4, 6), (6, 1), (5, 3), (7, 4))</span>
+</pre></div>
+</div>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Data Attributes:</p>
+<details><summary>Inherited from <a class="reference internal" href="#mutwo.common_generators.Backtracking" title="mutwo.common_generators.lehmer.Backtracking"><code class="xref py py-class docutils literal notranslate"><span class="pre">Backtracking</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">solution_count</span></code></p></td>
+<td><p>Return expected solution size</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">element_index_to_item_sequence</span></code>(...)</p></td>
+<td><p>Get a sequence of items to choose from for a specific element</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">append_new_element</span></code>(element_list)</p></td>
+<td><p>Append new element to element list.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_last_element</span></code>(element_list)</p></td>
+<td><p>Increments value of the last element in an element_list.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">can_last_element_be_updated</span></code>(element_list)</p></td>
+<td><p>Checks if the last element of the list can be incremented.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">element_list_to_solution</span></code>(element_list)</p></td>
+<td><p>Converts an element list to the final solution</p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="#mutwo.common_generators.Backtracking" title="mutwo.common_generators.lehmer.Backtracking"><code class="xref py py-class docutils literal notranslate"><span class="pre">Backtracking</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_valid</span></code>(element_list)</p></td>
+<td><p>Checks if an element list provides an acceptable solution.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">append_new_element</span></code>(element_list)</p></td>
+<td><p>Append new element to element list.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_last_element</span></code>(element_list)</p></td>
+<td><p>Increments value of the last element in an element_list.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">can_last_element_be_updated</span></code>(element_list)</p></td>
+<td><p>Checks if the last element of the list can be incremented.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">element_list_to_solution</span></code>(element_list)</p></td>
+<td><p>Converts an element list to the final solution</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve</span></code>([return_element_list])</p></td>
+<td><p>Apply backtracking algorithm.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.common_generators.IndexBasedBacktracking.append_new_element">
+<span class="sig-name descname"><span class="pre">append_new_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/common_generators/lehmer.html#IndexBasedBacktracking.append_new_element"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_generators.IndexBasedBacktracking.append_new_element" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append new element to element list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>element_list</strong> (<em>list</em><em>[</em><em>Any</em><em>]</em>) – The element list to which a new
+element shall be appended.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.common_generators.IndexBasedBacktracking.can_last_element_be_updated">
+<span class="sig-name descname"><span class="pre">can_last_element_be_updated</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/common_generators/lehmer.html#IndexBasedBacktracking.can_last_element_be_updated"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_generators.IndexBasedBacktracking.can_last_element_be_updated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if the last element of the list can be incremented.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>element_list</strong> (<em>list</em><em>[</em><em>Any</em><em>]</em>) – The element list which last value shall
+be checked.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.common_generators.IndexBasedBacktracking.element_index_to_item_sequence">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">element_index_to_item_sequence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/common_generators/lehmer.html#IndexBasedBacktracking.element_index_to_item_sequence"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_generators.IndexBasedBacktracking.element_index_to_item_sequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a sequence of items to choose from for a specific element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>element_index</strong> (<em>int</em>) – The index of the element for which a sequence
+of solutions shall be returned.</p></li>
+<li><p><strong>element_list</strong> (<em>list</em><em>[</em><em>Any</em><em>]</em>) – The current element list</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Sequence</em>[<em>Any</em>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.common_generators.IndexBasedBacktracking.element_list_to_solution">
+<span class="sig-name descname"><span class="pre">element_list_to_solution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/common_generators/lehmer.html#IndexBasedBacktracking.element_list_to_solution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_generators.IndexBasedBacktracking.element_list_to_solution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts an element list to the final solution</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>element_list</strong> (<em>list</em><em>[</em><em>Any</em><em>]</em>) – The element list to be converted.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple[<em>Any</em>, …]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.common_generators.IndexBasedBacktracking.update_last_element">
+<span class="sig-name descname"><span class="pre">update_last_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/common_generators/lehmer.html#IndexBasedBacktracking.update_last_element"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_generators.IndexBasedBacktracking.update_last_element" title="Permalink to this definition">¶</a></dt>
+<dd><p>Increments value of the last element in an element_list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>element_list</strong> (<em>list</em><em>[</em><em>Any</em><em>]</em>) – The element list which last value shall
+be updated.</p>
+</dd>
+</dl>
+<p>This function should raise an Exception in case the last
+element can’t be updated.</p>
+</dd></dl>
+
+</dd></dl>
+
+<section id="module-mutwo.common_generators.constants">
+<span id="mutwo-common-generators-constants"></span><h2><a class="toc-backref" href="#id28" role="doc-backlink">mutwo.common_generators.constants</a><a class="headerlink" href="#module-mutwo.common_generators.constants" title="Permalink to this heading">¶</a></h2>
+<p>Constants which are used in <a class="reference internal" href="#module-mutwo.common_generators" title="mutwo.common_generators"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mutwo.common_generators</span></code></a>.</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="mutwo.common_generators.constants.ACTIVITY_LEVEL_TUPLE">
+<span class="sig-name descname"><span class="pre">ACTIVITY_LEVEL_TUPLE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(((0,),</span> <span class="pre">(0,),</span> <span class="pre">(0,)),</span> <span class="pre">((1,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0),</span> <span class="pre">(0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0),</span> <span class="pre">(0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0)),</span> <span class="pre">((1,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0),</span> <span class="pre">(0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0),</span> <span class="pre">(0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">0)),</span> <span class="pre">((1,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0),</span> <span class="pre">(0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0),</span> <span class="pre">(0,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">0)),</span> <span class="pre">((1,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">0),</span> <span class="pre">(0,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0),</span> <span class="pre">(0,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1)),</span> <span class="pre">((1,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">0),</span> <span class="pre">(0,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">1),</span> <span class="pre">(0,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1)),</span> <span class="pre">((1,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">0),</span> <span class="pre">(0,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">1),</span> <span class="pre">(0,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1)),</span> <span class="pre">((1,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1),</span> <span class="pre">(1,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">1),</span> <span class="pre">(1,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1)),</span> <span class="pre">((1,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1),</span> <span class="pre">(1,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">1),</span> <span class="pre">(1,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1)),</span> <span class="pre">((1,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">1),</span> <span class="pre">(1,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">1),</span> <span class="pre">(1,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1)),</span> <span class="pre">((1,),</span> <span class="pre">(1,),</span> <span class="pre">(1,)))</span></em><a class="headerlink" href="#mutwo.common_generators.constants.ACTIVITY_LEVEL_TUPLE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Definition of activity level pattern. <a class="reference external" href="https://github.com/mdedwards/slippery-chicken/blob/c1c11fa/src/activity-levels.lsp#L75-L109">Pattern are copied from
+Michael Edwards Common Lisp composition software ‘slippery-chicken’</a>.</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mutwo.common_utilities.html" title="mutwo.common_utilities"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="mutwo.abjad_version.html" title="mutwo.abjad_version"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="api_documentation.html" >mutwo API documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.common_generators</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2024, mutwo authors.
+    </div>
+  </body>
+</html>

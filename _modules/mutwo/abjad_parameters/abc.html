@@ -1,0 +1,311 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mutwo.abjad_parameters.abc &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.abjad_parameters.abc</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mutwo.abjad_parameters.abc</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">import</span> <span class="nn">abc</span>
+<span class="kn">import</span> <span class="nn">dataclasses</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="kn">import</span> <span class="nn">abjad</span>
+
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_events</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_utilities</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_parameters</span>
+
+
+<div class="viewcode-block" id="AbjadAttachment"><a class="viewcode-back" href="../../../api/mutwo.abjad_parameters.html#mutwo.abjad_parameters.abc.AbjadAttachment">[docs]</a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">()</span>
+<span class="k">class</span> <span class="nc">AbjadAttachment</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Abstract base class for all Abjad attachments.&quot;&quot;&quot;</span>
+
+    <span class="n">indicator</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+        <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PlayingIndicator</span> <span class="o">|</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">NotationIndicator</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">is_chronon_rest</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+        <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">mutwo_pitch_to_abjad_pitch</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+        <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">],</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Pitch</span><span class="p">]</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">mutwo_pitch_to_abjad_pitch</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+        <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">],</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Pitch</span><span class="p">]</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">mutwo_volume_to_abjad_attachment_dynamic</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+        <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Volume</span><span class="p">],</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Dynamic</span><span class="p">]</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">mutwo_lyric_to_abjad_string</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+        <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Lyric</span><span class="p">],</span> <span class="nb">str</span><span class="p">]</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">with_duration_line</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">replace_leaf_by_leaf</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Communicate expected return type of process_leaf_tuple</span>
+
+<span class="sd">        Set to ``True`` if &#39;process_leaf_tuple&#39; returns a sequence of</span>
+<span class="sd">        abjad leaves with an equal length to the provided leaf_tuple</span>
+<span class="sd">        and where each new leaf replaces the respective old leaf at</span>
+<span class="sd">        the same position.</span>
+<span class="sd">        Set to ``True`` if &#39;process_leaf_tuple&#39; returns a new abjad</span>
+<span class="sd">        object which is set at the position of the old first leaf and</span>
+<span class="sd">        if all other old leaves are supposed to be deleted.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="AbjadAttachment.get_class_name"><a class="viewcode-back" href="../../../api/mutwo.abjad_parameters.html#mutwo.abjad_parameters.abc.AbjadAttachment.get_class_name">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_class_name</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">camel_case_to_snake_case</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="AbjadAttachment.from_indicator_collection"><a class="viewcode-back" href="../../../api/mutwo.abjad_parameters.html#mutwo.abjad_parameters.abc.AbjadAttachment.from_indicator_collection">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_indicator_collection</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">indicator_collection</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">IndicatorCollection</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">AbjadAttachment</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Initialize :class:`AbjadAttachment` from :class:`~mutwo.music_parameters.abc.IndicatorCollection`.</span>
+
+<span class="sd">        If no suitable :class:`~mutwo.music_parameters.abc.Indicator` could be found in the collection</span>
+<span class="sd">        the method will simply return None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">class_name</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">get_class_name</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">indicator</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">indicator_collection</span><span class="p">,</span> <span class="n">class_name</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">indicator</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="AbjadAttachment.process_leaf_tuple"><a class="viewcode-back" href="../../../api/mutwo.abjad_parameters.html#mutwo.abjad_parameters.abc.AbjadAttachment.process_leaf_tuple">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">process_leaf_tuple</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">leaf_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+        <span class="n">previous_attachment</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">AbjadAttachment</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="o">...</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_active</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">indicator</span><span class="o">.</span><span class="n">is_active</span></div>
+
+
+<div class="viewcode-block" id="ToggleAttachment"><a class="viewcode-back" href="../../../api/mutwo.abjad_parameters.html#mutwo.abjad_parameters.abc.ToggleAttachment">[docs]</a><span class="k">class</span> <span class="nc">ToggleAttachment</span><span class="p">(</span><span class="n">AbjadAttachment</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Abstract base class for Abjad attachments which behave like a toggle.</span>
+
+<span class="sd">    In Western notation one can differentiate between elements which only get</span>
+<span class="sd">    notated if they change (for instance dynamics, tempo) and elements which</span>
+<span class="sd">    have to be notated again and again (for instance arpeggi or tremolo).</span>
+<span class="sd">    Attachments that inherit from :class:`ToggleAttachment` represent elements</span>
+<span class="sd">    which only get notated if their value changes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ToggleAttachment.process_leaf"><a class="viewcode-back" href="../../../api/mutwo.abjad_parameters.html#mutwo.abjad_parameters.abc.ToggleAttachment.process_leaf">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">process_leaf</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">leaf</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">,</span> <span class="n">previous_attachment</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">AbjadAttachment</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">]:</span>
+        <span class="o">...</span></div>
+
+<div class="viewcode-block" id="ToggleAttachment.process_leaf_tuple"><a class="viewcode-back" href="../../../api/mutwo.abjad_parameters.html#mutwo.abjad_parameters.abc.ToggleAttachment.process_leaf_tuple">[docs]</a>    <span class="k">def</span> <span class="nf">process_leaf_tuple</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">leaf_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+        <span class="n">previous_attachment</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">AbjadAttachment</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">previous_attachment</span> <span class="o">!=</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">process_leaf</span><span class="p">(</span><span class="n">leaf_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">previous_attachment</span><span class="p">),</span>
+            <span class="p">)</span> <span class="o">+</span> <span class="n">leaf_tuple</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">leaf_tuple</span></div></div>
+
+
+<div class="viewcode-block" id="BangAttachment"><a class="viewcode-back" href="../../../api/mutwo.abjad_parameters.html#mutwo.abjad_parameters.abc.BangAttachment">[docs]</a><span class="k">class</span> <span class="nc">BangAttachment</span><span class="p">(</span><span class="n">AbjadAttachment</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Abstract base class for Abjad attachments which behave like a bang.</span>
+
+<span class="sd">    In Western notation one can differentiate between elements which only get</span>
+<span class="sd">    notated if they change (for instance dynamics, tempo) and elements which</span>
+<span class="sd">    have to be notated again and again to be effective (for instance arpeggi or</span>
+<span class="sd">    tremolo). Attachments that inherit from :class:`BangAttachment` represent</span>
+<span class="sd">    elements which have to be notated again and again to be effective.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="BangAttachment.process_first_leaf"><a class="viewcode-back" href="../../../api/mutwo.abjad_parameters.html#mutwo.abjad_parameters.abc.BangAttachment.process_first_leaf">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">process_first_leaf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">leaf</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">:</span>
+        <span class="o">...</span></div>
+
+<div class="viewcode-block" id="BangAttachment.process_last_leaf"><a class="viewcode-back" href="../../../api/mutwo.abjad_parameters.html#mutwo.abjad_parameters.abc.BangAttachment.process_last_leaf">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">process_last_leaf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">leaf</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">:</span>
+        <span class="o">...</span></div>
+
+<div class="viewcode-block" id="BangAttachment.process_central_leaf"><a class="viewcode-back" href="../../../api/mutwo.abjad_parameters.html#mutwo.abjad_parameters.abc.BangAttachment.process_central_leaf">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">process_central_leaf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">leaf</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">:</span>
+        <span class="o">...</span></div>
+
+<div class="viewcode-block" id="BangAttachment.process_leaf_tuple"><a class="viewcode-back" href="../../../api/mutwo.abjad_parameters.html#mutwo.abjad_parameters.abc.BangAttachment.process_leaf_tuple">[docs]</a>    <span class="k">def</span> <span class="nf">process_leaf_tuple</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">leaf_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+        <span class="n">previous_attachment</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">AbjadAttachment</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="n">new_leaf_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">leaf_count</span> <span class="o">:=</span> <span class="nb">len</span><span class="p">(</span><span class="n">leaf_tuple</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">new_leaf_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">process_first_leaf</span><span class="p">(</span><span class="n">leaf_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="n">leaf_count</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">leaf</span> <span class="ow">in</span> <span class="n">leaf_tuple</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">new_leaf_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">process_central_leaf</span><span class="p">(</span><span class="n">leaf</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">leaf_count</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">new_leaf_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">process_last_leaf</span><span class="p">(</span><span class="n">leaf_tuple</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">new_leaf_list</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="BangEachAttachment"><a class="viewcode-back" href="../../../api/mutwo.abjad_parameters.html#mutwo.abjad_parameters.abc.BangEachAttachment">[docs]</a><span class="k">class</span> <span class="nc">BangEachAttachment</span><span class="p">(</span><span class="n">BangAttachment</span><span class="p">):</span>
+<div class="viewcode-block" id="BangEachAttachment.process_leaf"><a class="viewcode-back" href="../../../api/mutwo.abjad_parameters.html#mutwo.abjad_parameters.abc.BangEachAttachment.process_leaf">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">process_leaf</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">leaf</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">]:</span>
+        <span class="o">...</span></div>
+
+<div class="viewcode-block" id="BangEachAttachment.process_first_leaf"><a class="viewcode-back" href="../../../api/mutwo.abjad_parameters.html#mutwo.abjad_parameters.abc.BangEachAttachment.process_first_leaf">[docs]</a>    <span class="k">def</span> <span class="nf">process_first_leaf</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">leaf</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_leaf</span><span class="p">(</span><span class="n">leaf</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BangEachAttachment.process_last_leaf"><a class="viewcode-back" href="../../../api/mutwo.abjad_parameters.html#mutwo.abjad_parameters.abc.BangEachAttachment.process_last_leaf">[docs]</a>    <span class="k">def</span> <span class="nf">process_last_leaf</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">leaf</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_leaf</span><span class="p">(</span><span class="n">leaf</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BangEachAttachment.process_central_leaf"><a class="viewcode-back" href="../../../api/mutwo.abjad_parameters.html#mutwo.abjad_parameters.abc.BangEachAttachment.process_central_leaf">[docs]</a>    <span class="k">def</span> <span class="nf">process_central_leaf</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">leaf</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_leaf</span><span class="p">(</span><span class="n">leaf</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="BangFirstAttachment"><a class="viewcode-back" href="../../../api/mutwo.abjad_parameters.html#mutwo.abjad_parameters.abc.BangFirstAttachment">[docs]</a><span class="k">class</span> <span class="nc">BangFirstAttachment</span><span class="p">(</span><span class="n">BangAttachment</span><span class="p">):</span>
+<div class="viewcode-block" id="BangFirstAttachment.process_leaf"><a class="viewcode-back" href="../../../api/mutwo.abjad_parameters.html#mutwo.abjad_parameters.abc.BangFirstAttachment.process_leaf">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">process_leaf</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">leaf</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">]:</span>
+        <span class="o">...</span></div>
+
+<div class="viewcode-block" id="BangFirstAttachment.process_first_leaf"><a class="viewcode-back" href="../../../api/mutwo.abjad_parameters.html#mutwo.abjad_parameters.abc.BangFirstAttachment.process_first_leaf">[docs]</a>    <span class="k">def</span> <span class="nf">process_first_leaf</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">leaf</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_leaf</span><span class="p">(</span><span class="n">leaf</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BangFirstAttachment.process_last_leaf"><a class="viewcode-back" href="../../../api/mutwo.abjad_parameters.html#mutwo.abjad_parameters.abc.BangFirstAttachment.process_last_leaf">[docs]</a>    <span class="k">def</span> <span class="nf">process_last_leaf</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">leaf</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="n">leaf</span></div>
+
+<div class="viewcode-block" id="BangFirstAttachment.process_central_leaf"><a class="viewcode-back" href="../../../api/mutwo.abjad_parameters.html#mutwo.abjad_parameters.abc.BangFirstAttachment.process_central_leaf">[docs]</a>    <span class="k">def</span> <span class="nf">process_central_leaf</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">leaf</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="n">leaf</span></div></div>
+
+
+<div class="viewcode-block" id="BangLastAttachment"><a class="viewcode-back" href="../../../api/mutwo.abjad_parameters.html#mutwo.abjad_parameters.abc.BangLastAttachment">[docs]</a><span class="k">class</span> <span class="nc">BangLastAttachment</span><span class="p">(</span><span class="n">BangAttachment</span><span class="p">):</span>
+<div class="viewcode-block" id="BangLastAttachment.process_leaf"><a class="viewcode-back" href="../../../api/mutwo.abjad_parameters.html#mutwo.abjad_parameters.abc.BangLastAttachment.process_leaf">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">process_leaf</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">leaf</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">]:</span>
+        <span class="o">...</span></div>
+
+<div class="viewcode-block" id="BangLastAttachment.process_first_leaf"><a class="viewcode-back" href="../../../api/mutwo.abjad_parameters.html#mutwo.abjad_parameters.abc.BangLastAttachment.process_first_leaf">[docs]</a>    <span class="k">def</span> <span class="nf">process_first_leaf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">leaf</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">leaf</span></div>
+
+<div class="viewcode-block" id="BangLastAttachment.process_last_leaf"><a class="viewcode-back" href="../../../api/mutwo.abjad_parameters.html#mutwo.abjad_parameters.abc.BangLastAttachment.process_last_leaf">[docs]</a>    <span class="k">def</span> <span class="nf">process_last_leaf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">leaf</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_leaf</span><span class="p">(</span><span class="n">leaf</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BangLastAttachment.process_central_leaf"><a class="viewcode-back" href="../../../api/mutwo.abjad_parameters.html#mutwo.abjad_parameters.abc.BangLastAttachment.process_central_leaf">[docs]</a>    <span class="k">def</span> <span class="nf">process_central_leaf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">leaf</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">leaf</span></div>
+
+<div class="viewcode-block" id="BangLastAttachment.process_leaf_tuple"><a class="viewcode-back" href="../../../api/mutwo.abjad_parameters.html#mutwo.abjad_parameters.abc.BangLastAttachment.process_leaf_tuple">[docs]</a>    <span class="k">def</span> <span class="nf">process_leaf_tuple</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">leaf_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+        <span class="n">previous_attachment</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">AbjadAttachment</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">Leaf</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">leaf_tuple</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">leaf_tuple</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">process_last_leaf</span><span class="p">(</span><span class="n">leaf_tuple</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">leaf_tuple</span></div></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.abjad_parameters.abc</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Levin Eric Zimmermann.
+    </div>
+  </body>
+</html>

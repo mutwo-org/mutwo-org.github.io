@@ -1,0 +1,250 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Understanding parameters &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Understanding converters" href="converters.html" />
+    <link rel="prev" title="Understanding events" href="events.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="converters.html" title="Understanding converters"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="events.html" title="Understanding events"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">mutwo  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Understanding parameters</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="understanding-parameters">
+<span id="parameters"></span><h1>Understanding parameters<a class="headerlink" href="#understanding-parameters" title="Permalink to this heading">¶</a></h1>
+<p>In <a class="reference internal" href="events.html#events-0"><span class="std std-ref">Understanding events</span></a> we defined a nested event.
+This event is still very abstract: we don’t know exactly what it is supposed to represent, apart from a nested time structure, which we took from a graph.
+What is missing is some concrete content:
+in case our event is a musical structure, we may need to know</p>
+<ul class="simple">
+<li><p>which pitch should be played</p></li>
+<li><p>which dynamic should be played</p></li>
+<li><p>which articulation should be played</p></li>
+<li><p>…</p></li>
+</ul>
+<p>Then our abstract event could become a musical composition.</p>
+<p>This missing content is described as <strong>parameters</strong> in <em>mutwo</em>.
+<strong>Parameters</strong> are object which are mapped to events.
+When we think of a tone, we could interpret this as a <a class="reference internal" href="api/mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">Chronon</span></code></a> which - besides its information about its duration - also hosts data about…</p>
+<ul class="simple">
+<li><p>…its pitch</p></li>
+<li><p>…its dynamic</p></li>
+<li><p>…its articulation.</p></li>
+</ul>
+<img alt="_images/tone.png" src="_images/tone.png" />
+<p>All these data types are defined as parameter classes in <em>mutwo</em>:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="api/mutwo.core_parameters.html#mutwo.core_parameters.abc.Duration" title="mutwo.core_parameters.abc.Duration"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_parameters.abc.Duration</span></code></a></p></li>
+<li><p><a class="reference internal" href="api/mutwo.music_parameters.html#mutwo.music_parameters.abc.Pitch" title="mutwo.music_parameters.abc.Pitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.abc.Pitch</span></code></a></p></li>
+<li><p><a class="reference internal" href="api/mutwo.music_parameters.html#mutwo.music_parameters.abc.Volume" title="mutwo.music_parameters.abc.Volume"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.abc.Volume</span></code></a></p></li>
+<li><p>…</p></li>
+</ul>
+<section id="identities-and-flexibility">
+<h2>Identities and flexibility<a class="headerlink" href="#identities-and-flexibility" title="Permalink to this heading">¶</a></h2>
+<p>Many parameters can be reduced to a single value when we want to describe them.
+For instance we can say:</p>
+<table class="docutils align-left">
+<colgroup>
+<col style="width: 60.0%" />
+<col style="width: 40.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>parameter…</p></th>
+<th class="head"><p>has value…</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>volume</p></td>
+<td><p>decibel</p></td>
+</tr>
+<tr class="row-odd"><td><p>pitch</p></td>
+<td><p>hertz</p></td>
+</tr>
+<tr class="row-even"><td><p>duration</p></td>
+<td><p>beat_count</p></td>
+</tr>
+</tbody>
+</table>
+<p>So volume, pitch or duration can essentially be described by one numerical value.
+Nevertheless this doesn’t resonate with how we usually think about these parameters in our daily context:
+for pitch some people may use Western pitch names as <em>c-sharp</em> or <em>g-flat</em>.
+Other people who prefer MIDI notation say <em>61</em> or <em>66</em> instead of <em>c-sharp</em> or <em>g-flat</em>.
+Both groups of people refer to the same frequencies.</p>
+<p><em>Mutwos</em> objective is that any nomenclature can be used to describe the same underlying concept.
+In this way it’s possible that various groups of people can impose their preferred model of thinking on the <em>mutwo</em> framework.</p>
+</section>
+<section id="define-pitches">
+<h2>Define pitches<a class="headerlink" href="#define-pitches" title="Permalink to this heading">¶</a></h2>
+<p>Let’s illustrate this concept by defining some actual pitches in <em>mutwo</em>.
+We start with using the class <a class="reference internal" href="api/mutwo.music_parameters.html#mutwo.music_parameters.DirectPitch" title="mutwo.music_parameters.DirectPitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">DirectPitch</span></code></a>.
+This pitch is directly represented by its <a class="reference internal" href="api/mutwo.music_parameters.html#mutwo.music_parameters.DirectPitch.hertz" title="mutwo.music_parameters.DirectPitch.hertz"><code class="xref py py-attr docutils literal notranslate"><span class="pre">hertz</span></code></a> and doesn’t utilities any higher abstraction.
+So the following code gives us a pitch with the frequency 440 Hertz.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_parameters</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p0</span> <span class="o">=</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">DirectPitch</span><span class="p">(</span><span class="mi">440</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Let’s check its <a class="reference internal" href="api/mutwo.music_parameters.html#mutwo.music_parameters.DirectPitch.hertz" title="mutwo.music_parameters.DirectPitch.hertz"><code class="xref py py-attr docutils literal notranslate"><span class="pre">hertz</span></code></a>:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">p0</span><span class="o">.</span><span class="n">hertz</span>
+<span class="go">440.0</span>
+</pre></div>
+</div>
+<p>And now let’s create a pitch with the same frequency, but a more abstract nomenclature.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">p1</span> <span class="o">=</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">WesternPitch</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This <a class="reference internal" href="api/mutwo.music_parameters.html#mutwo.music_parameters.WesternPitch" title="mutwo.music_parameters.WesternPitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">WesternPitch</span></code></a> uses the <a class="reference external" href="https://en.wikipedia.org/wiki/Pitch_class">pitch class</a> <code class="docutils literal notranslate"><span class="pre">a</span></code> in octave <code class="docutils literal notranslate"><span class="pre">4</span></code>
+(it uses the <a class="reference external" href="https://en.wikipedia.org/wiki/Scientific_pitch_notation">scientific pitch notation</a>).
+When we check its frequency, <a class="reference external" href="https://en.wikipedia.org/wiki/Piano_key_frequencies">it’s also 440</a>:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">p1</span><span class="o">.</span><span class="n">hertz</span>
+<span class="go">440.0</span>
+</pre></div>
+</div>
+<p>We can now compare our two pitches:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">p0</span> <span class="o">==</span> <span class="n">p1</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p>How comes they are the same?
+<em>Mutwo</em> only checks if their compact identities are the same, e.g. if their frequencies are equal.
+It doesn’t compare their actual type and doesn’t care about the specific nomenclature.
+In this way <em>mutwo</em> code that only cares about frequencies doesn’t care about the specifically used pitch representation.
+This ensures any other representation can be equally well implemented and used within the <em>mutwo</em> framework.</p>
+<p><em>Mutwo</em> already provides several builtin pitch representations:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="api/mutwo.music_parameters.html#mutwo.music_parameters.DirectPitch" title="mutwo.music_parameters.DirectPitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">DirectPitch</span></code></a>: define pitch by frequency</p></li>
+<li><p><a class="reference internal" href="api/mutwo.music_parameters.html#mutwo.music_parameters.MidiPitch" title="mutwo.music_parameters.MidiPitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">MidiPitch</span></code></a>: define pitch by midi pitch number</p></li>
+<li><p><a class="reference internal" href="api/mutwo.music_parameters.html#mutwo.music_parameters.WesternPitch" title="mutwo.music_parameters.WesternPitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">WesternPitch</span></code></a>: define pitch by western pitch name</p></li>
+<li><p><a class="reference internal" href="api/mutwo.music_parameters.html#mutwo.music_parameters.JustIntonationPitch" title="mutwo.music_parameters.JustIntonationPitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">JustIntonationPitch</span></code></a>: define pitch by tuning ratio</p></li>
+</ul>
+<p>If none of those representations suit your interpretation of pitch, then it’s possible to define your own new pitch class.
+For this you need to define a new class which inherits from <a class="reference internal" href="api/mutwo.music_parameters.html#mutwo.music_parameters.abc.Pitch" title="mutwo.music_parameters.abc.Pitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.abc.Pitch</span></code></a> and which declares the abstract attributes
+(please consult the <a class="reference external" href="https://docs.python.org/3/glossary.html#term-abstract-base-class">Python documentation</a> and the <a class="reference external" href="https://peps.python.org/pep-3119/">respective pep</a> for more information about abstract base classes).</p>
+</section>
+<section id="define-tones-chords-rests">
+<h2>Define tones, chords &amp; rests<a class="headerlink" href="#define-tones-chords-rests" title="Permalink to this heading">¶</a></h2>
+<p>After understanding <em>mutwos</em> basic parameters approach, we can now use parameters in order to actually define some more meaningful events.
+Besides the fundamental classes <a class="reference internal" href="api/mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">Chronon</span></code></a>, <a class="reference internal" href="api/mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a> and <a class="reference internal" href="api/mutwo.core_events.html#mutwo.core_events.Concurrence" title="mutwo.core_events.Concurrence"><code class="xref py py-class docutils literal notranslate"><span class="pre">Concurrence</span></code></a> of the <a class="reference external" href="https://pypi.org/project/mutwo.core/">mutwo.core package</a>, <a class="reference external" href="https://pypi.org/project/mutwo.music/">mutwo.music</a> provides the very useful <a class="reference internal" href="api/mutwo.music_events.html#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoteLike</span></code></a>.
+With <a class="reference internal" href="api/mutwo.music_events.html#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoteLike</span></code></a> it’s easy to represent musical elements as tones, chords or rests.
+<a class="reference internal" href="api/mutwo.music_events.html#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoteLike</span></code></a> is a subclass of <a class="reference internal" href="api/mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">Chronon</span></code></a> and extends it by mapping more parameters to itself.
+Let’s say a tone is a pitch with a specific duration and a specific volume and let’s try to represent this with <a class="reference internal" href="api/mutwo.music_events.html#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoteLike</span></code></a>.
+We first define our parameters:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_parameters</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_parameters</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">duration</span> <span class="o">=</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">DirectDuration</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pitch</span> <span class="o">=</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">WesternPitch</span><span class="p">(</span><span class="s1">&#39;cs&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">volume</span> <span class="o">=</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">WesternVolume</span><span class="p">(</span><span class="s1">&#39;ff&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>And now we want to define our actual tone:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_events</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n</span> <span class="o">=</span> <span class="n">music_events</span><span class="o">.</span><span class="n">NoteLike</span><span class="p">(</span><span class="n">pitch</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">volume</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We can ask our tone for its volume, duration and pitch:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">n</span><span class="o">.</span><span class="n">volume</span>
+<span class="go">WesternVolume(ff)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n</span><span class="o">.</span><span class="n">duration</span>
+<span class="go">DirectDuration(1)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n</span><span class="o">.</span><span class="n">pitch_list</span>
+<span class="go">[WesternPitch(&#39;cs&#39;, 3)]</span>
+</pre></div>
+</div>
+<p>The last call for our pitch may be surprising: we didn’t ask for <code class="docutils literal notranslate"><span class="pre">n.pitch</span></code>, but for <code class="docutils literal notranslate"><span class="pre">n.pitch_list</span></code>.
+This means <a class="reference internal" href="api/mutwo.music_events.html#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoteLike</span></code></a> is capable of containing one or more pitches.
+In this way the same class can be used to represent chords, if we say chords are multiple pitches which start at the same time, have the same duration and the same volume.
+Then let’s define a triad:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pitch1</span> <span class="o">=</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">WesternPitch</span><span class="p">(</span><span class="s1">&#39;es&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pitch2</span> <span class="o">=</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">WesternPitch</span><span class="p">(</span><span class="s1">&#39;gs&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">triad</span> <span class="o">=</span> <span class="n">music_events</span><span class="o">.</span><span class="n">NoteLike</span><span class="p">([</span><span class="n">pitch</span><span class="p">,</span> <span class="n">pitch1</span><span class="p">,</span> <span class="n">pitch2</span><span class="p">],</span> <span class="n">duration</span><span class="p">,</span> <span class="n">volume</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">triad</span><span class="o">.</span><span class="n">pitch_list</span>
+<span class="go">[WesternPitch(&#39;cs&#39;, 3), WesternPitch(&#39;es&#39;, 3), WesternPitch(&#39;gs&#39;, 3)]</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="converters.html" title="Understanding converters"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="events.html" title="Understanding events"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">mutwo  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Understanding parameters</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2024, mutwo authors.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,293 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mutwo.core_utilities.exceptions &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.core_utilities.exceptions</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mutwo.core_utilities.exceptions</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module for mutwo specific exceptions.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_constants</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;CannotSetDurationOfEmptyComplexEvent&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;AlreadyDefinedValueNameError&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;InvalidAverageValueStartAndEndWarning&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;InvalidStartValueError&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;InvalidPointError&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ImpossibleToPutInError&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ImpossibleToSquashInError&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ImpossibleToSlideInError&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ImpossibleToExtendUntilError&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;IneffectiveExtendUntilError&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;InvalidStartAndEndValueError&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;InvalidCutOutStartAndEndValuesError&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SplitUnavailableChildError&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;NoSolutionFoundError&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;EmptyEnvelopeError&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;UndefinedReferenceWarning&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ConcatenationError&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;NoTagError&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SplitError&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;InvalidAbsoluteTime&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;NoSplitTimeError&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="CannotSetDurationOfEmptyComplexEvent"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.CannotSetDurationOfEmptyComplexEvent">[docs]</a><span class="k">class</span> <span class="nc">CannotSetDurationOfEmptyComplexEvent</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="s2">&quot;You tried to set the duration of a complex &quot;</span>
+            <span class="s2">&quot;event (e.g. &#39;Consecution&#39; or &#39;Concurrence&#39;) &quot;</span>
+            <span class="s2">&quot;which doesn&#39;t have any child events. This&quot;</span>
+            <span class="s2">&quot; is impossible, because the duration of a &#39;ComplexEvent&#39;&quot;</span>
+            <span class="s2">&quot; is simply the sum of its sequentially ordered child events.&quot;</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AlreadyDefinedValueNameError"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.AlreadyDefinedValueNameError">[docs]</a><span class="k">class</span> <span class="nc">AlreadyDefinedValueNameError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Confusing setup in class &#39;</span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2">&#39; which inherits from &quot;</span>
+            <span class="s2">&quot;&#39;SingleValueParameter&#39;. Found already a defined value for&quot;</span>
+            <span class="s2">&quot; &#39;value_name&#39;. SingleValueParameter instances can only &quot;</span>
+            <span class="s2">&quot;have one value!&quot;</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="InvalidStartValueError"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.InvalidStartValueError">[docs]</a><span class="k">class</span> <span class="nc">InvalidStartValueError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">start</span><span class="p">,</span>
+        <span class="n">duration</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Invalid value for start = &#39;</span><span class="si">{</span><span class="n">start</span><span class="si">}</span><span class="s2">&#39; in &#39;squash_in&#39; call &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;for event with duration = &#39;</span><span class="si">{</span><span class="n">duration</span><span class="si">}</span><span class="s2">&#39;!&quot;</span>
+            <span class="s2">&quot; Start has to be equal or smaller than the events duration.&quot;</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="InvalidAverageValueStartAndEndWarning"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.InvalidAverageValueStartAndEndWarning">[docs]</a><span class="k">class</span> <span class="nc">InvalidAverageValueStartAndEndWarning</span><span class="p">(</span><span class="ne">RuntimeWarning</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="s2">&quot;Average value for range where start == end is equal to&quot;</span>
+            <span class="s2">&quot; envelope.value_at(start)!&quot;</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="InvalidPointError"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.InvalidPointError">[docs]</a><span class="k">class</span> <span class="nc">InvalidPointError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">,</span> <span class="n">point_count</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Found invalid point: &#39;</span><span class="si">{</span><span class="n">point</span><span class="si">}</span><span class="s2">&#39; with </span><span class="si">{</span><span class="n">point_count</span><span class="si">}</span><span class="s2"> &quot;</span>
+            <span class="s2">&quot;items! Points should have two or three items.&quot;</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ImpossibleToPutInError"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.ImpossibleToPutInError">[docs]</a><span class="k">class</span> <span class="nc">ImpossibleToPutInError</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event_to_be_put_into</span><span class="p">,</span> <span class="n">event_to_put_in</span><span class="p">,</span> <span class="n">method_name</span><span class="p">):</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">method_name</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Can&#39;t </span><span class="si">{</span><span class="n">m</span><span class="si">}</span><span class="s2"> &#39;</span><span class="si">{</span><span class="n">event_to_put_in</span><span class="si">}</span><span class="s2">&#39; in &#39;</span><span class="si">{</span><span class="n">event_to_be_put_into</span><span class="si">}</span><span class="s2">&#39;. &quot;</span>
+            <span class="s2">&quot;Does the Concurrence contain SimpleEvents or events that inherit&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; from SimpleEvent? For being able to </span><span class="si">{</span><span class="n">m</span><span class="si">}</span><span class="s2"> in, the&quot;</span>
+            <span class="s2">&quot; Concurrence needs to only contain Consecutions or&quot;</span>
+            <span class="s2">&quot; Concurrences.&quot;</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ImpossibleToSquashInError"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.ImpossibleToSquashInError">[docs]</a><span class="k">class</span> <span class="nc">ImpossibleToSquashInError</span><span class="p">(</span><span class="n">ImpossibleToPutInError</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event_to_be_squashed_into</span><span class="p">,</span> <span class="n">event_to_squash_in</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">event_to_be_squashed_into</span><span class="p">,</span> <span class="n">event_to_squash_in</span><span class="p">,</span> <span class="s2">&quot;squash&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ImpossibleToSlideInError"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.ImpossibleToSlideInError">[docs]</a><span class="k">class</span> <span class="nc">ImpossibleToSlideInError</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event_to_be_slided_into</span><span class="p">,</span> <span class="n">event_to_slide_in</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">event_to_be_slided_into</span><span class="p">,</span> <span class="n">event_to_slide_in</span><span class="p">,</span> <span class="s2">&quot;slide&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ImpossibleToExtendUntilError"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.ImpossibleToExtendUntilError">[docs]</a><span class="k">class</span> <span class="nc">ImpossibleToExtendUntilError</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event_to_extend_until</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Can&#39;t extend &#39;</span><span class="si">{</span><span class="n">event_to_extend_until</span><span class="si">}</span><span class="s2">&#39; of type&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">event_to_extend_until</span><span class="p">)</span><span class="si">}</span><span class="s2">&#39; which resides inside a &quot;</span>
+            <span class="s2">&quot;Concurrence. Set &#39;prolong_chronon&#39; to &#39;True&#39; in&quot;</span>
+            <span class="s2">&quot;case you want chronons to be prolonged.&quot;</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="IneffectiveExtendUntilError"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.IneffectiveExtendUntilError">[docs]</a><span class="k">class</span> <span class="nc">IneffectiveExtendUntilError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event_to_extend_until</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Can&#39;t extend empty event &#39;</span><span class="si">{</span><span class="n">event_to_extend_until</span><span class="si">}</span><span class="s2">&#39; of type&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">event_to_extend_until</span><span class="p">)</span><span class="si">}</span><span class="s2">&#39;. If you want to extend &quot;</span>
+            <span class="s2">&quot;a Concurrence you should first append an empty &quot;</span>
+            <span class="s2">&quot;Consecution to your Concurrence.&quot;</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="InvalidStartAndEndValueError"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.InvalidStartAndEndValueError">[docs]</a><span class="k">class</span> <span class="nc">InvalidStartAndEndValueError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Invalid values for start and end property (start = &#39;</span><span class="si">{</span><span class="n">start</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;and end = &#39;</span><span class="si">{</span><span class="n">end</span><span class="si">}</span><span class="s2">&#39;)!&quot;</span>
+            <span class="s2">&quot; Value for &#39;end&#39; has to be bigger than value for &#39;start&#39;.&quot;</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="InvalidCutOutStartAndEndValuesError"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.InvalidCutOutStartAndEndValuesError">[docs]</a><span class="k">class</span> <span class="nc">InvalidCutOutStartAndEndValuesError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">chronon</span><span class="p">,</span> <span class="n">duration</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Can&#39;t cut out SimpleEvent &#39;</span><span class="si">{</span><span class="n">chronon</span><span class="si">}</span><span class="s2">&#39; with &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;duration &#39;</span><span class="si">{</span><span class="n">duration</span><span class="si">}</span><span class="s2">&#39; from&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; (start = </span><span class="si">{</span><span class="n">start</span><span class="si">}</span><span class="s2"> to end = </span><span class="si">{</span><span class="n">end</span><span class="si">}</span><span class="s2">).&quot;</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SplitError"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.SplitError">[docs]</a><span class="k">class</span> <span class="nc">SplitError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">absolute_time</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">DurationType</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Can&#39;t split event at absolute time &#39;</span><span class="si">{</span><span class="n">absolute_time</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SplitUnavailableChildError"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.SplitUnavailableChildError">[docs]</a><span class="k">class</span> <span class="nc">SplitUnavailableChildError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">absolute_time</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">DurationType</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Can&#39;t split child at absolute time &#39;</span><span class="si">{</span><span class="n">absolute_time</span><span class="si">}</span><span class="s2">&#39;. There is no child&quot;</span>
+            <span class="s2">&quot; event available at the requested time.&quot;</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="NoSolutionFoundError"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.NoSolutionFoundError">[docs]</a><span class="k">class</span> <span class="nc">NoSolutionFoundError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="EmptyEnvelopeError"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.EmptyEnvelopeError">[docs]</a><span class="k">class</span> <span class="nc">EmptyEnvelopeError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">envelope</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Can&#39;t call &#39;</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">&#39; on empty envelope &#39;</span><span class="si">{</span><span class="n">envelope</span><span class="si">}</span><span class="s2">&#39;!&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="UndefinedReferenceWarning"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.UndefinedReferenceWarning">[docs]</a><span class="k">class</span> <span class="nc">UndefinedReferenceWarning</span><span class="p">(</span><span class="ne">RuntimeWarning</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tempo_point</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Tempo point &#39;</span><span class="si">{</span><span class="n">tempo_point</span><span class="si">}</span><span class="s2">&#39; of type &#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">tempo_point</span><span class="p">)</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
+            <span class="s2">&quot;doesn&#39;t know attribute &#39;reference&#39;.&quot;</span>
+            <span class="s2">&quot; Therefore reference has been set to 1.&quot;</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ConcatenationError"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.ConcatenationError">[docs]</a><span class="k">class</span> <span class="nc">ConcatenationError</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ancestor</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Can&#39;t concatenate event &#39;</span><span class="si">{</span><span class="n">event</span><span class="si">}</span><span class="s2">&#39; to event &#39;</span><span class="si">{</span><span class="n">ancestor</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;of type &#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">ancestor</span><span class="p">)</span><span class="si">}</span><span class="s2">&#39;. It is only possible to&quot;</span>
+            <span class="s2">&quot; concatenate a new event to events which are instances of &quot;</span>
+            <span class="s2">&quot;Consecution or Concurrence. To fix this bug you can&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; put your event &#39;</span><span class="si">{</span><span class="n">ancestor</span><span class="si">}</span><span class="s2">&#39; inside a Consecution or&quot;</span>
+            <span class="s2">&quot; a Concurrence.&quot;</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="NoTagError"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.NoTagError">[docs]</a><span class="k">class</span> <span class="nc">NoTagError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event_without_tag</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="s2">&quot;It&#39;s not possible to concatenate an event &quot;</span>
+            <span class="s2">&quot;with the &#39;concatenate_by_tag&#39; method if not &quot;</span>
+            <span class="s2">&quot;all child events have tags. Here &#39;mutwo&#39; detected the &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;child event &#39;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">event_without_tag</span><span class="p">)[:</span><span class="mi">50</span><span class="p">]</span><span class="si">}</span><span class="s2">...&#39; &quot;</span>
+            <span class="s2">&quot;which doesn&#39;t have any &#39;tag&#39; attribute.&quot;</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="InvalidAbsoluteTime"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.InvalidAbsoluteTime">[docs]</a><span class="k">class</span> <span class="nc">InvalidAbsoluteTime</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Duration &#39;</span><span class="si">{</span><span class="n">t</span><span class="si">}</span><span class="s2">&#39; is smaller than 0 and can therefore not &quot;</span>
+            <span class="s2">&quot;represent an absolute time. The absolute time line starts &quot;</span>
+            <span class="s2">&quot;from 0 until +inf and therefore the smallest absolute time is 0.&quot;</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="NoSplitTimeError"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.NoSplitTimeError">[docs]</a><span class="k">class</span> <span class="nc">NoSplitTimeError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;Nothing to split (no split time given)!&quot;</span><span class="p">)</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.core_utilities.exceptions</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Levin Eric Zimmermann.
+    </div>
+  </body>
+</html>

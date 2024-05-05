@@ -1,0 +1,1404 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mutwo.abjad_converters.events.building &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css" />
+    
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.abjad_converters.events.building</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mutwo.abjad_converters.events.building</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module to build complex multi-level abjad based scores from mutwo events.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">abc</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">quicktions</span> <span class="k">as</span> <span class="nn">fractions</span>  <span class="c1"># type: ignore</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">fractions</span>  <span class="c1"># type: ignore</span>
+
+<span class="kn">import</span> <span class="nn">abjad</span>  <span class="c1"># type: ignore</span>
+
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">abjad_converters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">abjad_parameters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_converters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_events</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_parameters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_utilities</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_converters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_parameters</span>
+
+<span class="kn">from</span> <span class="nn">..parameters</span> <span class="kn">import</span> <span class="n">MutwoPitchToAbjadPitch</span>
+<span class="kn">from</span> <span class="nn">..parameters</span> <span class="kn">import</span> <span class="n">MutwoVolumeToAbjadAttachmentDynamic</span>
+<span class="kn">from</span> <span class="nn">..parameters</span> <span class="kn">import</span> <span class="n">TempoEnvelopeToAbjadAttachmentTempo</span>
+<span class="kn">from</span> <span class="nn">..parameters</span> <span class="kn">import</span> <span class="n">ComplexTempoEnvelopeToAbjadAttachmentTempo</span>
+<span class="kn">from</span> <span class="nn">..parameters</span> <span class="kn">import</span> <span class="n">MutwoLyricToAbjadString</span>
+
+<span class="kn">from</span> <span class="nn">.quantization</span> <span class="kn">import</span> <span class="n">ConsecutionToQuantizedAbjadContainer</span>
+<span class="kn">from</span> <span class="nn">.quantization</span> <span class="kn">import</span> <span class="n">NauertConsecutionToQuantizedAbjadContainer</span>
+
+<span class="kn">from</span> <span class="nn">.quantization</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">NauertConsecutionToDurationLineBasedQuantizedAbjadContainer</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.quantization</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">LeafMakerConsecutionToDurationLineBasedQuantizedAbjadContainer</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;ComplexEventToAbjadContainer&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ConsecutionToAbjadVoice&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;NestedComplexEventToAbjadContainer&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;NestedComplexEventToComplexEventToAbjadContainers&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CycleBasedNestedComplexEventToComplexEventToAbjadContainers&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;TagBasedNestedComplexEventToComplexEventToAbjadContainers&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="ComplexEventToAbjadContainer"><a class="viewcode-back" href="../../../../api/mutwo.abjad_converters.html#mutwo.abjad_converters.ComplexEventToAbjadContainer">[docs]</a><span class="k">class</span> <span class="nc">ComplexEventToAbjadContainer</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Converter</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">abjad_container_class</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Type</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">Container</span><span class="p">],</span>
+        <span class="n">lilypond_type_of_abjad_container</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">complex_event_to_abjad_container_name</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ComplexEvent</span><span class="p">],</span> <span class="nb">str</span>
+        <span class="p">],</span>
+        <span class="n">pre_process_abjad_container_routine_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span>
+            <span class="n">abjad_converters</span><span class="o">.</span><span class="n">ProcessAbjadContainerRoutine</span>
+        <span class="p">],</span>
+        <span class="n">post_process_abjad_container_routine_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span>
+            <span class="n">abjad_converters</span><span class="o">.</span><span class="n">ProcessAbjadContainerRoutine</span>
+        <span class="p">],</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_abjad_container_class</span> <span class="o">=</span> <span class="n">abjad_container_class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lilypond_type_of_abjad_container</span> <span class="o">=</span> <span class="n">lilypond_type_of_abjad_container</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_complex_event_to_abjad_container_name</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">complex_event_to_abjad_container_name</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pre_process_abjad_container_routine_sequence</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">pre_process_abjad_container_routine_sequence</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_post_process_abjad_container_routine_sequence</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">post_process_abjad_container_routine_sequence</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_make_empty_abjad_container</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">complex_event_to_converter</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ComplexEvent</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Container</span><span class="p">:</span>
+        <span class="n">abjad_container_name</span> <span class="o">=</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">call_function_except_attribute_error</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_complex_event_to_abjad_container_name</span><span class="p">,</span>
+            <span class="n">complex_event_to_converter</span><span class="p">,</span>
+            <span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">argument_tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_abjad_container_class</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="s2">&quot;simultaneous&quot;</span> <span class="ow">in</span> <span class="n">argument_tuple</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;simultaneous&quot;</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span>
+                        <span class="n">complex_event_to_converter</span><span class="p">,</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Concurrence</span>
+                    <span class="p">)</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">abjad_container_name</span> <span class="ow">and</span> <span class="s2">&quot;name&quot;</span> <span class="ow">in</span> <span class="n">argument_tuple</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">abjad_container_name</span><span class="p">})</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lilypond_type_of_abjad_container</span> <span class="ow">and</span> <span class="s2">&quot;lilypond_type&quot;</span> <span class="ow">in</span> <span class="n">argument_tuple</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;lilypond_type&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lilypond_type_of_abjad_container</span><span class="p">})</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_abjad_container_class</span><span class="p">([],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_pre_process_abjad_container</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">complex_event_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ComplexEvent</span><span class="p">,</span>
+        <span class="n">abjad_container_to_pre_process</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Container</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">for</span> <span class="p">(</span>
+            <span class="n">pre_process_abjad_container_routine</span>
+        <span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pre_process_abjad_container_routine_sequence</span><span class="p">:</span>
+            <span class="n">pre_process_abjad_container_routine</span><span class="p">(</span>
+                <span class="n">complex_event_to_convert</span><span class="p">,</span> <span class="n">abjad_container_to_pre_process</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_post_process_abjad_container</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">complex_event_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ComplexEvent</span><span class="p">,</span>
+        <span class="n">abjad_container_to_post_process</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Container</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">for</span> <span class="p">(</span>
+            <span class="n">post_process_abjad_container_routine</span>
+        <span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_post_process_abjad_container_routine_sequence</span><span class="p">:</span>
+            <span class="n">post_process_abjad_container_routine</span><span class="p">(</span>
+                <span class="n">complex_event_to_convert</span><span class="p">,</span> <span class="n">abjad_container_to_post_process</span>
+            <span class="p">)</span>
+
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">_fill_abjad_container</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">abjad_container_to_fill</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Container</span><span class="p">,</span>
+        <span class="n">complex_event_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ComplexEvent</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+<div class="viewcode-block" id="ComplexEventToAbjadContainer.convert"><a class="viewcode-back" href="../../../../api/mutwo.abjad_converters.html#mutwo.abjad_converters.ComplexEventToAbjadContainer.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">complex_event_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ComplexEvent</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Container</span><span class="p">:</span>
+        <span class="n">abjad_container</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_empty_abjad_container</span><span class="p">(</span><span class="n">complex_event_to_convert</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pre_process_abjad_container</span><span class="p">(</span><span class="n">complex_event_to_convert</span><span class="p">,</span> <span class="n">abjad_container</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fill_abjad_container</span><span class="p">(</span><span class="n">abjad_container</span><span class="p">,</span> <span class="n">complex_event_to_convert</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_post_process_abjad_container</span><span class="p">(</span><span class="n">complex_event_to_convert</span><span class="p">,</span> <span class="n">abjad_container</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">abjad_container</span></div></div>
+
+
+<div class="viewcode-block" id="ConsecutionToAbjadVoice"><a class="viewcode-back" href="../../../../api/mutwo.abjad_converters.html#mutwo.abjad_converters.ConsecutionToAbjadVoice">[docs]</a><span class="k">class</span> <span class="nc">ConsecutionToAbjadVoice</span><span class="p">(</span><span class="n">ComplexEventToAbjadContainer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert :class:`~mutwo.core_events.Consecution` to :class:`abjad.Voice`.</span>
+
+<span class="sd">    :param consecution_to_quantized_abjad_container: Class which</span>
+<span class="sd">        defines how the Mutwo data will be quantized. See</span>
+<span class="sd">        :class:`ConsecutionToQuantizedAbjadContainer` for more information.</span>
+<span class="sd">    :type consecution_to_quantized_abjad_container: ConsecutionToQuantizedAbjadContainer, optional</span>
+<span class="sd">    :param default_tempo_envelope: Fallback value in case `event_to_tempo_envelope`</span>
+<span class="sd">        is set to `None` or returns `None`. This is the default for now, but likely</span>
+<span class="sd">        to be removed in the future. If possible, better use</span>
+<span class="sd">        `event_to_tempo_envelope`.</span>
+<span class="sd">    :type default_tempo_envelope: core_events.TempoEnvelope</span>
+<span class="sd">    :param chronon_to_pitch_list: Function to extract from a</span>
+<span class="sd">        :class:`mutwo.core_events.SimpleEvent` a tuple that contains pitch objects</span>
+<span class="sd">        (objects that inherit from :class:`mutwo.music_parameters.abc.Pitch`).</span>
+<span class="sd">        By default it asks the Event for its</span>
+<span class="sd">        :attr:`~mutwo.music_events.NoteLike.pitch_list` attribute</span>
+<span class="sd">        (because by default :class:`mutwo.music_events.NoteLike` objects are expected).</span>
+<span class="sd">        When using different Event classes than :class:`~mutwo.music_events.NoteLike`</span>
+<span class="sd">        with a different name for their pitch property, this argument</span>
+<span class="sd">        should be overridden.</span>
+<span class="sd">        If the function call raises an :obj:`AttributeError` (e.g. if no pitch can be</span>
+<span class="sd">        extracted), mutwo will assume an event without any pitches.</span>
+<span class="sd">    :type chronon_to_pitch_list: typing.Callable[[core_events.SimpleEvent], music_parameters.abc.Pitch], optional</span>
+<span class="sd">    :param chronon_to_volume: Function to extract the volume from a</span>
+<span class="sd">        :class:`mutwo.core_events.SimpleEvent` in the purpose of generating dynamic</span>
+<span class="sd">        indicators. The function should return an object that inherits from</span>
+<span class="sd">        :class:`mutwo.music_parameters.abc.Volume`. By default it asks the Event for</span>
+<span class="sd">        its :attr:`~mutwo.music_events.NoteLike.volume` attribute (because by default</span>
+<span class="sd">        :class:`mutwo.music_events.NoteLike` objects are expected).</span>
+<span class="sd">        When using different Event classes than :class:`~mutwo.music_events.NoteLike`</span>
+<span class="sd">        with a different name for their volume property, this argument should</span>
+<span class="sd">        be overridden.</span>
+<span class="sd">        If the function call raises an :obj:`AttributeError` (e.g. if no volume can be</span>
+<span class="sd">        extracted), mutwo will set :attr:`pitch_list` to an empty list and set</span>
+<span class="sd">        volume to 0.</span>
+<span class="sd">    :type chronon_to_volume: typing.Callable[[core_events.SimpleEvent], music_parameters.abc.Volume], optional</span>
+<span class="sd">    :param chronon_to_grace_note_consecution: Function to extract from a</span>
+<span class="sd">        :class:`mutwo.core_events.SimpleEvent` a</span>
+<span class="sd">        :class:`~mutwo.core_events.Consecution`</span>
+<span class="sd">        object filled with</span>
+<span class="sd">        :class:`~mutwo.core_events.SimpleEvent`.</span>
+<span class="sd">        By default it asks the Event for its</span>
+<span class="sd">        :attr:`~mutwo.music_events.NoteLike.grace_note_consecution`</span>
+<span class="sd">        attribute (because by default :class:`mutwo.music_events.NoteLike`</span>
+<span class="sd">        objects are expected).</span>
+<span class="sd">        When using different Event classes than :class:`~mutwo.music_events.NoteLike`</span>
+<span class="sd">        with a different name for their `grace_note_consecution` property, this argument</span>
+<span class="sd">        should be overridden. If the</span>
+<span class="sd">        function call raises an :obj:`AttributeError` (e.g. if no grace_note_consecution can be</span>
+<span class="sd">        extracted), mutwo will use an empty</span>
+<span class="sd">        :class:`~mutwo.core_events.Consecution`.</span>
+<span class="sd">    :type chronon_to_grace_note_consecution: typing.Callable[[core_events.SimpleEvent], core_events.Consecution[core_events.SimpleEvent]], optional</span>
+<span class="sd">    :param chronon_to_after_grace_note_consecution: Function to extract from a</span>
+<span class="sd">        :class:`mutwo.core_events.SimpleEvent` a</span>
+<span class="sd">        :class:`~mutwo.core_events.Consecution`</span>
+<span class="sd">        object filled with</span>
+<span class="sd">        :class:`~mutwo.core_events.SimpleEvent`.</span>
+<span class="sd">        By default it asks the Event for its</span>
+<span class="sd">        :attr:`~mutwo.music_events.NoteLike.after_grace_note_consecution`</span>
+<span class="sd">        attribute (because by default :class:`mutwo.music_events.NoteLike`</span>
+<span class="sd">        objects are expected).</span>
+<span class="sd">        When using different Event classes than :class:`~mutwo.music_events.NoteLike`</span>
+<span class="sd">        with a different name for their `after_grace_note_consecution` property, this</span>
+<span class="sd">        argument should be overridden. If the function call</span>
+<span class="sd">        raises an :obj:`AttributeError` (e.g. if no after_grace_note_consecution can be</span>
+<span class="sd">        extracted), mutwo will use an empty</span>
+<span class="sd">        :class:`~mutwo.core_events.Consecution`.</span>
+<span class="sd">    :type chronon_to_after_grace_note_consecution: typing.Callable[[core_events.SimpleEvent], core_events.Consecution[core_events.SimpleEvent]], optional</span>
+<span class="sd">    :param chronon_to_playing_indicator_collection: Function to extract from a</span>
+<span class="sd">        :class:`mutwo.core_events.SimpleEvent` a</span>
+<span class="sd">        :class:`mutwo.music_parameters.playing_indicators.PlayingIndicatorCollection`</span>
+<span class="sd">        object. By default it asks the Event for its</span>
+<span class="sd">        :attr:`~mutwo.music_events.NoteLike.playing_indicator_collection`</span>
+<span class="sd">        attribute (because by default :class:`mutwo.music_events.NoteLike`</span>
+<span class="sd">        objects are expected).</span>
+<span class="sd">        When using different Event classes than :class:`~mutwo.music_events.NoteLike`</span>
+<span class="sd">        with a different name for their playing_indicators property, this argument</span>
+<span class="sd">        should be overridden. If the</span>
+<span class="sd">        function call raises an :obj:`AttributeError` (e.g. if no playing indicator</span>
+<span class="sd">        collection can be extracted), mutwo will build a playing indicator collection</span>
+<span class="sd">        from :const:`~mutwo.music_events.configurations.DEFAULT_PLAYING_INDICATORS_COLLECTION_CLASS`.</span>
+<span class="sd">    :type chronon_to_playing_indicator_collection: typing.Callable[[core_events.SimpleEvent], music_parameters.PlayingIndicatorCollection,], optional</span>
+<span class="sd">    :param chronon_to_notation_indicator_collection: Function to extract from a</span>
+<span class="sd">        :class:`mutwo.core_events.SimpleEvent` a</span>
+<span class="sd">        :class:`mutwo.music_parameters.notation_indicators.NotationIndicatorCollection`</span>
+<span class="sd">        object. By default it asks the Event for its</span>
+<span class="sd">        :attr:`~mutwo.music_events.NoteLike.notation_indicators`</span>
+<span class="sd">        (because by default :class:`mutwo.music_events.NoteLike` objects are expected).</span>
+<span class="sd">        When using different Event classes than ``NoteLike`` with a different name for</span>
+<span class="sd">        their playing_indicators property, this argument should be overridden. If the</span>
+<span class="sd">        function call raises an :obj:`AttributeError` (e.g. if no notation indicator</span>
+<span class="sd">        collection can be extracted), mutwo will build a notation indicator collection</span>
+<span class="sd">        from :const:`~mutwo.music_events.configurations.DEFAULT_NOTATION_INDICATORS_COLLECTION_CLASS`</span>
+<span class="sd">    :type chronon_to_notation_indicator_collection: typing.Callable[[core_events.SimpleEvent], music_parameters.NotationIndicatorCollection,], optional</span>
+<span class="sd">    :param chronon_to_lyric: Function to extract the lyric from a</span>
+<span class="sd">        :class:`mutwo.core_events.SimpleEvent` in the purpose of generating lyrics.</span>
+<span class="sd">        The function should return an object that inherits from</span>
+<span class="sd">        :class:`mutwo.music_parameters.abc.Lyric`. By default it asks the Event for</span>
+<span class="sd">        its :attr:`~mutwo.music_events.NoteLike.lyric` attribute (because by default</span>
+<span class="sd">        :class:`mutwo.music_events.NoteLike` objects are expected).</span>
+<span class="sd">        When using different Event classes than :class:`~mutwo.music_events.NoteLike`</span>
+<span class="sd">        with a different name for their lyric property, this argument should</span>
+<span class="sd">        be overridden.</span>
+<span class="sd">        If the function call raises an :obj:`AttributeError` (e.g. if no lyric can be</span>
+<span class="sd">        extracted), mutwo will set :attr:`lyric` to an empty text.</span>
+<span class="sd">    :type chronon_to_lyric: typing.Callable[[core_events.SimpleEvent], music_parameters.abc.Lyric], optional</span>
+<span class="sd">    :param is_chronon_rest: Function to detect if the</span>
+<span class="sd">        the inspected :class:`mutwo.core_events.SimpleEvent` is a Rest. By</span>
+<span class="sd">        default Mutwo simply checks if &#39;pitch_list&#39; contain any objects. If not,</span>
+<span class="sd">        the Event will be interpreted as a rest.</span>
+<span class="sd">    :type is_chronon_rest: typing.Callable[[core_events.SimpleEvent], bool], optional</span>
+<span class="sd">    :param mutwo_pitch_to_abjad_pitch: Class which defines how to convert</span>
+<span class="sd">        :class:`mutwo.music_parameters.abc.Pitch` objects to :class:`abjad.Pitch` objects.</span>
+<span class="sd">        See :class:`MutwoPitchToAbjadPitch` for more information.</span>
+<span class="sd">    :type mutwo_pitch_to_abjad_pitch: MutwoPitchToAbjadPitch, optional</span>
+<span class="sd">    :param mutwo_volume_to_abjad_attachment_dynamic: Class which defines how</span>
+<span class="sd">        to convert :class:`mutwo.music_parameters.abc.Volume` objects to</span>
+<span class="sd">        :class:`mutwo.abjad_parameters.Dynamic` objects.</span>
+<span class="sd">        See :class:`MutwoVolumeToAbjadAttachmentDynamic` for more information.</span>
+<span class="sd">    :type mutwo_volume_to_abjad_attachment_dynamic: MutwoVolumeToAbjadAttachmentDynamic, optional</span>
+<span class="sd">    :param tempo_envelope_to_abjad_attachment_tempo: Class which defines how</span>
+<span class="sd">        to convert tempo envelopes to</span>
+<span class="sd">        :class:`mutwo.abjad_parameters.Tempo` objects.</span>
+<span class="sd">        See :class:`TempoEnvelopeToAbjadAttachmentTempo` for more information.</span>
+<span class="sd">    :type tempo_envelope_to_abjad_attachment_tempo: TempoEnvelopeToAbjadAttachmentTempo, optional</span>
+<span class="sd">    :param mutwo_lyric_to_abjad_string: Callable which defines how</span>
+<span class="sd">        to convert :class:`mutwo.music_parameters.abc.Lyric` to a string.</span>
+<span class="sd">        Consult :class:`mutwo.abjad_converters.MutwoLyricToAbjadString`</span>
+<span class="sd">        for more information.</span>
+<span class="sd">    :type mutwo_lyric_to_abjad_string: MutwoLyricToAbjadString</span>
+<span class="sd">    :param event_to_tempo_envelope: A function which extracts a</span>
+<span class="sd">        :class:`mutwo.core_events.TempoEnvelope` from a</span>
+<span class="sd">        :class:`mutwo.core_events.abc.Event`. If set to `None` or if the</span>
+<span class="sd">        function returns `None` mutwo falls back to `default_tempo_envelope`.</span>
+<span class="sd">        Default to ``None``, but this will likely change in the future.</span>
+<span class="sd">    :type event_to_tempo_envelope: typing.Optional[typing.Callable[[core_events.abc.Event], typing.Optional[core_events.TempoEnvelope]]]</span>
+<span class="sd">    :param abjad_attachment_class_sequence: A tuple which contains all available abjad attachment classes</span>
+<span class="sd">        which shall be used by the converter.</span>
+<span class="sd">    :type abjad_attachment_class_sequence: typing.Sequence[abjad_parameters.abc.AbjadAttachment], optional</span>
+<span class="sd">    :param write_multimeasure_rests: Set to ``True`` if the converter should replace</span>
+<span class="sd">        rests that last a complete bar with multimeasure rests (rests with uppercase</span>
+<span class="sd">        &quot;R&quot; in Lilypond). Default to ``True``.</span>
+<span class="sd">    :type write_multimeasure_rests: bool</span>
+<span class="sd">    :param duration_line_engraver: If `consecution_to_quantized_abjad_container` is</span>
+<span class="sd">        any duration line based converter, the converter adds</span>
+<span class="sd">        :class:`mutwo.abjad_converters.AddDurationLineEngraver` to</span>
+<span class="sd">        `post_process_abjad_container_routine_sequence`. Default to ``True``.</span>
+<span class="sd">    :type duration_line_engraver: bool</span>
+<span class="sd">    :param prepare_for_duration_line_based_notation: If</span>
+<span class="sd">        `consecution_to_quantized_abjad_container` is</span>
+<span class="sd">        any duration line based converter, the converter adds</span>
+<span class="sd">        :class:`mutwo.abjad_converters.PrepareForDurationLineBasedNotation` to</span>
+<span class="sd">        `post_process_abjad_container_routine_sequence`. Default to ``True``.</span>
+<span class="sd">    :type prepare_for_duration_line_based_notation: bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ExtractedData</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">[</span>
+        <span class="nb">list</span><span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">],</span>
+        <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Volume</span><span class="p">,</span>
+        <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span>
+        <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span>
+        <span class="n">music_parameters</span><span class="o">.</span><span class="n">PlayingIndicatorCollection</span><span class="p">,</span>
+        <span class="n">music_parameters</span><span class="o">.</span><span class="n">NotationIndicatorCollection</span><span class="p">,</span>
+        <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Lyric</span><span class="p">,</span>
+    <span class="p">]</span>
+
+    <span class="n">ExtractedDataPerSimpleEvent</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">ExtractedData</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">consecution_to_quantized_abjad_container</span><span class="p">:</span> <span class="n">ConsecutionToQuantizedAbjadContainer</span> <span class="o">=</span> <span class="n">NauertConsecutionToQuantizedAbjadContainer</span><span class="p">(),</span>
+        <span class="n">default_tempo_envelope</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">TempoEnvelope</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">TempoEnvelope</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">DirectTempoPoint</span><span class="p">(</span><span class="mi">120</span><span class="p">)),</span>
+                <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">DirectTempoPoint</span><span class="p">(</span><span class="mi">120</span><span class="p">)),</span>
+            <span class="p">)</span>
+        <span class="p">),</span>
+        <span class="n">chronon_to_pitch_list</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">]</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">SimpleEventToPitchList</span><span class="p">(),</span>
+        <span class="n">chronon_to_volume</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Volume</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">SimpleEventToVolume</span><span class="p">(),</span>
+        <span class="n">chronon_to_grace_note_consecution</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">SimpleEventToGraceNoteConsecution</span><span class="p">(),</span>
+        <span class="n">chronon_to_after_grace_note_consecution</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">SimpleEventToAfterGraceNoteConsecution</span><span class="p">(),</span>
+        <span class="n">chronon_to_playing_indicator_collection</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span>
+            <span class="n">music_parameters</span><span class="o">.</span><span class="n">PlayingIndicatorCollection</span><span class="p">,</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">SimpleEventToPlayingIndicatorCollection</span><span class="p">(),</span>
+        <span class="n">chronon_to_notation_indicator_collection</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span>
+            <span class="n">music_parameters</span><span class="o">.</span><span class="n">NotationIndicatorCollection</span><span class="p">,</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">SimpleEventToNotationIndicatorCollection</span><span class="p">(),</span>
+        <span class="n">chronon_to_lyric</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span>
+            <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Lyric</span><span class="p">,</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">SimpleEventToLyric</span><span class="p">(),</span>
+        <span class="n">is_chronon_rest</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+            <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">mutwo_pitch_to_abjad_pitch</span><span class="p">:</span> <span class="n">MutwoPitchToAbjadPitch</span> <span class="o">=</span> <span class="n">MutwoPitchToAbjadPitch</span><span class="p">(),</span>
+        <span class="n">mutwo_volume_to_abjad_attachment_dynamic</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+            <span class="n">MutwoVolumeToAbjadAttachmentDynamic</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">MutwoVolumeToAbjadAttachmentDynamic</span><span class="p">(),</span>
+        <span class="n">tempo_envelope_to_abjad_attachment_tempo</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+            <span class="n">TempoEnvelopeToAbjadAttachmentTempo</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">ComplexTempoEnvelopeToAbjadAttachmentTempo</span><span class="p">(),</span>
+        <span class="n">mutwo_lyric_to_abjad_string</span><span class="p">:</span> <span class="n">MutwoLyricToAbjadString</span> <span class="o">=</span> <span class="n">MutwoLyricToAbjadString</span><span class="p">(),</span>
+        <span class="n">event_to_tempo_envelope</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+            <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+                <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">],</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">TempoEnvelope</span><span class="p">]</span>
+            <span class="p">]</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">abjad_attachment_class_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span>
+            <span class="n">typing</span><span class="o">.</span><span class="n">Type</span><span class="p">[</span><span class="n">abjad_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">AbjadAttachment</span><span class="p">]</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">write_multimeasure_rests</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">abjad_container_class</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Type</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">Container</span><span class="p">]</span> <span class="o">=</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Voice</span><span class="p">,</span>
+        <span class="n">lilypond_type_of_abjad_container</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Voice&quot;</span><span class="p">,</span>
+        <span class="n">complex_event_to_abjad_container_name</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ComplexEvent</span><span class="p">],</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">pre_process_abjad_container_routine_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span>
+            <span class="n">abjad_converters</span><span class="o">.</span><span class="n">ProcessAbjadContainerRoutine</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([]),</span>
+        <span class="n">post_process_abjad_container_routine_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span>
+            <span class="n">abjad_converters</span><span class="o">.</span><span class="n">ProcessAbjadContainerRoutine</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([]),</span>
+        <span class="n">duration_line_engraver</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">prepare_for_duration_line_based_notation</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_with_duration_line</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">consecution_to_quantized_abjad_container</span><span class="p">,</span>
+            <span class="p">(</span>
+                <span class="n">NauertConsecutionToDurationLineBasedQuantizedAbjadContainer</span><span class="p">,</span>
+                <span class="n">LeafMakerConsecutionToDurationLineBasedQuantizedAbjadContainer</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+        <span class="c1"># special treatment for duration line based quantizer</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_with_duration_line</span><span class="p">:</span>
+            <span class="n">post_process_abjad_container_routine_sequence</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="n">post_process_abjad_container_routine_sequence</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">duration_line_engraver</span><span class="p">:</span>
+                <span class="n">post_process_abjad_container_routine_sequence</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">abjad_converters</span><span class="o">.</span><span class="n">AddDurationLineEngraver</span><span class="p">()</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="n">prepare_for_duration_line_based_notation</span><span class="p">:</span>
+                <span class="n">post_process_abjad_container_routine_sequence</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">abjad_converters</span><span class="o">.</span><span class="n">PrepareForDurationLineBasedNotation</span><span class="p">()</span>
+                <span class="p">)</span>
+
+        <span class="n">post_process_abjad_container_routine_sequence</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="n">post_process_abjad_container_routine_sequence</span>
+        <span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">abjad_container_class</span><span class="p">,</span>
+            <span class="n">lilypond_type_of_abjad_container</span><span class="p">,</span>
+            <span class="n">complex_event_to_abjad_container_name</span><span class="p">,</span>
+            <span class="n">pre_process_abjad_container_routine_sequence</span><span class="p">,</span>
+            <span class="n">post_process_abjad_container_routine_sequence</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">abjad_attachment_class_sequence</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">abjad_attachment_class_sequence</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">abjad_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_ABJAD_ATTACHMENT_CLASS_TUPLE</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">abjad_attachment_class_sequence</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">abjad_attachment_class_sequence</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">is_chronon_rest</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="k">def</span> <span class="nf">is_chronon_rest</span><span class="p">(</span><span class="n">chronon</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+                <span class="n">pitch_list</span> <span class="o">=</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">call_function_except_attribute_error</span><span class="p">(</span>
+                    <span class="n">chronon_to_pitch_list</span><span class="p">,</span> <span class="n">chronon</span><span class="p">,</span> <span class="p">[]</span>
+                <span class="p">)</span>
+                <span class="k">return</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">(</span><span class="n">pitch_list</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_abjad_attachment_class_sequence</span> <span class="o">=</span> <span class="n">abjad_attachment_class_sequence</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_available_attachment_tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="n">abjad_attachment_class</span><span class="o">.</span><span class="n">get_class_name</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">abjad_attachment_class</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_abjad_attachment_class_sequence</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_consecution_to_quantized_abjad_container</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">consecution_to_quantized_abjad_container</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_pitch_list</span> <span class="o">=</span> <span class="n">chronon_to_pitch_list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_volume</span> <span class="o">=</span> <span class="n">chronon_to_volume</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_grace_note_consecution</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">chronon_to_grace_note_consecution</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_after_grace_note_consecution</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">chronon_to_after_grace_note_consecution</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_playing_indicator_collection</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">chronon_to_playing_indicator_collection</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_notation_indicator_collection</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">chronon_to_notation_indicator_collection</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_lyric</span> <span class="o">=</span> <span class="n">chronon_to_lyric</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_function_tuple</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_grace_note_consecution</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_after_grace_note_consecution</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_playing_indicator_collection</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_notation_indicator_collection</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_lyric</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_chronon_rest</span> <span class="o">=</span> <span class="n">is_chronon_rest</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mutwo_pitch_to_abjad_pitch</span> <span class="o">=</span> <span class="n">mutwo_pitch_to_abjad_pitch</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mutwo_volume_to_abjad_attachment_dynamic</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">mutwo_volume_to_abjad_attachment_dynamic</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tempo_envelope_to_abjad_attachment_tempo</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">tempo_envelope_to_abjad_attachment_tempo</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_default_tempo_envelope</span> <span class="o">=</span> <span class="n">default_tempo_envelope</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_event_to_tempo_envelope</span> <span class="o">=</span> <span class="n">event_to_tempo_envelope</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mutwo_lyric_to_abjad_string</span> <span class="o">=</span> <span class="n">mutwo_lyric_to_abjad_string</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_write_multimeasure_rests</span> <span class="o">=</span> <span class="n">write_multimeasure_rests</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                          static methods                                #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_detect_abjad_event_type</span><span class="p">(</span><span class="n">pitch_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">:</span>
+        <span class="n">pitch_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pitch_list</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pitch_count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">abjad_event_type</span> <span class="o">=</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Rest</span>
+        <span class="k">elif</span> <span class="n">pitch_count</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">abjad_event_type</span> <span class="o">=</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Note</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">abjad_event_type</span> <span class="o">=</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Chord</span>
+        <span class="k">return</span> <span class="n">abjad_event_type</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_find_absolute_times_of_abjad_leaves</span><span class="p">(</span>
+        <span class="n">abjad_voice</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Voice</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="n">absolute_time_per_leaf_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">leaf</span> <span class="ow">in</span> <span class="n">abjad</span><span class="o">.</span><span class="n">select</span><span class="o">.</span><span class="n">leaves</span><span class="p">(</span><span class="n">abjad_voice</span><span class="p">):</span>
+            <span class="n">start</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">abjad</span><span class="o">.</span><span class="n">get</span><span class="o">.</span><span class="n">timespan</span><span class="p">(</span><span class="n">leaf</span><span class="p">)</span><span class="o">.</span><span class="n">offsets</span>
+            <span class="n">absolute_time_per_leaf_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">(</span><span class="n">start</span><span class="o">.</span><span class="n">numerator</span><span class="p">,</span> <span class="n">start</span><span class="o">.</span><span class="n">denominator</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">absolute_time_per_leaf_list</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_replace_rests_with_full_measure_rests</span><span class="p">(</span><span class="n">abjad_voice</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Voice</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">def</span> <span class="nf">ok</span><span class="p">(</span><span class="n">indicator_sequence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">indicator</span> <span class="ow">in</span> <span class="n">indicator_sequence</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
+                    <span class="n">indicator</span><span class="p">,</span>
+                    <span class="n">abjad_converters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">INEFFECTIVE_INDICATOR_FOR_MULTIMEASURE_REST_TUPLE</span><span class="p">,</span>
+                <span class="p">):</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="k">for</span> <span class="n">bar</span> <span class="ow">in</span> <span class="n">abjad_voice</span><span class="p">:</span>
+            <span class="c1"># We can only replace rests with multi measure rests if certain</span>
+            <span class="c1"># requirments apply:</span>
+            <span class="c1"># First ensure we only have rests in this bar.</span>
+            <span class="c1"># Then we need to ensure that none of those rests have an</span>
+            <span class="c1"># indicator: if they would have an indicator it would be</span>
+            <span class="c1"># lost, because MultiMeasureRest can&#39;t print plenty of</span>
+            <span class="c1"># attachments (for instance fermata).</span>
+            <span class="k">if</span> <span class="nb">all</span><span class="p">((</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Rest</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">bar</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">ok</span><span class="p">(</span><span class="n">abjad</span><span class="o">.</span><span class="n">get</span><span class="o">.</span><span class="n">indicators</span><span class="p">(</span><span class="n">item</span><span class="p">))</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">bar</span><span class="p">]</span>
+            <span class="p">):</span>
+                <span class="n">duration</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">((</span><span class="n">item</span><span class="o">.</span><span class="n">written_duration</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">bar</span><span class="p">))</span>
+                <span class="n">numerator</span><span class="p">,</span> <span class="n">denominator</span> <span class="o">=</span> <span class="n">duration</span><span class="o">.</span><span class="n">numerator</span><span class="p">,</span> <span class="n">duration</span><span class="o">.</span><span class="n">denominator</span>
+                <span class="n">abjad</span><span class="o">.</span><span class="n">mutate</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                    <span class="n">bar</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="n">abjad</span><span class="o">.</span><span class="n">MultimeasureRest</span><span class="p">(</span>
+                        <span class="n">abjad</span><span class="o">.</span><span class="n">Duration</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">denominator</span><span class="p">),</span> <span class="n">multiplier</span><span class="o">=</span><span class="n">numerator</span>
+                    <span class="p">),</span>
+                    <span class="n">wrappers</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">del</span> <span class="n">bar</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                          private methods                               #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="k">def</span> <span class="nf">_get_tempo_envelope</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">TempoEnvelope</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_to_tempo_envelope</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">tempo_envelope</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_to_tempo_envelope</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">tempo_envelope</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_tempo_envelope</span>
+
+    <span class="k">def</span> <span class="nf">_indicator_collection_to_abjad_parameters</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">indicator_collection</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">IndicatorCollection</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">abjad_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">AbjadAttachment</span><span class="p">]:</span>
+        <span class="n">attachment_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">abjad_attachment_class</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_abjad_attachment_class_sequence</span><span class="p">:</span>
+            <span class="n">abjad_attachment</span> <span class="o">=</span> <span class="n">abjad_attachment_class</span><span class="o">.</span><span class="n">from_indicator_collection</span><span class="p">(</span>
+                <span class="n">indicator_collection</span><span class="p">,</span>
+                <span class="n">is_chronon_rest</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_is_chronon_rest</span><span class="p">,</span>
+                <span class="n">mutwo_pitch_to_abjad_pitch</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mutwo_pitch_to_abjad_pitch</span><span class="p">,</span>
+                <span class="n">mutwo_volume_to_abjad_attachment_dynamic</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mutwo_volume_to_abjad_attachment_dynamic</span><span class="p">,</span>
+                <span class="n">mutwo_lyric_to_abjad_string</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mutwo_lyric_to_abjad_string</span><span class="p">,</span>
+                <span class="n">with_duration_line</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_with_duration_line</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">abjad_attachment</span><span class="p">:</span>
+                <span class="n">attachment_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                    <span class="p">{</span><span class="n">abjad_attachment_class</span><span class="o">.</span><span class="n">get_class_name</span><span class="p">():</span> <span class="n">abjad_attachment</span><span class="p">}</span>
+                <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">attachment_dict</span>
+
+    <span class="k">def</span> <span class="nf">_grace_note_consecution_to_abjad_attachment</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">grace_note_consecution_or_after_grace_note_consecution</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">[</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span>
+        <span class="p">],</span>
+        <span class="n">is_before</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">abjad_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">AbjadAttachment</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">grace_note_consecution_or_after_grace_note_consecution</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{}</span>
+        <span class="n">converter</span> <span class="o">=</span> <span class="n">_GraceNotesToAbjadVoiceConverter</span><span class="p">(</span>
+            <span class="n">is_before</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_pitch_list</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_volume</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_playing_indicator_collection</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_notation_indicator_collection</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_is_chronon_rest</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_mutwo_pitch_to_abjad_pitch</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">grace_note_consecution_container</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span>
+            <span class="n">grace_note_consecution_or_after_grace_note_consecution</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">is_before</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;grace_note_consecution&quot;</span>
+            <span class="n">abjad_attachment_class</span> <span class="o">=</span> <span class="n">abjad_parameters</span><span class="o">.</span><span class="n">GraceNoteConsecution</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;after_grace_note_consecution&quot;</span>
+            <span class="n">abjad_attachment_class</span> <span class="o">=</span> <span class="n">abjad_parameters</span><span class="o">.</span><span class="n">AfterGraceNoteConsecution</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">abjad_attachment_class</span><span class="p">(</span><span class="n">grace_note_consecution_container</span><span class="p">)}</span>
+
+    <span class="k">def</span> <span class="nf">_volume_to_abjad_attachment</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">volume</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Volume</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">abjad_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">AbjadAttachment</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mutwo_volume_to_abjad_attachment_dynamic</span><span class="p">:</span>
+            <span class="n">abjad_attachment_dynamic</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_mutwo_volume_to_abjad_attachment_dynamic</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">volume</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">abjad_attachment_dynamic</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;dynamic&quot;</span><span class="p">:</span> <span class="n">abjad_attachment_dynamic</span><span class="p">}</span>
+        <span class="k">return</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">_get_tempo_attachment_tuple_for_quantized_abjad_leaves</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">abjad_voice</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Voice</span><span class="p">,</span>
+        <span class="n">tempo_attachment_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span>
+            <span class="nb">tuple</span><span class="p">[</span><span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">,</span> <span class="n">abjad_parameters</span><span class="o">.</span><span class="n">Tempo</span><span class="p">],</span> <span class="o">...</span>
+        <span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span>
+        <span class="nb">tuple</span><span class="p">[</span>
+            <span class="nb">int</span><span class="p">,</span>
+            <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span>
+                <span class="n">abjad_parameters</span><span class="o">.</span><span class="n">Tempo</span><span class="p">,</span> <span class="n">abjad_parameters</span><span class="o">.</span><span class="n">DynamicChangeIndicationStop</span>
+            <span class="p">],</span>
+        <span class="p">],</span>
+        <span class="o">...</span><span class="p">,</span>
+    <span class="p">]:</span>
+        <span class="n">absolute_time_per_leaf</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">ConsecutionToAbjadVoice</span><span class="o">.</span><span class="n">_find_absolute_times_of_abjad_leaves</span><span class="p">(</span>
+                <span class="n">abjad_voice</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">absolute_time_per_leaf</span> <span class="o">==</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">absolute_time_per_leaf</span><span class="p">))</span>
+
+        <span class="n">leaf_index_to_tempo_attachment_pairs_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span>
+            <span class="nb">tuple</span><span class="p">[</span>
+                <span class="nb">int</span><span class="p">,</span>
+                <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span>
+                    <span class="n">abjad_parameters</span><span class="o">.</span><span class="n">Tempo</span><span class="p">,</span>
+                    <span class="n">abjad_parameters</span><span class="o">.</span><span class="n">DynamicChangeIndicationStop</span><span class="p">,</span>
+                <span class="p">],</span>
+            <span class="p">]</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">absolute_time</span><span class="p">,</span> <span class="n">tempo_attachment</span> <span class="ow">in</span> <span class="n">tempo_attachment_tuple</span><span class="p">:</span>
+            <span class="n">closest_leaf</span> <span class="o">=</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">find_closest_index</span><span class="p">(</span>
+                <span class="n">absolute_time</span><span class="o">.</span><span class="n">duration</span><span class="p">,</span> <span class="n">absolute_time_per_leaf</span>
+            <span class="p">)</span>
+            <span class="c1"># special case:</span>
+            <span class="c1"># check for stop dynamic change indication</span>
+            <span class="c1"># (has to applied to the previous leaf for</span>
+            <span class="c1">#  better looking results)</span>
+            <span class="k">if</span> <span class="n">tempo_attachment</span><span class="o">.</span><span class="n">stop_dynamic_change_indicaton</span><span class="p">:</span>
+                <span class="n">leaf_index_to_tempo_attachment_pairs_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">closest_leaf</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">abjad_parameters</span><span class="o">.</span><span class="n">DynamicChangeIndicationStop</span><span class="p">())</span>
+                <span class="p">)</span>
+            <span class="n">leaf_index_to_tempo_attachment_pairs_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">closest_leaf</span><span class="p">,</span> <span class="n">tempo_attachment</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">leaf_index_to_tempo_attachment_pairs_list</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_abjad_parameters_for_quantized_abjad_leaves</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">extracted_data_per_chronon</span><span class="p">:</span> <span class="n">ExtractedDataPerSimpleEvent</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">abjad_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">AbjadAttachment</span><span class="p">],</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="n">abjad_parameters_per_type_per_event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span>
+            <span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">abjad_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">AbjadAttachment</span><span class="p">]]</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">attachment_name</span><span class="p">:</span> <span class="p">[</span><span class="kc">None</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">extracted_data_per_chronon</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">attachment_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_available_attachment_tuple</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">nth_event</span><span class="p">,</span> <span class="n">extracted_data</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">extracted_data_per_chronon</span><span class="p">):</span>
+            <span class="p">(</span>
+                <span class="n">_</span><span class="p">,</span>
+                <span class="n">volume</span><span class="p">,</span>
+                <span class="n">grace_note_consecution</span><span class="p">,</span>
+                <span class="n">after_grace_note_consecution</span><span class="p">,</span>
+                <span class="n">playing_indicators</span><span class="p">,</span>
+                <span class="n">notation_indicators</span><span class="p">,</span>
+                <span class="o">*</span><span class="n">_</span><span class="p">,</span>
+            <span class="p">)</span> <span class="o">=</span> <span class="n">extracted_data</span>
+            <span class="n">abjad_parameters_for_nth_event</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_volume_to_abjad_attachment</span><span class="p">(</span><span class="n">volume</span><span class="p">)</span>
+            <span class="n">abjad_parameters_for_nth_event</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_grace_note_consecution_to_abjad_attachment</span><span class="p">(</span>
+                    <span class="n">grace_note_consecution</span><span class="p">,</span> <span class="kc">True</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">abjad_parameters_for_nth_event</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_grace_note_consecution_to_abjad_attachment</span><span class="p">(</span>
+                    <span class="n">after_grace_note_consecution</span><span class="p">,</span> <span class="kc">False</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">abjad_parameters_for_nth_event</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_indicator_collection_to_abjad_parameters</span><span class="p">(</span><span class="n">playing_indicators</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">abjad_parameters_for_nth_event</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_indicator_collection_to_abjad_parameters</span><span class="p">(</span><span class="n">notation_indicators</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">attachment_name</span><span class="p">,</span> <span class="n">attachment</span> <span class="ow">in</span> <span class="n">abjad_parameters_for_nth_event</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">abjad_parameters_per_type_per_event</span><span class="p">[</span><span class="n">attachment_name</span><span class="p">][</span>
+                    <span class="n">nth_event</span>
+                <span class="p">]</span> <span class="o">=</span> <span class="n">attachment</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="nb">tuple</span><span class="p">(</span><span class="n">abjad_parameters</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">abjad_parameters</span> <span class="ow">in</span> <span class="n">abjad_parameters_per_type_per_event</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_apply_tempos_on_quantized_abjad_leaves</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">quanitisized_abjad_leaf_voice</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Voice</span><span class="p">,</span>
+        <span class="n">tempo_envelope</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">TempoEnvelope</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">tempo_attachment_tuple</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tempo_envelope_to_abjad_attachment_tempo</span><span class="p">:</span>
+            <span class="n">tempo_attachment_tuple</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_tempo_envelope_to_abjad_attachment_tempo</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">tempo_envelope</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">tempo_attachment_tuple</span><span class="p">:</span>
+            <span class="n">leaves</span> <span class="o">=</span> <span class="n">abjad</span><span class="o">.</span><span class="n">select</span><span class="o">.</span><span class="n">leaves</span><span class="p">(</span><span class="n">quanitisized_abjad_leaf_voice</span><span class="p">)</span>
+            <span class="n">tempo_attachment_data</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_get_tempo_attachment_tuple_for_quantized_abjad_leaves</span><span class="p">(</span>
+                    <span class="n">quanitisized_abjad_leaf_voice</span><span class="p">,</span> <span class="n">tempo_attachment_tuple</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">nth_event</span><span class="p">,</span> <span class="n">tempo_attachment</span> <span class="ow">in</span> <span class="n">tempo_attachment_data</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">tempo_attachment</span><span class="o">.</span><span class="n">process_leaf_tuple</span><span class="p">((</span><span class="n">leaves</span><span class="p">[</span><span class="n">nth_event</span><span class="p">],),</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">abjad</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">PersistentIndicatorError</span><span class="p">:</span>
+                    <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">_apply_abjad_parameters_on_quantized_abjad_leaves</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">quanitisized_abjad_leaf_voice</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Voice</span><span class="p">,</span>
+        <span class="n">related_abjad_leaf_index_tuple_tuple_per_chronon</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span>
+            <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span>
+        <span class="p">],</span>
+        <span class="n">abjad_parameters_per_type_per_event_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span>
+            <span class="nb">tuple</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">abjad_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">AbjadAttachment</span><span class="p">],</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span>
+        <span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="n">index_tuple_to_remove_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># All indicators which don&#39;t replace leaf-by-leaf can</span>
+        <span class="c1"># potentially break indicators which do replace leaf-by-leaf:</span>
+        <span class="c1"># Because the second category expects leaf-only input, but the</span>
+        <span class="c1"># first category may create outputs which break with this rule.</span>
+        <span class="c1"># To fix this we ensure that all leaf-by-leaf indicators are applied</span>
+        <span class="c1"># before more complex converters start.</span>
+
+        <span class="k">def</span> <span class="nf">filter_key</span><span class="p">(</span><span class="n">abjad_parameters_per_type</span><span class="p">):</span>
+            <span class="n">abjad_parameters_per_type</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="n">abjad_parameters_per_type</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">abjad_parameters_per_type</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">abjad_parameters_per_type</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace_leaf_by_leaf</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="mi">0</span>
+
+        <span class="n">abjad_parameters_per_type_per_event_tuple</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="n">abjad_parameters_per_type_per_event_tuple</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">=</span><span class="n">filter_key</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">abjad_parameters_per_type</span> <span class="ow">in</span> <span class="n">abjad_parameters_per_type_per_event_tuple</span><span class="p">:</span>
+            <span class="n">previous_attachment</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">for</span> <span class="n">related_abjad_leaf_index_tuple_tuple</span><span class="p">,</span> <span class="n">attachment</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                <span class="n">related_abjad_leaf_index_tuple_tuple_per_chronon</span><span class="p">,</span>
+                <span class="n">abjad_parameters_per_type</span><span class="p">,</span>
+            <span class="p">):</span>
+                <span class="k">if</span> <span class="n">attachment</span> <span class="ow">and</span> <span class="n">attachment</span><span class="o">.</span><span class="n">is_active</span><span class="p">:</span>
+                    <span class="n">index_tuple_to_remove_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_abjad_attachment</span><span class="p">(</span>
+                            <span class="n">attachment</span><span class="p">,</span>
+                            <span class="n">previous_attachment</span><span class="p">,</span>
+                            <span class="n">quanitisized_abjad_leaf_voice</span><span class="p">,</span>
+                            <span class="n">related_abjad_leaf_index_tuple_tuple</span><span class="p">,</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="n">previous_attachment</span> <span class="o">=</span> <span class="n">attachment</span>
+
+        <span class="k">for</span> <span class="n">index_tuple</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">index_tuple_to_remove_list</span><span class="p">):</span>
+            <span class="n">core_utilities</span><span class="o">.</span><span class="n">del_nested_item_from_index_sequence</span><span class="p">(</span>
+                <span class="n">index_tuple</span><span class="p">,</span> <span class="n">quanitisized_abjad_leaf_voice</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_apply_abjad_attachment</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">attachment</span><span class="p">:</span> <span class="n">abjad_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">AbjadAttachment</span><span class="p">,</span>
+        <span class="n">previous_attachment</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">abjad_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">AbjadAttachment</span><span class="p">],</span>
+        <span class="n">quanitisized_abjad_leaf_voice</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Voice</span><span class="p">,</span>
+        <span class="n">related_abjad_leaf_index_tuple_tuple</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
+        <span class="n">abjad_leaf_tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="n">core_utilities</span><span class="o">.</span><span class="n">get_nested_item_from_index_sequence</span><span class="p">(</span>
+                <span class="n">index_tuple</span><span class="p">,</span>
+                <span class="n">quanitisized_abjad_leaf_voice</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">index_tuple</span> <span class="ow">in</span> <span class="n">related_abjad_leaf_index_tuple_tuple</span>
+        <span class="p">)</span>
+        <span class="n">processed_abjad_leaf_tuple</span> <span class="o">=</span> <span class="n">attachment</span><span class="o">.</span><span class="n">process_leaf_tuple</span><span class="p">(</span>
+            <span class="n">abjad_leaf_tuple</span><span class="p">,</span> <span class="n">previous_attachment</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">attachment</span><span class="o">.</span><span class="n">replace_leaf_by_leaf</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">processed_abjad_leaf_tuple</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span>
+                <span class="n">related_abjad_leaf_index_tuple_tuple</span>
+            <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Attachment &#39;</span><span class="si">{</span><span class="n">attachment</span><span class="si">}</span><span class="s2">&#39; returned bad abjad_leaf_tuple!&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">processed_abjad_leaf_tuple</span> <span class="o">=</span> <span class="p">(</span><span class="n">processed_abjad_leaf_tuple</span><span class="p">,)</span> <span class="o">+</span> <span class="p">(</span>
+                <span class="p">(</span><span class="kc">None</span><span class="p">,)</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">related_abjad_leaf_index_tuple_tuple</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="n">index_tuple_to_remove_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">processed_abjad_leaf</span><span class="p">,</span> <span class="n">index_tuple</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+            <span class="n">processed_abjad_leaf_tuple</span><span class="p">,</span> <span class="n">related_abjad_leaf_index_tuple_tuple</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="n">processed_abjad_leaf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># We can&#39;t immediately call __delitem__, because</span>
+                <span class="c1"># this would confuse all other indices!</span>
+                <span class="n">index_tuple_to_remove_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index_tuple</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">core_utilities</span><span class="o">.</span><span class="n">set_nested_item_from_index_sequence</span><span class="p">(</span>
+                    <span class="n">index_tuple</span><span class="p">,</span>
+                    <span class="n">quanitisized_abjad_leaf_voice</span><span class="p">,</span>
+                    <span class="n">processed_abjad_leaf</span><span class="p">,</span>
+                <span class="p">)</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">index_tuple_to_remove_list</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_extract_pitch_list_and_volume_from_chronon</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">chronon</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">],</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Volume</span><span class="p">]:</span>
+        <span class="n">pitch_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_pitch_list</span><span class="p">(</span><span class="n">chronon</span><span class="p">)</span>
+
+        <span class="c1"># TODO(Add option: no dynamic indicator if there aren&#39;t any pitches)</span>
+        <span class="k">if</span> <span class="n">pitch_list</span><span class="p">:</span>
+            <span class="n">volume</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_volume</span><span class="p">(</span><span class="n">chronon</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">volume</span><span class="o">.</span><span class="n">amplitude</span><span class="p">:</span>
+                <span class="n">pitch_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">volume</span> <span class="o">=</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">DirectVolume</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">pitch_list</span><span class="p">,</span> <span class="n">volume</span>
+
+    <span class="k">def</span> <span class="nf">_extract_data_from_chronon</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">chronon</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ExtractedData</span><span class="p">:</span>
+        <span class="c1"># Special case for pitch_list and volume:</span>
+        <span class="c1"># if pitch_list is empty, there is also no volume. If volume is empty</span>
+        <span class="c1"># there is also no pitch_list.</span>
+        <span class="n">extracted_data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_extract_pitch_list_and_volume_from_chronon</span><span class="p">(</span><span class="n">chronon</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">function</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_function_tuple</span><span class="p">:</span>
+            <span class="n">extracted_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">function</span><span class="p">(</span><span class="n">chronon</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">extracted_data</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+
+    <span class="k">def</span> <span class="nf">_apply_pitch_list_on_quantized_abjad_leaf</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">quanitisized_abjad_leaf_voice</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Voice</span><span class="p">,</span>
+        <span class="n">abjad_pitch_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">Pitch</span><span class="p">],</span>
+        <span class="n">related_abjad_leaf_index_tuple_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">],</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">abjad_pitch_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">leaf_class</span> <span class="o">=</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Note</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">leaf_class</span> <span class="o">=</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Chord</span>
+
+        <span class="k">for</span> <span class="n">related_abjad_leaf_index_tuple</span> <span class="ow">in</span> <span class="n">related_abjad_leaf_index_tuple_tuple</span><span class="p">:</span>
+            <span class="n">abjad_leaf</span> <span class="o">=</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">get_nested_item_from_index_sequence</span><span class="p">(</span>
+                <span class="n">related_abjad_leaf_index_tuple</span><span class="p">,</span> <span class="n">quanitisized_abjad_leaf_voice</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">leaf_class</span> <span class="o">==</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Note</span><span class="p">:</span>
+                <span class="c1"># skip don&#39;t have note heads</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">abjad_leaf</span><span class="p">,</span> <span class="s2">&quot;note_head&quot;</span><span class="p">):</span>
+                    <span class="n">abjad_leaf</span><span class="o">.</span><span class="n">note_head</span><span class="o">.</span><span class="n">_written_pitch</span> <span class="o">=</span> <span class="n">abjad_pitch_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_abjad_leaf</span> <span class="o">=</span> <span class="n">leaf_class</span><span class="p">(</span>
+                    <span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">NamedPitch</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">abjad_pitch_list</span><span class="p">],</span>
+                    <span class="n">abjad_leaf</span><span class="o">.</span><span class="n">written_duration</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">indicator</span> <span class="ow">in</span> <span class="n">abjad</span><span class="o">.</span><span class="n">get</span><span class="o">.</span><span class="n">indicators</span><span class="p">(</span><span class="n">abjad_leaf</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">indicator</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">dict</span><span class="p">:</span>
+                        <span class="n">abjad</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">indicator</span><span class="p">,</span> <span class="n">new_abjad_leaf</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">abjad_pitch</span><span class="p">,</span> <span class="n">note_head</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                    <span class="n">abjad_pitch_list</span><span class="p">,</span> <span class="n">new_abjad_leaf</span><span class="o">.</span><span class="n">note_heads</span>
+                <span class="p">):</span>
+                    <span class="n">note_head</span><span class="o">.</span><span class="n">_written_pitch</span> <span class="o">=</span> <span class="n">abjad_pitch</span>
+
+                <span class="n">core_utilities</span><span class="o">.</span><span class="n">set_nested_item_from_index_sequence</span><span class="p">(</span>
+                    <span class="n">related_abjad_leaf_index_tuple</span><span class="p">,</span>
+                    <span class="n">quanitisized_abjad_leaf_voice</span><span class="p">,</span>
+                    <span class="n">new_abjad_leaf</span><span class="p">,</span>
+                <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_apply_pitches_on_quantized_abjad_leaves</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">quanitisized_abjad_leaf_voice</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Voice</span><span class="p">,</span>
+        <span class="n">related_abjad_leaf_index_tuple_tuple_per_chronon</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span>
+            <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span>
+        <span class="p">],</span>
+        <span class="n">extracted_data_per_chronon</span><span class="p">:</span> <span class="n">ExtractedDataPerSimpleEvent</span><span class="p">,</span>
+        <span class="n">is_chronon_rest_per_chronon</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+    <span class="p">):</span>
+        <span class="k">for</span> <span class="p">(</span>
+            <span class="n">is_chronon_rest</span><span class="p">,</span>
+            <span class="n">extracted_data</span><span class="p">,</span>
+            <span class="n">related_abjad_leaf_index_tuple_tuple</span><span class="p">,</span>
+        <span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+            <span class="n">is_chronon_rest_per_chronon</span><span class="p">,</span>
+            <span class="n">extracted_data_per_chronon</span><span class="p">,</span>
+            <span class="n">related_abjad_leaf_index_tuple_tuple_per_chronon</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">is_chronon_rest</span><span class="p">:</span>
+                <span class="n">pitch_list</span> <span class="o">=</span> <span class="n">extracted_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">abjad_pitch_list</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_mutwo_pitch_to_abjad_pitch</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">pitch</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">pitch</span> <span class="ow">in</span> <span class="n">pitch_list</span>
+                <span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_apply_pitch_list_on_quantized_abjad_leaf</span><span class="p">(</span>
+                    <span class="n">quanitisized_abjad_leaf_voice</span><span class="p">,</span>
+                    <span class="n">abjad_pitch_list</span><span class="p">,</span>
+                    <span class="n">related_abjad_leaf_index_tuple_tuple</span><span class="p">,</span>
+                <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_lyric_content</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">extracted_data_per_chronon</span><span class="p">:</span> <span class="n">ExtractedDataPerSimpleEvent</span><span class="p">,</span>
+        <span class="n">is_chronon_rest_per_chronon</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">lyric_content_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">extracted_data</span><span class="p">,</span> <span class="n">is_chronon_rest</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+            <span class="n">extracted_data_per_chronon</span><span class="p">,</span> <span class="n">is_chronon_rest_per_chronon</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">is_chronon_rest</span><span class="p">:</span>
+                <span class="n">lyric</span> <span class="o">=</span> <span class="n">extracted_data</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+                <span class="n">abjad_string</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mutwo_lyric_to_abjad_string</span><span class="p">(</span><span class="n">lyric</span><span class="p">)</span>
+                <span class="n">lyric_content_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">abjad_string</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lyric_content_list</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_apply_lyrics_on_voice</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">voice_to_apply_lyrics_to</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Voice</span><span class="p">,</span> <span class="n">lyric_content</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">):</span>
+        <span class="c1"># We only add the lyrics in case it isn&#39;t empty</span>
+        <span class="n">reduced_lyric</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="n">lyric_content</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">))))</span>
+        <span class="n">test_tuple</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="c1"># &quot;&quot; -&gt; this doesn&#39;t need to be added</span>
+            <span class="nb">bool</span><span class="p">(</span><span class="n">lyric_content</span><span class="p">),</span>
+            <span class="c1"># &quot;        &quot; -&gt; this doesn&#39;t need to be added</span>
+            <span class="ow">not</span> <span class="n">lyric_content</span><span class="o">.</span><span class="n">isspace</span><span class="p">(),</span>
+            <span class="c1"># &quot;_ _ _ _&quot; -&gt; this doesn&#39;t need to be added</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">reduced_lyric</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">reduced_lyric</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;_&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">test_tuple</span><span class="p">):</span>
+            <span class="n">abjad</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span>
+                <span class="n">abjad</span><span class="o">.</span><span class="n">LilyPondLiteral</span><span class="p">(</span>
+                    <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">addlyrics { &quot;</span> <span class="o">+</span> <span class="n">lyric_content</span> <span class="o">+</span> <span class="s2">&quot; }&quot;</span><span class="p">,</span>
+                    <span class="n">site</span><span class="o">=</span><span class="s2">&quot;absolute_after&quot;</span><span class="p">,</span>
+                <span class="p">),</span>
+                <span class="n">voice_to_apply_lyrics_to</span><span class="p">,</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_quantize_consecution</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">consecution_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">[</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span>
+        <span class="p">],</span>
+        <span class="n">is_chronon_rest_per_chronon</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">Container</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">],]:</span>
+        <span class="n">is_chronon_rest_per_chronon_iterator</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span>
+            <span class="n">is_chronon_rest_per_chronon</span>
+        <span class="p">)</span>
+        <span class="p">(</span>
+            <span class="n">quanitisized_abjad_leaf_voice</span><span class="p">,</span>
+            <span class="n">related_abjad_leaf_index_tuple_tuple_per_chronon</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_consecution_to_quantized_abjad_container</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span>
+            <span class="n">consecution_to_convert</span><span class="o">.</span><span class="n">set_parameter</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+                <span class="s2">&quot;is_rest&quot;</span><span class="p">,</span>
+                <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="nb">next</span><span class="p">(</span><span class="n">is_chronon_rest_per_chronon_iterator</span><span class="p">),</span>
+                <span class="n">set_unassigned_parameter</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">mutate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">quanitisized_abjad_leaf_voice</span><span class="p">,</span>
+            <span class="n">related_abjad_leaf_index_tuple_tuple_per_chronon</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_fill_abjad_container</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">abjad_container_to_fill</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Voice</span><span class="p">,</span>
+        <span class="n">consecution_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">[</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span>
+        <span class="p">],</span>
+    <span class="p">):</span>
+        <span class="c1"># tie rests before processing the event!</span>
+        <span class="n">consecution_to_convert</span> <span class="o">=</span> <span class="n">consecution_to_convert</span><span class="o">.</span><span class="n">tie_by</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">event0</span><span class="p">,</span> <span class="n">event1</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_chronon_rest</span><span class="p">(</span><span class="n">event0</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_chronon_rest</span><span class="p">(</span><span class="n">event1</span><span class="p">),</span>
+            <span class="n">event_type_to_examine</span><span class="o">=</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">,</span>
+            <span class="n">mutate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
+        <span class="p">)</span>
+
+        <span class="c1"># first, extract data from chronons and find rests</span>
+        <span class="n">extracted_data_per_chronon</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_extract_data_from_chronon</span><span class="p">(</span><span class="n">chronon</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">chronon</span> <span class="ow">in</span> <span class="n">consecution_to_convert</span>
+        <span class="p">)</span>
+        <span class="n">is_chronon_rest_per_chronon</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_is_chronon_rest</span><span class="p">(</span><span class="n">chronon</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">chronon</span> <span class="ow">in</span> <span class="n">consecution_to_convert</span>
+        <span class="p">)</span>
+
+        <span class="c1"># second, quantize the consecution</span>
+        <span class="p">(</span>
+            <span class="n">quanitisized_abjad_leaf_voice</span><span class="p">,</span>
+            <span class="n">related_abjad_leaf_index_tuple_tuple_per_chronon</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_quantize_consecution</span><span class="p">(</span>
+            <span class="n">consecution_to_convert</span><span class="p">,</span> <span class="n">is_chronon_rest_per_chronon</span>
+        <span class="p">)</span>
+
+        <span class="c1"># third, apply pitches on Abjad voice</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_pitches_on_quantized_abjad_leaves</span><span class="p">(</span>
+            <span class="n">quanitisized_abjad_leaf_voice</span><span class="p">,</span>
+            <span class="n">related_abjad_leaf_index_tuple_tuple_per_chronon</span><span class="p">,</span>
+            <span class="n">extracted_data_per_chronon</span><span class="p">,</span>
+            <span class="n">is_chronon_rest_per_chronon</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># fourth, apply dynamics, tempos and playing_indicators on abjad voice</span>
+        <span class="n">abjad_parameters_per_type_per_event</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_get_abjad_parameters_for_quantized_abjad_leaves</span><span class="p">(</span>
+                <span class="n">extracted_data_per_chronon</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">tempo_envelope</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_tempo_envelope</span><span class="p">(</span><span class="n">consecution_to_convert</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_tempos_on_quantized_abjad_leaves</span><span class="p">(</span>
+            <span class="n">quanitisized_abjad_leaf_voice</span><span class="p">,</span> <span class="n">tempo_envelope</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_abjad_parameters_on_quantized_abjad_leaves</span><span class="p">(</span>
+            <span class="n">quanitisized_abjad_leaf_voice</span><span class="p">,</span>
+            <span class="n">related_abjad_leaf_index_tuple_tuple_per_chronon</span><span class="p">,</span>
+            <span class="n">abjad_parameters_per_type_per_event</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># fifth, replace rests lasting one bar with full measure rests</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_write_multimeasure_rests</span><span class="p">:</span>
+            <span class="n">ConsecutionToAbjadVoice</span><span class="o">.</span><span class="n">_replace_rests_with_full_measure_rests</span><span class="p">(</span>
+                <span class="n">quanitisized_abjad_leaf_voice</span>
+            <span class="p">)</span>
+
+        <span class="c1"># move leaves from &#39;quanitisized_abjad_leaf_voice&#39; object to target container</span>
+        <span class="n">abjad</span><span class="o">.</span><span class="n">mutate</span><span class="o">.</span><span class="n">swap</span><span class="p">(</span><span class="n">quanitisized_abjad_leaf_voice</span><span class="p">,</span> <span class="n">abjad_container_to_fill</span><span class="p">)</span>
+
+        <span class="c1"># finally: apply lyrics on abjad voice</span>
+        <span class="n">lyric_content</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_lyric_content</span><span class="p">(</span>
+            <span class="n">extracted_data_per_chronon</span><span class="p">,</span> <span class="n">is_chronon_rest_per_chronon</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_lyrics_on_voice</span><span class="p">(</span><span class="n">abjad_container_to_fill</span><span class="p">,</span> <span class="n">lyric_content</span><span class="p">)</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#               public methods for interaction with the user             #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+<div class="viewcode-block" id="ConsecutionToAbjadVoice.convert"><a class="viewcode-back" href="../../../../api/mutwo.abjad_converters.html#mutwo.abjad_converters.ConsecutionToAbjadVoice.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">consecution_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">[</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span>
+        <span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Voice</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Convert passed :class:`~mutwo.core_events.Consecution`.</span>
+
+<span class="sd">        :param consecution_to_convert: The</span>
+<span class="sd">            :class:`~mutwo.core_events.Consecution` which shall</span>
+<span class="sd">            be converted to the :class:`abjad.Voice` object.</span>
+<span class="sd">        :type consecution_to_convert: mutwo.core_events.Consecution</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; import abjad</span>
+<span class="sd">        &gt;&gt;&gt; from mutwo.events import basic, music</span>
+<span class="sd">        &gt;&gt;&gt; from mutwo.converters.frontends import abjad as mutwo_abjad</span>
+<span class="sd">        &gt;&gt;&gt; mutwo_melody = basic.Consecution(</span>
+<span class="sd">        &gt;&gt;&gt;     [</span>
+<span class="sd">        &gt;&gt;&gt;         music.NoteLike(pitch, duration)</span>
+<span class="sd">        &gt;&gt;&gt;         for pitch, duration in zip(&quot;c a g e&quot;.split(&quot; &quot;), (1, 1 / 6, 1 / 6, 1 / 6))</span>
+<span class="sd">        &gt;&gt;&gt;     ]</span>
+<span class="sd">        &gt;&gt;&gt; )</span>
+<span class="sd">        &gt;&gt;&gt; converter = mutwo_abjad.ConsecutionToAbjadVoice()</span>
+<span class="sd">        &gt;&gt;&gt; abjad_melody = converter.convert(mutwo_melody)</span>
+<span class="sd">        &gt;&gt;&gt; abjad.lilypond(abjad_melody)</span>
+<span class="sd">        \\new Voice</span>
+<span class="sd">        {</span>
+<span class="sd">            {</span>
+<span class="sd">                \\tempo 4=120</span>
+<span class="sd">                %%% \\time 4/4 %%%</span>
+<span class="sd">                c&#39;1</span>
+<span class="sd">                \\mf</span>
+<span class="sd">            }</span>
+<span class="sd">            {</span>
+<span class="sd">                \\times 2/3 {</span>
+<span class="sd">                    a&#39;4</span>
+<span class="sd">                    g&#39;4</span>
+<span class="sd">                    e&#39;4</span>
+<span class="sd">                }</span>
+<span class="sd">                r2</span>
+<span class="sd">            }</span>
+<span class="sd">        }</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">consecution_to_convert</span><span class="p">)</span></div></div>
+
+
+<span class="k">class</span> <span class="nc">_GraceNotesToAbjadVoiceConverter</span><span class="p">(</span><span class="n">ConsecutionToAbjadVoice</span><span class="p">):</span>
+    <span class="k">class</span> <span class="nc">GraceNotesToQuantizedAbjadContainerConverter</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Converter</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">consecution_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Container</span><span class="p">:</span>
+            <span class="n">container</span> <span class="o">=</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Container</span><span class="p">([],</span> <span class="n">simultaneous</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">indices</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">nth_event</span><span class="p">,</span> <span class="n">event</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">consecution_to_convert</span><span class="p">):</span>
+                <span class="n">leaf</span> <span class="o">=</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Note</span><span class="p">(</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">duration</span><span class="p">)</span>
+                <span class="n">container</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">leaf</span><span class="p">)</span>
+                <span class="n">indices</span><span class="o">.</span><span class="n">append</span><span class="p">(((</span><span class="n">nth_event</span><span class="p">,),))</span>
+            <span class="k">return</span> <span class="n">container</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">is_before</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">chronon_to_pitch_list</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">]</span>
+        <span class="p">],</span>
+        <span class="n">chronon_to_volume</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Volume</span>
+        <span class="p">],</span>
+        <span class="n">chronon_to_playing_indicator_collection</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span>
+            <span class="n">music_parameters</span><span class="o">.</span><span class="n">PlayingIndicatorCollection</span><span class="p">,</span>
+        <span class="p">],</span>
+        <span class="n">chronon_to_notation_indicator_collection</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span>
+            <span class="n">music_parameters</span><span class="o">.</span><span class="n">NotationIndicatorCollection</span><span class="p">,</span>
+        <span class="p">],</span>
+        <span class="n">is_chronon_rest</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span> <span class="nb">bool</span><span class="p">],</span>
+        <span class="n">mutwo_pitch_to_abjad_pitch</span><span class="p">:</span> <span class="n">MutwoPitchToAbjadPitch</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">is_before</span><span class="p">:</span>
+            <span class="n">abjad_container_class</span> <span class="o">=</span> <span class="n">abjad</span><span class="o">.</span><span class="n">BeforeGraceContainer</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">abjad_container_class</span> <span class="o">=</span> <span class="n">abjad</span><span class="o">.</span><span class="n">AfterGraceContainer</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">consecution_to_quantized_abjad_container</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">GraceNotesToQuantizedAbjadContainerConverter</span><span class="p">(),</span>
+            <span class="n">chronon_to_pitch_list</span><span class="o">=</span><span class="n">chronon_to_pitch_list</span><span class="p">,</span>
+            <span class="n">chronon_to_volume</span><span class="o">=</span><span class="n">chronon_to_volume</span><span class="p">,</span>
+            <span class="n">chronon_to_playing_indicator_collection</span><span class="o">=</span><span class="n">chronon_to_playing_indicator_collection</span><span class="p">,</span>
+            <span class="n">chronon_to_notation_indicator_collection</span><span class="o">=</span><span class="n">chronon_to_notation_indicator_collection</span><span class="p">,</span>
+            <span class="n">is_chronon_rest</span><span class="o">=</span><span class="n">is_chronon_rest</span><span class="p">,</span>
+            <span class="n">mutwo_pitch_to_abjad_pitch</span><span class="o">=</span><span class="n">mutwo_pitch_to_abjad_pitch</span><span class="p">,</span>
+            <span class="n">mutwo_volume_to_abjad_attachment_dynamic</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">tempo_envelope_to_abjad_attachment_tempo</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">chronon_to_grace_note_consecution</span><span class="o">=</span><span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">(</span>
+                <span class="p">[]</span>
+            <span class="p">),</span>
+            <span class="n">chronon_to_after_grace_note_consecution</span><span class="o">=</span><span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">(</span>
+                <span class="p">[]</span>
+            <span class="p">),</span>
+            <span class="n">write_multimeasure_rests</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">abjad_container_class</span><span class="o">=</span><span class="n">abjad_container_class</span><span class="p">,</span>
+            <span class="n">lilypond_type_of_abjad_container</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_grace_note_consecution_to_abjad_attachment</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">grace_note_consecution_or_after_grace_note_consecution</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">[</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span>
+        <span class="p">],</span>
+        <span class="n">is_before</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">abjad_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">AbjadAttachment</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">_get_tempo_attachment_tuple_for_quantized_abjad_leaves</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">abjad_voice</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Voice</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span>
+        <span class="nb">tuple</span><span class="p">[</span>
+            <span class="nb">int</span><span class="p">,</span>
+            <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span>
+                <span class="n">abjad_parameters</span><span class="o">.</span><span class="n">Tempo</span><span class="p">,</span> <span class="n">abjad_parameters</span><span class="o">.</span><span class="n">DynamicChangeIndicationStop</span>
+            <span class="p">],</span>
+        <span class="p">],</span>
+        <span class="o">...</span><span class="p">,</span>
+    <span class="p">]:</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">([])</span>
+
+
+<div class="viewcode-block" id="NestedComplexEventToComplexEventToAbjadContainers"><a class="viewcode-back" href="../../../../api/mutwo.abjad_converters.html#mutwo.abjad_converters.NestedComplexEventToComplexEventToAbjadContainers">[docs]</a><span class="k">class</span> <span class="nc">NestedComplexEventToComplexEventToAbjadContainers</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Converter</span><span class="p">):</span>
+<div class="viewcode-block" id="NestedComplexEventToComplexEventToAbjadContainers.convert"><a class="viewcode-back" href="../../../../api/mutwo.abjad_converters.html#mutwo.abjad_converters.NestedComplexEventToComplexEventToAbjadContainers.convert">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">nested_complex_event_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ComplexEvent</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">ComplexEventToAbjadContainer</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div></div>
+
+
+<div class="viewcode-block" id="CycleBasedNestedComplexEventToComplexEventToAbjadContainers"><a class="viewcode-back" href="../../../../api/mutwo.abjad_converters.html#mutwo.abjad_converters.CycleBasedNestedComplexEventToComplexEventToAbjadContainers">[docs]</a><span class="k">class</span> <span class="nc">CycleBasedNestedComplexEventToComplexEventToAbjadContainers</span><span class="p">(</span>
+    <span class="n">NestedComplexEventToComplexEventToAbjadContainers</span>
+<span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">complex_event_to_abjad_container_converter_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span>
+            <span class="n">ComplexEventToAbjadContainer</span>
+        <span class="p">],</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_complex_event_to_abjad_container_converters</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">complex_event_to_abjad_container_converter_sequence</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="CycleBasedNestedComplexEventToComplexEventToAbjadContainers.convert"><a class="viewcode-back" href="../../../../api/mutwo.abjad_converters.html#mutwo.abjad_converters.CycleBasedNestedComplexEventToComplexEventToAbjadContainers.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">nested_complex_event_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ComplexEvent</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">ComplexEventToAbjadContainer</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="n">complex_event_to_abjad_container_converters_cycle</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_complex_event_to_abjad_container_converters</span>
+        <span class="p">)</span>
+        <span class="n">complex_event_to_abjad_container_converter_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">nested_complex_event_to_convert</span><span class="p">:</span>
+            <span class="n">complex_event_to_abjad_container_converter_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="nb">next</span><span class="p">(</span><span class="n">complex_event_to_abjad_container_converters_cycle</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">complex_event_to_abjad_container_converter_list</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="TagBasedNestedComplexEventToComplexEventToAbjadContainers"><a class="viewcode-back" href="../../../../api/mutwo.abjad_converters.html#mutwo.abjad_converters.TagBasedNestedComplexEventToComplexEventToAbjadContainers">[docs]</a><span class="k">class</span> <span class="nc">TagBasedNestedComplexEventToComplexEventToAbjadContainers</span><span class="p">(</span>
+    <span class="n">NestedComplexEventToComplexEventToAbjadContainers</span>
+<span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">tag_to_abjad_converter_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ComplexEventToAbjadContainer</span><span class="p">],</span>
+        <span class="n">complex_event_to_tag</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ComplexEvent</span><span class="p">],</span> <span class="nb">str</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">complex_event</span><span class="p">:</span> <span class="n">complex_event</span><span class="o">.</span><span class="n">tag</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tag_to_abjad_converter_dict</span> <span class="o">=</span> <span class="n">tag_to_abjad_converter_dict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_complex_event_to_tag</span> <span class="o">=</span> <span class="n">complex_event_to_tag</span>
+
+<div class="viewcode-block" id="TagBasedNestedComplexEventToComplexEventToAbjadContainers.convert"><a class="viewcode-back" href="../../../../api/mutwo.abjad_converters.html#mutwo.abjad_converters.TagBasedNestedComplexEventToComplexEventToAbjadContainers.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">nested_complex_event_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ComplexEvent</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">ComplexEventToAbjadContainer</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="n">complex_event_to_abjad_container_converter_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">complex_event</span> <span class="ow">in</span> <span class="n">nested_complex_event_to_convert</span><span class="p">:</span>
+            <span class="n">tag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_complex_event_to_tag</span><span class="p">(</span><span class="n">complex_event</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">complex_event_to_abjad_container_converter</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_tag_to_abjad_converter_dict</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Found undefined tag &#39;</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>
+                    <span class="s2">&quot; This object only knows the following tags:&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot; &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_tag_to_abjad_converter_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+                <span class="p">)</span>
+
+            <span class="n">complex_event_to_abjad_container_converter_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">complex_event_to_abjad_container_converter</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">complex_event_to_abjad_container_converter_list</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="NestedComplexEventToAbjadContainer"><a class="viewcode-back" href="../../../../api/mutwo.abjad_converters.html#mutwo.abjad_converters.NestedComplexEventToAbjadContainer">[docs]</a><span class="k">class</span> <span class="nc">NestedComplexEventToAbjadContainer</span><span class="p">(</span><span class="n">ComplexEventToAbjadContainer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">nested_complex_event_to_complex_event_to_abjad_container_converters_converter</span><span class="p">:</span> <span class="n">NestedComplexEventToComplexEventToAbjadContainers</span><span class="p">,</span>
+        <span class="n">abjad_container_class</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Type</span><span class="p">[</span><span class="n">abjad</span><span class="o">.</span><span class="n">Container</span><span class="p">],</span>
+        <span class="n">lilypond_type_of_abjad_container</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">complex_event_to_abjad_container_name</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ComplexEvent</span><span class="p">],</span> <span class="nb">str</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">complex_event</span><span class="p">:</span> <span class="n">complex_event</span><span class="o">.</span><span class="n">tag</span><span class="p">,</span>
+        <span class="n">pre_process_abjad_container_routine_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span>
+            <span class="n">abjad_converters</span><span class="o">.</span><span class="n">ProcessAbjadContainerRoutine</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([]),</span>
+        <span class="n">post_process_abjad_container_routine_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span>
+            <span class="n">abjad_converters</span><span class="o">.</span><span class="n">ProcessAbjadContainerRoutine</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([]),</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">abjad_container_class</span><span class="p">,</span>
+            <span class="n">lilypond_type_of_abjad_container</span><span class="p">,</span>
+            <span class="n">complex_event_to_abjad_container_name</span><span class="p">,</span>
+            <span class="n">pre_process_abjad_container_routine_sequence</span><span class="p">,</span>
+            <span class="n">post_process_abjad_container_routine_sequence</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nested_complex_event_to_complex_event_to_abjad_container_converters_converter</span> <span class="o">=</span> <span class="n">nested_complex_event_to_complex_event_to_abjad_container_converters_converter</span>
+
+    <span class="k">def</span> <span class="nf">_fill_abjad_container</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">abjad_container_to_fill</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Container</span><span class="p">,</span>
+        <span class="n">nested_complex_event_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ComplexEvent</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">complex_event_to_abjad_container_converter_tuple</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nested_complex_event_to_complex_event_to_abjad_container_converters_converter</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span>
+            <span class="n">nested_complex_event_to_convert</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">complex_event</span><span class="p">,</span> <span class="n">complex_event_to_abjad_container_converter</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+            <span class="n">nested_complex_event_to_convert</span><span class="p">,</span>
+            <span class="n">complex_event_to_abjad_container_converter_tuple</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="n">converted_complex_event</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">complex_event_to_abjad_container_converter</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">complex_event</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">abjad_container_to_fill</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">converted_complex_event</span><span class="p">)</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.abjad_converters.events.building</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Levin Eric Zimmermann.
+    </div>
+  </body>
+</html>

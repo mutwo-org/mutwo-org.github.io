@@ -1,0 +1,600 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mutwo.midi_converters.backends &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.midi_converters.backends</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mutwo.midi_converters.backends</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Load midi files to mutwo&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">abc</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="kn">import</span> <span class="nn">mido</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">quicktions</span> <span class="k">as</span> <span class="nn">fractions</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">fractions</span>
+
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_converters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_events</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_parameters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_utilities</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">midi_converters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_converters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_parameters</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;PitchBendingNumberToPitchInterval&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;PitchBendingNumberToDirectPitchInterval&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;MidiPitchToMutwoPitch&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;MidiPitchToDirectPitch&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;MidiPitchToMutwoMidiPitch&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;MidiVelocityToMutwoVolume&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;MidiVelocityToWesternVolume&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;MidiFileToEvent&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="PitchBendingNumberToPitchInterval"><a class="viewcode-back" href="../../../api/mutwo.midi_converters.html#mutwo.midi_converters.PitchBendingNumberToPitchInterval">[docs]</a><span class="k">class</span> <span class="nc">PitchBendingNumberToPitchInterval</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Converter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert midi pitch bend number to :class:`mutwo.music_parameters.abc.PitchInterval`.</span>
+
+<span class="sd">    :param maximum_pitch_bend_deviation: sets the maximum pitch bending range in cents.</span>
+<span class="sd">        This value depends on the particular used software synthesizer and its settings,</span>
+<span class="sd">        because it is up to the respective synthesizer how to interpret the pitch</span>
+<span class="sd">        bending messages. By default mutwo sets the value to 200 cents which</span>
+<span class="sd">        seems to be the most common interpretation among different manufacturers.</span>
+<span class="sd">    :type maximum_pitch_bend_deviation: int</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maximum_pitch_bend_deviation</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">maximum_pitch_bend_deviation</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">maximum_pitch_bend_deviation</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">midi_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_MAXIMUM_PITCH_BEND_DEVIATION_IN_CENTS</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_maximum_pitch_bend_deviation</span> <span class="o">=</span> <span class="n">maximum_pitch_bend_deviation</span>
+
+<div class="viewcode-block" id="PitchBendingNumberToPitchInterval.convert"><a class="viewcode-back" href="../../../api/mutwo.midi_converters.html#mutwo.midi_converters.PitchBendingNumberToPitchInterval.convert">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">pitch_bending_number_to_convert</span><span class="p">:</span> <span class="n">midi_converters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">PitchBend</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PitchInterval</span><span class="p">:</span>
+        <span class="o">...</span></div></div>
+
+
+<div class="viewcode-block" id="PitchBendingNumberToDirectPitchInterval"><a class="viewcode-back" href="../../../api/mutwo.midi_converters.html#mutwo.midi_converters.PitchBendingNumberToDirectPitchInterval">[docs]</a><span class="k">class</span> <span class="nc">PitchBendingNumberToDirectPitchInterval</span><span class="p">(</span><span class="n">PitchBendingNumberToPitchInterval</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert midi pitch bend number to :class:`mutwo.music_parameters.DirectPitchInterval`.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="PitchBendingNumberToDirectPitchInterval.convert"><a class="viewcode-back" href="../../../api/mutwo.midi_converters.html#mutwo.midi_converters.PitchBendingNumberToDirectPitchInterval.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">pitch_bending_number_to_convert</span><span class="p">:</span> <span class="n">midi_converters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">PitchBend</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">DirectPitchInterval</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Convert pitch bending number to :class:`mutwo.music_parameters.DirectPitchInterval`</span>
+
+<span class="sd">        :param pitch_bending_number_to_convert: The pitch bending number</span>
+<span class="sd">            which shall be converted.</span>
+<span class="sd">        :type pitch_bending_number_to_convert: midi_converters.constants.PitchBend</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">cent_deviation</span> <span class="o">=</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span>
+            <span class="n">pitch_bending_number_to_convert</span><span class="p">,</span>
+            <span class="o">-</span><span class="n">midi_converters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">NEUTRAL_PITCH_BEND</span><span class="p">,</span>
+            <span class="n">midi_converters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">NEUTRAL_PITCH_BEND</span><span class="p">,</span>
+            <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_maximum_pitch_bend_deviation</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_maximum_pitch_bend_deviation</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">DirectPitchInterval</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">cent_deviation</span><span class="p">))</span></div></div>
+
+
+<div class="viewcode-block" id="MidiPitchToMutwoPitch"><a class="viewcode-back" href="../../../api/mutwo.midi_converters.html#mutwo.midi_converters.MidiPitchToMutwoPitch">[docs]</a><span class="k">class</span> <span class="nc">MidiPitchToMutwoPitch</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Converter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert midi pitch to :class:`mutwo.music_parameters.abc.Pitch`.</span>
+
+<span class="sd">    :param pitch_bending_number_to_pitch_interval: A callable object which</span>
+<span class="sd">        transforms a pitch bending number (integer) to a</span>
+<span class="sd">        :class:`mutwo.music_parameters.abc.PitchInterval`. Default to</span>
+<span class="sd">        :class:`PitchBendingNumberToDirectPitchInterval`.</span>
+<span class="sd">    :type pitch_bending_number_to_pitch_interval: typing.Callable[[midi_converters.constants.PitchBend], music_parameters.abc.PitchInterval]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">pitch_bending_number_to_pitch_interval</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">midi_converters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">PitchBend</span><span class="p">],</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PitchInterval</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">PitchBendingNumberToDirectPitchInterval</span><span class="p">(),</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pitch_bending_number_to_pitch_interval</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">pitch_bending_number_to_pitch_interval</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="MidiPitchToMutwoPitch.convert"><a class="viewcode-back" href="../../../api/mutwo.midi_converters.html#mutwo.midi_converters.MidiPitchToMutwoPitch.convert">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">midi_pitch_to_convert</span><span class="p">:</span> <span class="n">midi_converters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">MidiPitch</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">:</span>
+        <span class="o">...</span></div></div>
+
+
+<div class="viewcode-block" id="MidiPitchToDirectPitch"><a class="viewcode-back" href="../../../api/mutwo.midi_converters.html#mutwo.midi_converters.MidiPitchToDirectPitch">[docs]</a><span class="k">class</span> <span class="nc">MidiPitchToDirectPitch</span><span class="p">(</span><span class="n">MidiPitchToMutwoPitch</span><span class="p">):</span>
+<div class="viewcode-block" id="MidiPitchToDirectPitch.convert"><a class="viewcode-back" href="../../../api/mutwo.midi_converters.html#mutwo.midi_converters.MidiPitchToDirectPitch.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">midi_pitch_to_convert</span><span class="p">:</span> <span class="n">midi_converters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">MidiPitch</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">DirectPitch</span><span class="p">:</span>
+        <span class="n">midi_note</span><span class="p">,</span> <span class="n">pitch_bend</span> <span class="o">=</span> <span class="n">midi_pitch_to_convert</span>
+        <span class="n">frequency</span> <span class="o">=</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">MIDI_PITCH_FREQUENCY_TUPLE</span><span class="p">[</span><span class="n">midi_note</span><span class="p">]</span>
+        <span class="n">direct_pitch</span> <span class="o">=</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">DirectPitch</span><span class="p">(</span><span class="n">frequency</span><span class="p">)</span>
+        <span class="n">pitch_interval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pitch_bending_number_to_pitch_interval</span><span class="p">(</span><span class="n">pitch_bend</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">direct_pitch</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pitch_interval</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="MidiPitchToMutwoMidiPitch"><a class="viewcode-back" href="../../../api/mutwo.midi_converters.html#mutwo.midi_converters.MidiPitchToMutwoMidiPitch">[docs]</a><span class="k">class</span> <span class="nc">MidiPitchToMutwoMidiPitch</span><span class="p">(</span><span class="n">MidiPitchToMutwoPitch</span><span class="p">):</span>
+<div class="viewcode-block" id="MidiPitchToMutwoMidiPitch.convert"><a class="viewcode-back" href="../../../api/mutwo.midi_converters.html#mutwo.midi_converters.MidiPitchToMutwoMidiPitch.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">midi_pitch_to_convert</span><span class="p">:</span> <span class="n">midi_converters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">MidiPitch</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">MidiPitch</span><span class="p">:</span>
+        <span class="n">midi_note</span><span class="p">,</span> <span class="n">pitch_bend</span> <span class="o">=</span> <span class="n">midi_pitch_to_convert</span>
+        <span class="n">midi_pitch</span> <span class="o">=</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">MidiPitch</span><span class="p">(</span><span class="n">midi_note</span><span class="p">)</span>
+        <span class="n">pitch_interval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pitch_bending_number_to_pitch_interval</span><span class="p">(</span><span class="n">pitch_bend</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">midi_pitch</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pitch_interval</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="MidiVelocityToMutwoVolume"><a class="viewcode-back" href="../../../api/mutwo.midi_converters.html#mutwo.midi_converters.MidiVelocityToMutwoVolume">[docs]</a><span class="k">class</span> <span class="nc">MidiVelocityToMutwoVolume</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Converter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert midi velocity (integer) to :class:`mutwo.music_parameters.abc.Volume`.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="MidiVelocityToMutwoVolume.convert"><a class="viewcode-back" href="../../../api/mutwo.midi_converters.html#mutwo.midi_converters.MidiVelocityToMutwoVolume.convert">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">midi_velocity</span><span class="p">:</span> <span class="n">midi_converters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">MidiVelocity</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Volume</span><span class="p">:</span>
+        <span class="o">...</span></div></div>
+
+
+<div class="viewcode-block" id="MidiVelocityToWesternVolume"><a class="viewcode-back" href="../../../api/mutwo.midi_converters.html#mutwo.midi_converters.MidiVelocityToWesternVolume">[docs]</a><span class="k">class</span> <span class="nc">MidiVelocityToWesternVolume</span><span class="p">(</span><span class="n">MidiVelocityToMutwoVolume</span><span class="p">):</span>
+<div class="viewcode-block" id="MidiVelocityToWesternVolume.convert"><a class="viewcode-back" href="../../../api/mutwo.midi_converters.html#mutwo.midi_converters.MidiVelocityToWesternVolume.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">midi_velocity_to_convert</span><span class="p">:</span> <span class="n">midi_converters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">MidiVelocity</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Volume</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Convert midi velocity to :class:`mutwo.music_parameters.WesternVolume`</span>
+
+<span class="sd">        :param midi_velocity_to_convert: The velocity which shall be converted.</span>
+<span class="sd">        :type midi_velocity_to_convert: midi_converters.constants.MidiVelocity</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo import midi_converters</span>
+<span class="sd">        &gt;&gt;&gt; midi_converters.MidiVelocityToWesternVolume().convert(127)</span>
+<span class="sd">        WesternVolume(fffff)</span>
+<span class="sd">        &gt;&gt;&gt; midi_converters.MidiVelocityToWesternVolume().convert(0)</span>
+<span class="sd">        WesternVolume(ppppp)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">standard_dynamic_indicator_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span>
+            <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">STANDARD_DYNAMIC_INDICATOR</span>
+        <span class="p">)</span>
+        <span class="n">dynamic_indicator_index</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span>
+            <span class="n">core_utilities</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span>
+                <span class="n">midi_velocity_to_convert</span><span class="p">,</span>
+                <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">MINIMUM_VELOCITY</span><span class="p">,</span>
+                <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">MAXIMUM_VELOCITY</span><span class="p">,</span>
+                <span class="mi">0</span><span class="p">,</span>
+                <span class="n">standard_dynamic_indicator_count</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">dynamic_indicator</span> <span class="o">=</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">STANDARD_DYNAMIC_INDICATOR</span><span class="p">[</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">dynamic_indicator_index</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">WesternVolume</span><span class="p">(</span><span class="n">dynamic_indicator</span><span class="p">)</span></div></div>
+
+
+<span class="n">MessageTypeToMidiMessageList</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">mido</span><span class="o">.</span><span class="n">Message</span> <span class="o">|</span> <span class="n">mido</span><span class="o">.</span><span class="n">MetaMessage</span><span class="p">]]</span>
+<span class="n">NotePair</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">mido</span><span class="o">.</span><span class="n">Message</span><span class="p">,</span> <span class="n">mido</span><span class="o">.</span><span class="n">Message</span><span class="p">]</span>
+<span class="n">NotePairTuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NotePair</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+<span class="n">StartAndStopTupleToNotePairList</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="n">NotePair</span><span class="p">]]</span>
+
+
+<div class="viewcode-block" id="MidiFileToEvent"><a class="viewcode-back" href="../../../api/mutwo.midi_converters.html#mutwo.midi_converters.MidiFileToEvent">[docs]</a><span class="k">class</span> <span class="nc">MidiFileToEvent</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Converter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert a midi file to a mutwo event.</span>
+
+<span class="sd">    :param mutwo_parameter_tuple_to_chronon: A callable which converts a</span>
+<span class="sd">        tuple of mutwo parameters (duration, pitch list, volume) to a</span>
+<span class="sd">        :class:`mutwo.core_events.SimpleEvent`. In default state mutwo</span>
+<span class="sd">         generates a :class:`mutwo.music_events.NoteLike`.</span>
+<span class="sd">    :type mutwo_parameter_tuple_to_chronon: typing.Callable[[tuple[core_constants.DurationType, music_parameters.abc.Pitch, music_parameters.abc.Volume]], core_events.SimpleEvent]</span>
+<span class="sd">    :param midi_pitch_to_mutwo_pitch: Callable object which converts</span>
+<span class="sd">        midi pitch (integer) to a :class:`mutwo.music_parameters.abc.Pitch`.</span>
+<span class="sd">        Default to :class:`MidiPitchToMutwoMidiPitch`.</span>
+<span class="sd">    :type midi_pitch_to_mutwo_pitch: typing.Callable[[midi_converters.constants.MidiPitch], music_parameters.abc.Pitch]</span>
+<span class="sd">    :param midi_velocity_to_mutwo_volume: Callable object which converts</span>
+<span class="sd">        midi velocity (integer) to a :class:`mutwo.music_parameters.abc.Voume`.</span>
+<span class="sd">        Default to :class:`MidiPitchToWesternVolume`.</span>
+<span class="sd">    :type midi_velocity_to_mutwo_volume: typing.Callable[[midi_converters.constants.MidiVelocity], music_parameters.abc.Volume]</span>
+
+<span class="sd">    **Warning:**</span>
+
+<span class="sd">    This is an unstable early version of the converter.</span>
+<span class="sd">    Expect bugs when using it!</span>
+
+<span class="sd">    **Disclaimer:**</span>
+
+<span class="sd">    This conversion is incomplete: Not all information from a</span>
+<span class="sd">    midi file will be used. In its current state the converter</span>
+<span class="sd">    only takes into account midi notes (pitch, velocity and duration)</span>
+<span class="sd">    and ignores all other midi messages.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">mutwo_parameter_dict_to_chronon</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_converters</span><span class="o">.</span><span class="n">MutwoParameterDict</span><span class="p">],</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">,</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">MutwoParameterDictToNoteLike</span><span class="p">(),</span>
+        <span class="n">midi_pitch_to_mutwo_pitch</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">midi_converters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">MidiPitch</span><span class="p">],</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">MidiPitchToMutwoMidiPitch</span><span class="p">(),</span>
+        <span class="n">midi_velocity_to_mutwo_volume</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">midi_converters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">MidiVelocity</span><span class="p">],</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Volume</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">MidiVelocityToWesternVolume</span><span class="p">(),</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">get_cls_logger</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mutwo_parameter_dict_to_chronon</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">mutwo_parameter_dict_to_chronon</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_midi_pitch_to_mutwo_pitch</span> <span class="o">=</span> <span class="n">midi_pitch_to_mutwo_pitch</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_midi_velocity_to_mutwo_volume</span> <span class="o">=</span> <span class="n">midi_velocity_to_mutwo_volume</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                          static methods                                #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_message_type_to_midi_message_list</span><span class="p">(</span>
+        <span class="n">midi_file_to_convert</span><span class="p">:</span> <span class="n">mido</span><span class="o">.</span><span class="n">MidiFile</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MessageTypeToMidiMessageList</span><span class="p">:</span>
+        <span class="n">message_type_to_midi_message_list</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">midi_track</span> <span class="ow">in</span> <span class="n">midi_file_to_convert</span><span class="o">.</span><span class="n">tracks</span><span class="p">:</span>
+            <span class="n">absolute_tick</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">midi_message</span> <span class="ow">in</span> <span class="n">midi_track</span><span class="p">:</span>
+                <span class="n">message_type</span> <span class="o">=</span> <span class="n">midi_message</span><span class="o">.</span><span class="n">type</span>
+                <span class="k">if</span> <span class="n">message_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">message_type_to_midi_message_list</span><span class="p">:</span>
+                    <span class="n">message_type_to_midi_message_list</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">message_type</span><span class="p">:</span> <span class="p">[]})</span>
+                <span class="n">absolute_tick</span> <span class="o">+=</span> <span class="n">midi_message</span><span class="o">.</span><span class="n">time</span>
+                <span class="n">midi_message_with_absolute_tick</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">midi_message</span><span class="p">)</span>
+                <span class="n">midi_message_with_absolute_tick</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">absolute_tick</span><span class="p">)</span>
+                <span class="n">message_type_to_midi_message_list</span><span class="p">[</span><span class="n">message_type</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">midi_message_with_absolute_tick</span>
+                <span class="p">)</span>
+        <span class="k">for</span> <span class="n">midi_message_list</span> <span class="ow">in</span> <span class="n">message_type_to_midi_message_list</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">midi_message_list</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">midi_message</span><span class="p">:</span> <span class="n">midi_message</span><span class="o">.</span><span class="n">time</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">message_type_to_midi_message_list</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_note_pair_tuple_to_start_and_stop_tuple_to_note_pair_list</span><span class="p">(</span>
+        <span class="n">note_pair_tuple</span><span class="p">:</span> <span class="n">NotePairTuple</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StartAndStopTupleToNotePairList</span><span class="p">:</span>
+        <span class="n">start_and_stop_tuple_to_note_pair_list</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">note_pair</span> <span class="ow">in</span> <span class="n">note_pair_tuple</span><span class="p">:</span>
+            <span class="n">start_and_stop_tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+                <span class="n">note_message</span><span class="o">.</span><span class="n">time</span> <span class="k">for</span> <span class="n">note_message</span> <span class="ow">in</span> <span class="n">note_pair</span>  <span class="c1"># type: ignore</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">start_and_stop_tuple</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">start_and_stop_tuple_to_note_pair_list</span><span class="p">:</span>
+                <span class="n">start_and_stop_tuple_to_note_pair_list</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                    <span class="p">{</span><span class="n">start_and_stop_tuple</span><span class="p">:</span> <span class="p">[]}</span>
+                <span class="p">)</span>
+            <span class="n">start_and_stop_tuple_to_note_pair_list</span><span class="p">[</span><span class="n">start_and_stop_tuple</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">note_pair</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">start_and_stop_tuple_to_note_pair_list</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_add_chronon_to_consecution</span><span class="p">(</span>
+        <span class="n">consecution</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">,</span>
+        <span class="n">start</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">chronon</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">difference</span> <span class="o">=</span> <span class="n">start</span> <span class="o">-</span> <span class="n">consecution</span><span class="o">.</span><span class="n">duration</span><span class="o">.</span><span class="n">duration</span>
+        <span class="k">if</span> <span class="n">difference</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">rest</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">(</span><span class="n">difference</span><span class="p">)</span>
+            <span class="n">consecution</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rest</span><span class="p">)</span>
+        <span class="n">consecution</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chronon</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_tick_to_duration</span><span class="p">(</span>
+        <span class="n">tick</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">ticks_per_beat</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">DirectDuration</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">DirectDuration</span><span class="p">(</span><span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">(</span><span class="n">tick</span><span class="p">,</span> <span class="n">ticks_per_beat</span><span class="p">))</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                          private methods                               #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="k">def</span> <span class="nf">_get_note_off_partner</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">note_on_message</span><span class="p">:</span> <span class="n">mido</span><span class="o">.</span><span class="n">Message</span> <span class="o">|</span> <span class="n">mido</span><span class="o">.</span><span class="n">MetaMessage</span><span class="p">,</span>
+        <span class="n">note_off_message_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">mido</span><span class="o">.</span><span class="n">Message</span> <span class="o">|</span> <span class="n">mido</span><span class="o">.</span><span class="n">MetaMessage</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">mido</span><span class="o">.</span><span class="n">Message</span><span class="p">]:</span>
+        <span class="k">def</span> <span class="nf">is_valid_note_off_message</span><span class="p">(</span>
+            <span class="n">note_off_message</span><span class="p">:</span> <span class="n">mido</span><span class="o">.</span><span class="n">Message</span> <span class="o">|</span> <span class="n">mido</span><span class="o">.</span><span class="n">MetaMessage</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+            <span class="n">test_list</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">note_off_message</span><span class="o">.</span><span class="n">time</span> <span class="o">&gt;=</span> <span class="n">note_on_message</span><span class="o">.</span><span class="n">time</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
+                <span class="n">note_on_message</span><span class="o">.</span><span class="n">note</span> <span class="o">==</span> <span class="n">note_off_message</span><span class="o">.</span><span class="n">note</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
+                <span class="n">note_on_message</span><span class="o">.</span><span class="n">channel</span> <span class="o">==</span> <span class="n">note_off_message</span><span class="o">.</span><span class="n">channel</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
+            <span class="p">]</span>
+            <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">test_list</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">note_off_message</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+                <span class="nb">filter</span><span class="p">(</span><span class="n">is_valid_note_off_message</span><span class="p">,</span> <span class="n">note_off_message_list</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">note_off_message</span><span class="p">,</span> <span class="n">mido</span><span class="o">.</span><span class="n">Message</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Invalid midi file: &quot;</span>
+                <span class="s2">&quot;Found note on message without any suitable &quot;</span>
+                <span class="s2">&quot;note off message partner. The note on message is: &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">note_on_message</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>
+            <span class="p">)</span>
+            <span class="n">note_off_message</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="n">note_off_message</span>
+
+    <span class="k">def</span> <span class="nf">_get_note_pair_tuple</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">message_type_to_midi_message_list</span><span class="p">:</span> <span class="n">MessageTypeToMidiMessageList</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NotePairTuple</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">note_on_message_list</span> <span class="o">=</span> <span class="n">message_type_to_midi_message_list</span><span class="p">[</span><span class="s2">&quot;note_on&quot;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;No &#39;note_on&#39; messages were found!&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">tuple</span><span class="p">([])</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">note_off_message_list</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span>
+                <span class="n">message_type_to_midi_message_list</span><span class="p">[</span><span class="s2">&quot;note_off&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;No &#39;note_off&#39; messages were found! &quot;</span>
+                <span class="s2">&quot;This is strange, because &#39;note_on&#39; messages could be found. &quot;</span>
+                <span class="s2">&quot;Maybe you have a midi file which doesn&#39;t use &#39;note_off&#39;&quot;</span>
+                <span class="s2">&quot;messages but only &#39;note_on&#39; messages with velocity=0?&quot;</span>
+                <span class="s2">&quot; This is currently not supported, see&quot;</span>
+                <span class="s2">&quot; also https://github.com/mutwo-org/mutwo.midi/issues/4.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="nb">tuple</span><span class="p">([])</span>
+
+        <span class="n">note_pair_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">note_on_message</span> <span class="ow">in</span> <span class="n">note_on_message_list</span><span class="p">:</span>
+            <span class="n">note_off_message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_note_off_partner</span><span class="p">(</span>
+                <span class="n">note_on_message</span><span class="p">,</span> <span class="n">note_off_message_list</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">note_off_message</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">note_pair</span> <span class="o">=</span> <span class="p">(</span><span class="n">note_on_message</span><span class="p">,</span> <span class="n">note_off_message</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Found note_pair (on: </span><span class="si">{</span><span class="n">note_on_message</span><span class="si">}</span><span class="s2">, off: </span><span class="si">{</span><span class="n">note_off_message</span><span class="si">}</span><span class="s2">)&quot;</span>
+                <span class="p">)</span>
+                <span class="n">note_pair_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">note_pair</span><span class="p">)</span>
+                <span class="k">del</span> <span class="n">note_off_message_list</span><span class="p">[</span><span class="n">note_off_message_list</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">note_off_message</span><span class="p">)]</span>
+
+        <span class="n">note_pair_list</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">note_pair</span><span class="p">:</span> <span class="n">note_pair</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">time</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">note_pair_list</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_note_pair_list_to_chronon</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">note_pair_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">NotePair</span><span class="p">],</span> <span class="n">ticks_per_beat</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">:</span>
+        <span class="n">midi_pitch_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">velocity_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">note_pair</span> <span class="ow">in</span> <span class="n">note_pair_list</span><span class="p">:</span>
+            <span class="n">note_on</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">note_pair</span>
+            <span class="c1"># TODO(take pitch bend into account!)</span>
+            <span class="n">midi_pitch_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">note_on</span><span class="o">.</span><span class="n">note</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
+            <span class="n">velocity_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">note_on</span><span class="o">.</span><span class="n">velocity</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+
+        <span class="n">average_velocity</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">velocity_list</span><span class="p">))</span>
+        <span class="n">mutwo_volume</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_midi_velocity_to_mutwo_volume</span><span class="p">(</span><span class="n">average_velocity</span><span class="p">)</span>
+
+        <span class="n">mutwo_pitch_list</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_midi_pitch_to_mutwo_pitch</span><span class="p">(</span><span class="n">midi_pitch</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">midi_pitch</span> <span class="ow">in</span> <span class="n">midi_pitch_list</span>
+        <span class="p">]</span>
+
+        <span class="n">note_on</span><span class="p">,</span> <span class="n">note_off</span> <span class="o">=</span> <span class="n">note_pair_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">tick</span> <span class="o">=</span> <span class="n">note_off</span><span class="o">.</span><span class="n">time</span> <span class="o">-</span> <span class="n">note_on</span><span class="o">.</span><span class="n">time</span>  <span class="c1"># type: ignore</span>
+        <span class="n">duration</span> <span class="o">=</span> <span class="n">MidiFileToEvent</span><span class="o">.</span><span class="n">_tick_to_duration</span><span class="p">(</span><span class="n">tick</span><span class="p">,</span> <span class="n">ticks_per_beat</span><span class="p">)</span>
+
+        <span class="c1"># Use default values defined in configurations modules to ensure</span>
+        <span class="c1"># stability in case user changes the values.</span>
+        <span class="n">mutwo_parameter_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">core_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_DURATION_TO_SEARCH_NAME</span><span class="p">:</span> <span class="n">duration</span><span class="p">,</span>
+            <span class="n">music_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_PITCH_LIST_TO_SEARCH_NAME</span><span class="p">:</span> <span class="n">mutwo_pitch_list</span><span class="p">,</span>
+            <span class="n">music_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_VOLUME_TO_SEARCH_NAME</span><span class="p">:</span> <span class="n">mutwo_volume</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">chronon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mutwo_parameter_dict_to_chronon</span><span class="p">(</span><span class="n">mutwo_parameter_dict</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Midi data -&gt; Mutwo data -&gt; SimpleEvent:</span><span class="se">\n\t</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Midi data: (tick=</span><span class="si">{</span><span class="n">tick</span><span class="si">}</span><span class="s2">,velocity_list=</span><span class="si">{</span><span class="n">velocity_list</span><span class="si">}</span><span class="s2">,midi_pitch_list=</span><span class="si">{</span><span class="n">midi_pitch_list</span><span class="si">}</span><span class="s2">)</span><span class="se">\n\t</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Mutwo data: </span><span class="si">{</span><span class="n">mutwo_parameter_dict</span><span class="si">}</span><span class="se">\n\t</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;SimpleEvent: </span><span class="si">{</span><span class="n">chronon</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">chronon</span>
+
+    <span class="k">def</span> <span class="nf">_note_pair_tuple_to_simultaneous_event</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">note_pair_tuple</span><span class="p">:</span> <span class="n">NotePairTuple</span><span class="p">,</span> <span class="n">ticks_per_beat</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Concurrence</span><span class="p">[</span>
+        <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">]</span>
+    <span class="p">]:</span>
+        <span class="n">simultaneous_event</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Concurrence</span><span class="p">([])</span>
+
+        <span class="n">start_and_stop_tuple_to_note_pair_list</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">MidiFileToEvent</span><span class="o">.</span><span class="n">_note_pair_tuple_to_start_and_stop_tuple_to_note_pair_list</span><span class="p">(</span>
+                <span class="n">note_pair_tuple</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">start_and_stop_tuple</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="n">start_and_stop_tuple_to_note_pair_list</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span>
+            <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">start_and_stop_tuple</span><span class="p">:</span> <span class="n">start_and_stop_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="p">):</span>
+            <span class="n">start_tick</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">start_and_stop_tuple</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tick_to_duration</span><span class="p">(</span><span class="n">start_tick</span><span class="p">,</span> <span class="n">ticks_per_beat</span><span class="p">)</span>
+            <span class="n">note_pair_list</span> <span class="o">=</span> <span class="n">start_and_stop_tuple_to_note_pair_list</span><span class="p">[</span>
+                <span class="n">start_and_stop_tuple</span>
+            <span class="p">]</span>
+            <span class="n">chronon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_note_pair_list_to_chronon</span><span class="p">(</span>
+                <span class="n">note_pair_list</span><span class="p">,</span> <span class="n">ticks_per_beat</span>
+            <span class="p">)</span>
+            <span class="n">is_added</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">consecution</span> <span class="ow">in</span> <span class="n">simultaneous_event</span><span class="p">:</span>
+                <span class="n">duration</span> <span class="o">=</span> <span class="n">consecution</span><span class="o">.</span><span class="n">duration</span>
+                <span class="n">difference</span> <span class="o">=</span> <span class="n">start</span> <span class="o">-</span> <span class="n">duration</span>
+                <span class="k">if</span> <span class="n">difference</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_add_chronon_to_consecution</span><span class="p">(</span>
+                        <span class="n">consecution</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">chronon</span>
+                    <span class="p">)</span>
+                    <span class="n">is_added</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">is_added</span><span class="p">:</span>
+                <span class="n">simultaneous_event</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">([]))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_add_chronon_to_consecution</span><span class="p">(</span>
+                    <span class="n">simultaneous_event</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">start</span><span class="p">,</span> <span class="n">chronon</span>
+                <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">simultaneous_event</span>
+
+    <span class="k">def</span> <span class="nf">_note_pair_tuple_and_set_tempo_message_list_to_simultaneous_event</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">note_pair_tuple</span><span class="p">:</span> <span class="n">NotePairTuple</span><span class="p">,</span>
+        <span class="n">set_tempo_message_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">mido</span><span class="o">.</span><span class="n">Message</span> <span class="o">|</span> <span class="n">mido</span><span class="o">.</span><span class="n">MetaMessage</span><span class="p">],</span>
+        <span class="n">ticks_per_beat</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Concurrence</span><span class="p">[</span>
+        <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">]</span>
+    <span class="p">]:</span>
+        <span class="n">simultaneous_event</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_note_pair_tuple_to_simultaneous_event</span><span class="p">(</span>
+            <span class="n">note_pair_tuple</span><span class="p">,</span> <span class="n">ticks_per_beat</span>
+        <span class="p">)</span>
+        <span class="c1"># TODO(apply tempo messages)</span>
+        <span class="k">return</span> <span class="n">simultaneous_event</span>
+
+    <span class="k">def</span> <span class="nf">_midi_file_to_mutwo_event</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">midi_file_to_convert</span><span class="p">:</span> <span class="n">mido</span><span class="o">.</span><span class="n">MidiFile</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">:</span>
+        <span class="n">ticks_per_beat</span> <span class="o">=</span> <span class="n">midi_file_to_convert</span><span class="o">.</span><span class="n">ticks_per_beat</span>
+        <span class="n">message_type_to_midi_message_list</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">MidiFileToEvent</span><span class="o">.</span><span class="n">_get_message_type_to_midi_message_list</span><span class="p">(</span><span class="n">midi_file_to_convert</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">note_pair_tuple</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_note_pair_tuple</span><span class="p">(</span><span class="n">message_type_to_midi_message_list</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">set_tempo_message_list</span> <span class="o">=</span> <span class="n">message_type_to_midi_message_list</span><span class="p">[</span><span class="s2">&quot;set_tempo&quot;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">set_tempo_message_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_note_pair_tuple_and_set_tempo_message_list_to_simultaneous_event</span><span class="p">(</span>
+            <span class="n">note_pair_tuple</span><span class="p">,</span> <span class="n">set_tempo_message_list</span><span class="p">,</span> <span class="n">ticks_per_beat</span>
+        <span class="p">)</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                          public methods                                #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+<div class="viewcode-block" id="MidiFileToEvent.convert"><a class="viewcode-back" href="../../../api/mutwo.midi_converters.html#mutwo.midi_converters.MidiFileToEvent.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">midi_file_path_or_mido_midi_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">mido</span><span class="o">.</span><span class="n">MidiFile</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Convert midi file to mutwo event.</span>
+
+<span class="sd">        :param midi_file_path_or_mido_midi_file: The midi file which shall</span>
+<span class="sd">            be converted. Can either be a file path or a :class:`MidiFile`</span>
+<span class="sd">            object from the `mido &lt;https://github.com/mido/mido&gt;`_ package.</span>
+<span class="sd">        :type midi_file_path_or_mido_midi_file: str | mido.MidiFile</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">midi_file_path_or_mido_midi_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">midi_file</span> <span class="o">=</span> <span class="n">mido</span><span class="o">.</span><span class="n">MidiFile</span><span class="p">(</span><span class="n">midi_file_path_or_mido_midi_file</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">midi_file_path_or_mido_midi_file</span><span class="p">,</span> <span class="n">mido</span><span class="o">.</span><span class="n">MidiFile</span><span class="p">):</span>
+            <span class="n">midi_file</span> <span class="o">=</span> <span class="n">midi_file_path_or_mido_midi_file</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Found &#39;</span><span class="si">{</span><span class="n">midi_file_path_or_mido_midi_file</span><span class="si">}</span><span class="s2">&#39; of&quot;</span>
+                    <span class="s2">&quot;unsupported type&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">midi_file_path_or_mido_midi_file</span><span class="p">)</span><span class="si">}</span><span class="s2">&#39; for&quot;</span>
+                    <span class="s2">&quot;parameter &#39;midi_file_path_or_mido_midi_file&#39;! &quot;</span>
+                    <span class="s2">&quot;Please enter either a file name (str) or a MidiFile&quot;</span>
+                    <span class="s2">&quot; object (from the mido package).&quot;</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_midi_file_to_mutwo_event</span><span class="p">(</span><span class="n">midi_file</span><span class="p">)</span></div></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.midi_converters.backends</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Levin Eric Zimmermann.
+    </div>
+  </body>
+</html>

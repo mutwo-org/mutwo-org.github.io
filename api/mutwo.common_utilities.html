@@ -1,0 +1,254 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>mutwo.common_utilities &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+    
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="mutwo.common_version" href="mutwo.common_version.html" />
+    <link rel="prev" title="mutwo.common_generators" href="mutwo.common_generators.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mutwo.common_version.html" title="mutwo.common_version"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="mutwo.common_generators.html" title="mutwo.common_generators"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="api_documentation.html" accesskey="U">mutwo API documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.common_utilities</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="mutwo-common-utilities">
+<h1><a class="toc-backref" href="#id1" role="doc-backlink">mutwo.common_utilities</a><a class="headerlink" href="#mutwo-common-utilities" title="Permalink to this heading">¶</a></h1>
+<nav class="contents" id="table-of-content">
+<p class="topic-title">Table of content</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#mutwo-common-utilities" id="id1">mutwo.common_utilities</a></p></li>
+</ul>
+</nav>
+<span class="target" id="module-mutwo.common_utilities"></span><table class="docutils align-center" style="width: 95%">
+<thead>
+<tr class="row-odd"><th class="head"><p>Object</p></th>
+<th class="head"><p>Documentation</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.common_utilities.InvalidMinimaCurveAndMaximaCurveCombination" title="mutwo.common_utilities.InvalidMinimaCurveAndMaximaCurveCombination"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.common_utilities.InvalidMinimaCurveAndMaximaCurveCombination</span></code></a></p></td>
+<td><p>Raise for invalid envelope combinations in <a class="reference internal" href="mutwo.common_generators.html#mutwo.common_generators.Tendency" title="mutwo.common_generators.Tendency"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.common_generators.Tendency</span></code></a>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.common_utilities.UnequalEnvelopeDurationError" title="mutwo.common_utilities.UnequalEnvelopeDurationError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.common_utilities.UnequalEnvelopeDurationError</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.common_utilities.InvalidStartAtValueError" title="mutwo.common_utilities.InvalidStartAtValueError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.common_utilities.InvalidStartAtValueError</span></code></a></p></td>
+<td><p>Raise for invalid error of ‘start_at’ in <a class="reference internal" href="mutwo.common_generators.html#mutwo.common_generators.ActivityLevel" title="mutwo.common_generators.ActivityLevel"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.common_generators.ActivityLevel</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.common_utilities.NoSolutionFoundError" title="mutwo.common_utilities.NoSolutionFoundError"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.common_utilities.NoSolutionFoundError</span></code></a></p></td>
+<td><p>Raise in case backtracking algorithm can’t find any solution</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.common_utilities.InvalidMinimaCurveAndMaximaCurveCombination">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InvalidMinimaCurveAndMaximaCurveCombination</span></span><a class="reference internal" href="../_modules/mutwo/common_utilities/exceptions.html#InvalidMinimaCurveAndMaximaCurveCombination"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_utilities.InvalidMinimaCurveAndMaximaCurveCombination" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Raise for invalid envelope combinations in <a class="reference internal" href="mutwo.common_generators.html#mutwo.common_generators.Tendency" title="mutwo.common_generators.Tendency"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.common_generators.Tendency</span></code></a>.</p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Data Attributes:</p>
+<details><summary>Inherited from <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseException</span></code></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">args</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<details><summary>Inherited from <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseException</span></code></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">with_traceback</span></code></p></td>
+<td><p>Exception.with_traceback(tb) -- set self.__traceback__ to tb and return self.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+</dd></dl>
+
+<hr class="docutils" />
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.common_utilities.UnequalEnvelopeDurationError">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">UnequalEnvelopeDurationError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">minima_curve</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxima_curve</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/common_utilities/exceptions.html#UnequalEnvelopeDurationError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_utilities.UnequalEnvelopeDurationError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mutwo.common_utilities.InvalidMinimaCurveAndMaximaCurveCombination" title="mutwo.common_utilities.exceptions.InvalidMinimaCurveAndMaximaCurveCombination"><code class="xref py py-class docutils literal notranslate"><span class="pre">InvalidMinimaCurveAndMaximaCurveCombination</span></code></a></p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Data Attributes:</p>
+<details><summary>Inherited from <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseException</span></code></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">args</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<details><summary>Inherited from <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseException</span></code></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">with_traceback</span></code></p></td>
+<td><p>Exception.with_traceback(tb) -- set self.__traceback__ to tb and return self.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>minima_curve</strong> (<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Envelope" title="mutwo.core_events.envelopes.Envelope"><em>Envelope</em></a>) – </p></li>
+<li><p><strong>maxima_curve</strong> (<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Envelope" title="mutwo.core_events.envelopes.Envelope"><em>Envelope</em></a>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.common_utilities.InvalidStartAtValueError">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InvalidStartAtValueError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_at</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/common_utilities/exceptions.html#InvalidStartAtValueError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_utilities.InvalidStartAtValueError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code></p>
+<p>Raise for invalid error of ‘start_at’ in <a class="reference internal" href="mutwo.common_generators.html#mutwo.common_generators.ActivityLevel" title="mutwo.common_generators.ActivityLevel"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.common_generators.ActivityLevel</span></code></a></p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Data Attributes:</p>
+<details><summary>Inherited from <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseException</span></code></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">args</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<details><summary>Inherited from <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseException</span></code></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">with_traceback</span></code></p></td>
+<td><p>Exception.with_traceback(tb) -- set self.__traceback__ to tb and return self.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>start_at</strong> (<em>int</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.common_utilities.NoSolutionFoundError">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NoSolutionFoundError</span></span><a class="reference internal" href="../_modules/mutwo/common_utilities/exceptions.html#NoSolutionFoundError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.common_utilities.NoSolutionFoundError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Raise in case backtracking algorithm can’t find any solution</p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Data Attributes:</p>
+<details><summary>Inherited from <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseException</span></code></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">args</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<details><summary>Inherited from <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseException</span></code></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">with_traceback</span></code></p></td>
+<td><p>Exception.with_traceback(tb) -- set self.__traceback__ to tb and return self.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mutwo.common_version.html" title="mutwo.common_version"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="mutwo.common_generators.html" title="mutwo.common_generators"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="api_documentation.html" >mutwo API documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.common_utilities</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2024, mutwo authors.
+    </div>
+  </body>
+</html>

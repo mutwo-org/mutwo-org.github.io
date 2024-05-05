@@ -1,0 +1,228 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mutwo.reaper_converters.reaper &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.reaper_converters.reaper</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mutwo.reaper_converters.reaper</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">typing</span>
+
+
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_converters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_events</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_parameters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">reaper_converters</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;EventToReaperMarkerString&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SimpleEventToMarkerName&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SimpleEventToMarkerColor&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="SimpleEventToMarkerName"><a class="viewcode-back" href="../../../api/mutwo.reaper_converters.html#mutwo.reaper_converters.SimpleEventToMarkerName">[docs]</a><span class="k">class</span> <span class="nc">SimpleEventToMarkerName</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">SimpleEventToAttribute</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert :class:`~mutwo.core_events.SimpleEvent` to a name of a marker.</span>
+
+<span class="sd">    By default `mutwo` will fetch from an event the</span>
+<span class="sd">    :const:`~mutwo.reaper_converters.configurations.DEFAULT_MARKER_NAME_ATTRIBUTE_NAME`.</span>
+<span class="sd">    If no attribute with `attribute_name` can be found the converter will simply return</span>
+<span class="sd">    ``None``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">attribute_name</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">exception_value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">attribute_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">attribute_name</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">reaper_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_MARKER_NAME_ATTRIBUTE_NAME</span>
+            <span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">attribute_name</span><span class="p">,</span> <span class="n">exception_value</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SimpleEventToMarkerColor"><a class="viewcode-back" href="../../../api/mutwo.reaper_converters.html#mutwo.reaper_converters.SimpleEventToMarkerColor">[docs]</a><span class="k">class</span> <span class="nc">SimpleEventToMarkerColor</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">SimpleEventToAttribute</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert :class:`~mutwo.core_events.SimpleEvent` to the color of a marker.</span>
+
+<span class="sd">    By default `mutwo` will fetch from an event the</span>
+<span class="sd">    :const:`~mutwo.reaper_converters.configurations.DEFAULT_MARKER_COLOR_ATTRIBUTE_NAME`.</span>
+<span class="sd">    If no attribute with `attribute_name` can be found the converter will simply return</span>
+<span class="sd">    ``None``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">attribute_name</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">exception_value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">attribute_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">attribute_name</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">reaper_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_MARKER_COLOR_ATTRIBUTE_NAME</span>
+            <span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">attribute_name</span><span class="p">,</span> <span class="n">exception_value</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="EventToReaperMarkerString"><a class="viewcode-back" href="../../../api/mutwo.reaper_converters.html#mutwo.reaper_converters.EventToReaperMarkerString">[docs]</a><span class="k">class</span> <span class="nc">EventToReaperMarkerString</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">EventConverter</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Make Reaper Marker entries.</span>
+
+<span class="sd">    :param chronon_to_marker_name: A function which converts a</span>
+<span class="sd">        :class:`~mutwo.core_events.SimpleEvent` to the marker</span>
+<span class="sd">        name. If the function returns ``None`` `mutwo` will ignore`</span>
+<span class="sd">        the current event. By default `chronon_to_marker_name` is set</span>
+<span class="sd">        to :class:`SimpleEventToMarkerName`.</span>
+<span class="sd">    :type chronon_to_marker_name: typing.Callable[[core_events.SimpleEvent], str]</span>
+<span class="sd">    :param chronon_to_marker_color: A function which converts a</span>
+<span class="sd">        :class:`~mutwo.core_events.SimpleEvent` to the marker</span>
+<span class="sd">        color. If the function returns ``None`` `mutwo` will ignore`</span>
+<span class="sd">        the current event. By default `chronon_to_marker_name` is set</span>
+<span class="sd">        to :class:`SimpleEventToMarkerColor`.</span>
+<span class="sd">    :type chronon_to_marker_color: typing.Callable[[core_events.SimpleEvent], str]</span>
+
+<span class="sd">    The resulting string can be copied into the respective reaper</span>
+<span class="sd">    project file one line before the &#39;&lt;PROJBAY&#39; tag.</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import reaper_converters</span>
+<span class="sd">    &gt;&gt;&gt; from mutwo import core_events</span>
+<span class="sd">    &gt;&gt;&gt; marker_converter = reaper_converters.EventToReaperMarkerString()</span>
+<span class="sd">    &gt;&gt;&gt; events = core_events.Consecution([core_events.SimpleEvent(2), core_events.SimpleEvent(3)])</span>
+<span class="sd">    &gt;&gt;&gt; events[0].name = &#39;beginning&#39;</span>
+<span class="sd">    &gt;&gt;&gt; events[0].color = r&#39;0 16797088 1 B {A4376701-5AA5-246B-900B-28ABC969123A}&#39;</span>
+<span class="sd">    &gt;&gt;&gt; events[1].name = &#39;center&#39;</span>
+<span class="sd">    &gt;&gt;&gt; events[1].color = r&#39;0 18849803 1 B {E4DD7D23-98F4-CA97-8587-F4259A9498F7}&#39;</span>
+<span class="sd">    &gt;&gt;&gt; print(marker_converter.convert(events))</span>
+<span class="sd">    MARKER 0 0.0 beginning 0 16797088 1 B {A4376701-5AA5-246B-900B-28ABC969123A}</span>
+<span class="sd">    MARKER 1 2.0 center 0 18849803 1 B {E4DD7D23-98F4-CA97-8587-F4259A9498F7}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">chronon_to_marker_name</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span> <span class="nb">str</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">SimpleEventToMarkerName</span><span class="p">(),</span>  <span class="c1"># type: ignore</span>
+        <span class="n">chronon_to_marker_color</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span> <span class="nb">str</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">SimpleEventToMarkerColor</span><span class="p">(),</span>  <span class="c1"># type: ignore</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_marker_name</span> <span class="o">=</span> <span class="n">chronon_to_marker_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_marker_color</span> <span class="o">=</span> <span class="n">chronon_to_marker_color</span>
+
+    <span class="k">def</span> <span class="nf">_convert_chronon</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">chronon</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">,</span>
+        <span class="n">absolute_entry_delay</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="n">marker_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_marker_name</span><span class="p">(</span><span class="n">chronon</span><span class="p">)</span>
+        <span class="n">marker_color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_marker_color</span><span class="p">(</span><span class="n">chronon</span><span class="p">)</span>
+
+        <span class="c1"># If any of the functions return ``None`` `mutwo` will ignore`</span>
+        <span class="c1"># the current event.</span>
+        <span class="k">if</span> <span class="n">marker_name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">marker_color</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">tuple</span><span class="p">([])</span>
+
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">absolute_entry_delay</span><span class="o">.</span><span class="n">duration_in_floats</span><span class="p">,</span> <span class="n">marker_name</span><span class="p">,</span> <span class="n">marker_color</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="EventToReaperMarkerString.convert"><a class="viewcode-back" href="../../../api/mutwo.reaper_converters.html#mutwo.reaper_converters.EventToReaperMarkerString.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert event to reaper markers (as plain string).</span>
+
+<span class="sd">        :param event_to_convert: The event which shall be</span>
+<span class="sd">            converted to reaper marker entries.</span>
+<span class="sd">        :type event_to_convert: events.abc.Event</span>
+<span class="sd">        :return: The reaper marker entries as plain strings.</span>
+<span class="sd">            Copy them to your reaper project file one line</span>
+<span class="sd">            before the &#39;&lt;PROJBAY&#39; tag and the next time when</span>
+<span class="sd">            you open the project they will appear.</span>
+<span class="sd">        :return type: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">reaper_marker_tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="s2">&quot;MARKER </span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">marker_index</span><span class="p">,</span> <span class="n">marker_data</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">marker_index</span><span class="p">,</span> <span class="n">marker_data</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_convert_event</span><span class="p">(</span><span class="n">event_to_convert</span><span class="p">,</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">DirectDuration</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">reaper_marker_tuple</span><span class="p">)</span></div></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.reaper_converters.reaper</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, mutwo authors.
+    </div>
+  </body>
+</html>

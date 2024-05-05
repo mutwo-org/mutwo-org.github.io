@@ -1,0 +1,52 @@
+
+.. currentmodule:: mutwo.reaper_converters
+
+mutwo.reaper_converters
+=======================
+
+.. contents:: Table of content
+   :depth: 3
+
+.. automodule:: mutwo.reaper_converters
+   :members:
+
+
+.. list-table::
+   :align: center
+   :width: 95%
+   :header-rows: 1
+
+   * - Object
+     - Documentation
+   * - :class:`mutwo.reaper_converters.EventToReaperMarkerString`
+     - Make Reaper Marker entries.
+   * - :class:`mutwo.reaper_converters.ChrononToMarkerName`
+     - Convert :class:`~mutwo.core_events.Chronon` to a name of a marker.
+   * - :class:`mutwo.reaper_converters.ChrononToMarkerColor`
+     - Convert :class:`~mutwo.core_events.Chronon` to the color of a marker.
+
+
+
+
+.. autoclass:: mutwo.reaper_converters.EventToReaperMarkerString
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.reaper_converters.ChrononToMarkerName
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.reaper_converters.ChrononToMarkerColor
+
+        .. autoclasstoc::
+    
+
+
+mutwo.reaper_converters.configurations
+--------------------------------------
+
+.. automodule:: mutwo.reaper_converters.configurations
+   :members:
+

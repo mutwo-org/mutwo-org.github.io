@@ -1,0 +1,657 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mutwo.core_utilities.tools &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.core_utilities.tools</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mutwo.core_utilities.tools</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Generic utility functions.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">bisect</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">import</span> <span class="nn">types</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_configurations</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_constants</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;scale&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;scale_sequence_to_sum&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;accumulate_from_n&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;accumulate_from_zero&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;insert_next_to&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;uniqify_sequence&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;cyclic_permutations&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;find_closest_index&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;find_closest_item&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_nested_item_from_index_sequence&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;set_nested_item_from_index_sequence&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;find_numbers_which_sums_up_to&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;call_function_except_attribute_error&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;round_floats&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;camel_case_to_snake_case&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;test_if_objects_are_equal_by_parameter_tuple&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_all&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_cls_logger&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="scale"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.scale">[docs]</a><span class="k">def</span> <span class="nf">scale</span><span class="p">(</span>
+    <span class="n">value</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span>
+    <span class="n">old_min</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span>
+    <span class="n">old_max</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span>
+    <span class="n">new_min</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span>
+    <span class="n">new_max</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span>
+    <span class="n">translation_shape</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Scale a value from one range to another range.</span>
+
+<span class="sd">    :param value: The value that shall be scaled.</span>
+<span class="sd">    :param old_min: The minima of the old range.</span>
+<span class="sd">    :param old_max: The maxima of the old range.</span>
+<span class="sd">    :param new_min: The minima of the new range.</span>
+<span class="sd">    :param new_max: The maxima of the new range.</span>
+<span class="sd">    :param translation_shape: 0 for a linear translation,</span>
+<span class="sd">        values &gt; 0 for a slower change at the beginning,</span>
+<span class="sd">        values &lt; 0 for a faster change at the beginning.</span>
+
+<span class="sd">    The algorithmic to change the translation with the</span>
+<span class="sd">    `translation_shape` has been copied from</span>
+<span class="sd">    `expenvelope &lt;https://git.sr.ht/~marcevanstein/expenvelope/tree/master/item/expenvelope/envelope_segment.py#L206&gt;`_</span>
+<span class="sd">    by M. Evanstein.</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import core_utilities</span>
+<span class="sd">    &gt;&gt;&gt; core_utilities.scale(1, 0, 1, 0, 100)</span>
+<span class="sd">    100.0</span>
+<span class="sd">    &gt;&gt;&gt; core_utilities.scale(0.5, 0, 1, 0, 100)</span>
+<span class="sd">    50.0</span>
+<span class="sd">    &gt;&gt;&gt; core_utilities.scale(0.2, 0, 1, 0, 100)</span>
+<span class="sd">    20.0</span>
+<span class="sd">    &gt;&gt;&gt; core_utilities.scale(0.2, 0, 1, 0, 100, 1)</span>
+<span class="sd">    12.885124808584155</span>
+<span class="sd">    &gt;&gt;&gt; core_utilities.scale(0.2, 0, 1, 0, 100, -1)</span>
+<span class="sd">    28.67637263023771</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">old_min</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="n">old_max</span>
+    <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Input value &#39;</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&#39; has to be in the range of &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;(old_min = </span><span class="si">{</span><span class="n">old_min</span><span class="si">}</span><span class="s2">, old_max = </span><span class="si">{</span><span class="n">old_max</span><span class="si">}</span><span class="s2">).&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">old_span</span> <span class="o">=</span> <span class="n">old_max</span> <span class="o">-</span> <span class="n">old_min</span>
+    <span class="k">assert</span> <span class="n">old_span</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Can&#39;t scale if old span == 0&quot;</span>
+
+    <span class="n">percentage</span> <span class="o">=</span> <span class="p">(</span><span class="n">value</span> <span class="o">-</span> <span class="n">old_min</span><span class="p">)</span> <span class="o">/</span> <span class="n">old_span</span>
+    <span class="n">new_range</span> <span class="o">=</span> <span class="n">new_max</span> <span class="o">-</span> <span class="n">new_min</span>
+    <span class="k">if</span> <span class="n">translation_shape</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="p">(</span><span class="n">new_range</span> <span class="o">/</span> <span class="p">((</span><span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">translation_shape</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span>
+            <span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">translation_shape</span> <span class="o">*</span> <span class="n">percentage</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">new_range</span> <span class="o">*</span> <span class="n">percentage</span>
+    <span class="k">return</span> <span class="n">value</span> <span class="o">+</span> <span class="n">new_min</span></div>
+
+
+<div class="viewcode-block" id="scale_sequence_to_sum"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.scale_sequence_to_sum">[docs]</a><span class="k">def</span> <span class="nf">scale_sequence_to_sum</span><span class="p">(</span>
+    <span class="n">sequence_to_scale</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">],</span>
+    <span class="n">sum_to_scale_to</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Scale numbers in a sequence so that the resulting sum fits to the given value.</span>
+
+<span class="sd">    :param sequence_to_scale: The sequence filled with real numbers which sum should fit</span>
+<span class="sd">        to the given `sum_to_scale_to` argument.</span>
+<span class="sd">    :type sequence_to_scale: typing.Sequence[core_constants.Real]</span>
+<span class="sd">    :param sum_to_scale_to: The resulting sum of the sequence.</span>
+<span class="sd">    :type sum_to_scale_to: core_constants.Real</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import core_utilities</span>
+<span class="sd">    &gt;&gt;&gt; sequence_to_scale = [1, 3, 2]</span>
+<span class="sd">    &gt;&gt;&gt; core_utilities.scale_sequence_to_sum(sequence_to_scale, 3)</span>
+<span class="sd">    [0.5, 1.5, 1.0]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">sequence_to_scale</span><span class="p">:</span>
+        <span class="n">current_sum</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">sequence_to_scale</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">current_sum</span><span class="p">:</span>
+            <span class="n">factor</span> <span class="o">=</span> <span class="n">sum_to_scale_to</span> <span class="o">/</span> <span class="n">current_sum</span>
+            <span class="n">scaled_sequence</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">number</span><span class="p">:</span> <span class="n">number</span> <span class="o">*</span> <span class="n">factor</span><span class="p">,</span> <span class="n">sequence_to_scale</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">item_to_scale_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sequence_to_scale</span><span class="p">)</span>
+            <span class="n">size_per_item</span> <span class="o">=</span> <span class="n">sum_to_scale_to</span> <span class="o">/</span> <span class="n">item_to_scale_count</span>
+            <span class="n">scaled_sequence</span> <span class="o">=</span> <span class="p">(</span><span class="n">size_per_item</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">sequence_to_scale</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">sequence_to_scale</span><span class="p">)(</span><span class="n">scaled_sequence</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">sequence_to_scale</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="accumulate_from_n"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.accumulate_from_n">[docs]</a><span class="k">def</span> <span class="nf">accumulate_from_n</span><span class="p">(</span>
+    <span class="n">iterable</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">],</span> <span class="n">n</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Iterator</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Accumulates iterable starting with value n.</span>
+
+<span class="sd">    :param iterable: The iterable which values shall be accumulated.</span>
+<span class="sd">    :param n: The start number from which shall be accumulated.</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import core_utilities</span>
+<span class="sd">    &gt;&gt;&gt; tuple(core_utilities.accumulate_from_n((4, 2, 3), 0))</span>
+<span class="sd">    (0, 4, 6, 9)</span>
+<span class="sd">    &gt;&gt;&gt; tuple(core_utilities.accumulate_from_n((4, 2, 3), 2))</span>
+<span class="sd">    (2, 6, 8, 11)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">itertools</span><span class="o">.</span><span class="n">accumulate</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">((</span><span class="n">n</span><span class="p">,),</span> <span class="n">iterable</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="accumulate_from_zero"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.accumulate_from_zero">[docs]</a><span class="k">def</span> <span class="nf">accumulate_from_zero</span><span class="p">(</span>
+    <span class="n">iterable</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Iterator</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Accumulates iterable starting from 0.</span>
+
+<span class="sd">    :param iterable: The iterable which values shall be accumulated.</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import core_utilities</span>
+<span class="sd">    &gt;&gt;&gt; tuple(core_utilities.accumulate_from_zero((4, 2, 3)))</span>
+<span class="sd">    (0, 4, 6, 9)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">accumulate_from_n</span><span class="p">(</span><span class="n">iterable</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="insert_next_to"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.insert_next_to">[docs]</a><span class="k">def</span> <span class="nf">insert_next_to</span><span class="p">(</span>
+    <span class="n">mutable_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">MutableSequence</span><span class="p">,</span>
+    <span class="n">item_to_find</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+    <span class="n">distance</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">item_to_insert</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Insert an item into a list relative to the first item equal to a certain value.&quot;&quot;&quot;</span>
+
+    <span class="n">index</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">mutable_sequence</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">item_to_find</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">distance</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">mutable_sequence</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">item_to_insert</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">real_distance</span> <span class="o">=</span> <span class="n">distance</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">distance</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">distance</span>
+        <span class="n">mutable_sequence</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">index</span> <span class="o">+</span> <span class="n">real_distance</span><span class="p">,</span> <span class="n">item_to_insert</span><span class="p">)</span></div>
+
+
+<span class="n">T</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="find_closest_index"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.find_closest_index">[docs]</a><span class="k">def</span> <span class="nf">find_closest_index</span><span class="p">(</span>
+    <span class="n">item</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span>
+    <span class="n">sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">,</span>
+    <span class="n">key</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">],</span> <span class="n">T</span><span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="n">item</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Return index of element in ``data`` with smallest difference to ``item``.</span>
+
+<span class="sd">    :param item: The item from which the closest item shall be found.</span>
+<span class="sd">    :param sequence: The data to which the closest item shall be found.</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import core_utilities</span>
+<span class="sd">    &gt;&gt;&gt; core_utilities.find_closest_index(2, (1, 4, 5))</span>
+<span class="sd">    0</span>
+<span class="sd">    &gt;&gt;&gt; core_utilities.find_closest_index(127, (100, 4, 300, 53, 129))</span>
+<span class="sd">    4</span>
+<span class="sd">    &gt;&gt;&gt; core_utilities.find_closest_index(127, ((&#39;hi&#39;, 100), (&#39;hey&#39;, 4), (&#39;hello&#39;, 300)), key=lambda item: item[1])</span>
+<span class="sd">    0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">research_data</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">sequence</span><span class="p">))</span>
+    <span class="n">sorted_research_data</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">research_data</span><span class="p">)</span>
+
+    <span class="n">solution</span> <span class="o">=</span> <span class="n">bisect</span><span class="o">.</span><span class="n">bisect_left</span><span class="p">(</span><span class="n">sorted_research_data</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+    <span class="c1"># make type ignore because data has been converted to tuple (which is sizeable)</span>
+    <span class="k">if</span> <span class="n">solution</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">sequence</span><span class="p">):</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">solution</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="k">elif</span> <span class="n">solution</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">solution</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">index_tuple</span> <span class="o">=</span> <span class="p">(</span><span class="n">solution</span><span class="p">,</span> <span class="n">solution</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">difference_tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="nb">abs</span><span class="p">(</span><span class="o">-</span><span class="n">sorted_research_data</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">+</span> <span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">index_tuple</span>
+        <span class="p">)</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">index_tuple</span><span class="p">[</span><span class="n">difference_tuple</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">difference_tuple</span><span class="p">))]</span>
+
+    <span class="k">return</span> <span class="n">research_data</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">sorted_research_data</span><span class="p">[</span><span class="n">index</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="find_closest_item"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.find_closest_item">[docs]</a><span class="k">def</span> <span class="nf">find_closest_item</span><span class="p">(</span>
+    <span class="n">item</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span>
+    <span class="n">sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">,</span>
+    <span class="n">key</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">],</span> <span class="n">T</span><span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="n">item</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Return element in ``data`` with smallest difference to ``item``.</span>
+
+<span class="sd">    :param item: The item from which the closest item shall be found.</span>
+<span class="sd">    :param sequence: The data to which the closest item shall be found.</span>
+<span class="sd">    :return: The closest number to ``item`` in ``data``.</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import core_utilities</span>
+<span class="sd">    &gt;&gt;&gt; core_utilities.find_closest_item(2, (1, 4, 5))</span>
+<span class="sd">    1</span>
+<span class="sd">    &gt;&gt;&gt; core_utilities.find_closest_item(127, (100, 4, 300, 53, 129))</span>
+<span class="sd">    129</span>
+<span class="sd">    &gt;&gt;&gt; core_utilities.find_closest_item(</span>
+<span class="sd">    ...     127,</span>
+<span class="sd">    ...     ((&#39;hi&#39;, 100), (&#39;hey&#39;, 4), (&#39;hello&#39;, 300)),</span>
+<span class="sd">    ...     key=lambda item: item[1]</span>
+<span class="sd">    ... )</span>
+<span class="sd">    (&#39;hi&#39;, 100)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">sequence</span><span class="p">[</span><span class="n">find_closest_index</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">sequence</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">)]</span></div>
+
+
+<div class="viewcode-block" id="uniqify_sequence"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.uniqify_sequence">[docs]</a><span class="k">def</span> <span class="nf">uniqify_sequence</span><span class="p">(</span>
+    <span class="n">sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">,</span>
+    <span class="n">sort_key</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">],</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">group_by_key</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">],</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Iterable</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Not-Order preserving function to uniqify any iterable with non-hashable objects.</span>
+
+<span class="sd">    :param sequence: The iterable which items shall be uniqified.</span>
+<span class="sd">    :return: Return uniqified version of the entered iterable.</span>
+<span class="sd">        The function will try to return the same type of the passed</span>
+<span class="sd">        iterable. If Python raises an error during initialisation of</span>
+<span class="sd">        the original iterable type, the function will simply return</span>
+<span class="sd">        a tuple.</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import core_utilities</span>
+<span class="sd">    &gt;&gt;&gt; core_utilities.uniqify_sequence([[1, 2], [1], [1]])</span>
+<span class="sd">    [[1], [1, 2]]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">sorted_iterable</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">sequence</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">sort_key</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">sorted_iterable</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">group_by_key</span><span class="p">))</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">sequence</span><span class="p">)(</span><span class="n">result</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">result</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="cyclic_permutations"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.cyclic_permutations">[docs]</a><span class="k">def</span> <span class="nf">cyclic_permutations</span><span class="p">(</span><span class="n">sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Generator</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Cyclic permutation of an iterable. Return a generator object.</span>
+
+<span class="sd">    :param sequence: The sequence from which cyclic permutations shall be generated.</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import core_utilities</span>
+<span class="sd">    &gt;&gt;&gt; permutations = core_utilities.cyclic_permutations((1, 2, 3, 4))</span>
+<span class="sd">    &gt;&gt;&gt; next(permutations)</span>
+<span class="sd">    (1, 2, 3, 4)</span>
+<span class="sd">    &gt;&gt;&gt; next(permutations)</span>
+<span class="sd">    (2, 3, 4, 1)</span>
+
+<span class="sd">    `Adapted function from the reply of Paritosh Singh</span>
+<span class="sd">    &lt;https://stackoverflow.com/questions/56171246/cyclic-permutation-operators-in-python/56171531&gt;`_</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">reorder_from_index</span><span class="p">(</span><span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">sequence</span><span class="p">[</span><span class="n">index</span><span class="p">:]</span> <span class="o">+</span> <span class="n">sequence</span><span class="p">[:</span><span class="n">index</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">reorder_from_index</span><span class="p">,</span> <span class="n">i</span><span class="p">)(</span><span class="n">sequence</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sequence</span><span class="p">))</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="camel_case_to_snake_case"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.camel_case_to_snake_case">[docs]</a><span class="k">def</span> <span class="nf">camel_case_to_snake_case</span><span class="p">(</span><span class="n">camel_case_string</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Transform camel case formatted string to snake case.</span>
+
+<span class="sd">    :param camel_case_string: String which is formatted using</span>
+<span class="sd">        camel case (no whitespace, but upper letters at</span>
+<span class="sd">        new word start).</span>
+<span class="sd">    :return: string formatted using snake case</span>
+
+<span class="sd">    **Example:** MyClassName -&gt; my_class_name</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">character_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">is_first</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">for</span> <span class="n">character</span> <span class="ow">in</span> <span class="n">camel_case_string</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">character</span><span class="o">.</span><span class="n">isupper</span><span class="p">():</span>
+            <span class="n">character</span> <span class="o">=</span> <span class="n">character</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">is_first</span><span class="p">:</span>
+                <span class="n">character</span> <span class="o">=</span> <span class="s2">&quot;_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">character</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">is_first</span><span class="p">:</span>
+            <span class="n">is_first</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="n">character_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">character</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">character_list</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_nested_item_from_index_sequence"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.get_nested_item_from_index_sequence">[docs]</a><span class="k">def</span> <span class="nf">get_nested_item_from_index_sequence</span><span class="p">(</span>
+    <span class="n">index_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Get item in nested Sequence.</span>
+
+<span class="sd">    :param index_sequence: The indices of the nested item.</span>
+<span class="sd">    :type index_sequence: typing.Sequence[int]</span>
+<span class="sd">    :param sequence: A nested sequence.</span>
+<span class="sd">    :type sequence: typing.Sequence[typing.Any]</span>
+
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import core_utilities</span>
+<span class="sd">    &gt;&gt;&gt; nested_sequence = (1, 2, (4, (5, 1), (9, (3,))))</span>
+<span class="sd">    &gt;&gt;&gt; core_utilities.get_nested_item_from_index_sequence((2, 2, 0), nested_sequence)</span>
+<span class="sd">    9</span>
+<span class="sd">    &gt;&gt;&gt; nested_sequence[2][2][0]  # is equal</span>
+<span class="sd">    9</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">index_sequence</span><span class="p">:</span>
+        <span class="n">sequence</span> <span class="o">=</span> <span class="n">sequence</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">sequence</span></div>
+
+
+<div class="viewcode-block" id="set_nested_item_from_index_sequence"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.set_nested_item_from_index_sequence">[docs]</a><span class="k">def</span> <span class="nf">set_nested_item_from_index_sequence</span><span class="p">(</span>
+    <span class="n">index_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+    <span class="n">sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">MutableSequence</span><span class="p">,</span>
+    <span class="n">item</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Set item in nested Sequence.</span>
+
+<span class="sd">    :param index_sequence: The indices of the nested item which shall be set.</span>
+<span class="sd">    :type index_sequence: typing.Sequence[int]</span>
+<span class="sd">    :param sequence: A nested sequence.</span>
+<span class="sd">    :type sequence: typing.MutableSequence[typing.Any]</span>
+<span class="sd">    :param item: The new item value.</span>
+<span class="sd">    :type item: typing.Any</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import core_utilities</span>
+<span class="sd">    &gt;&gt;&gt; nested_sequence = [1, 2, [4, [5, 1], [9, [3]]]]</span>
+<span class="sd">    &gt;&gt;&gt; core_utilities.set_nested_item_from_index_sequence((2, 2, 0), nested_sequence, 100)</span>
+<span class="sd">    &gt;&gt;&gt; nested_sequence[2][2][0] = 100  # is equal</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">index_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">index_sequence</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">index_index</span><span class="p">,</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">index_sequence</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">index_count</span> <span class="o">==</span> <span class="n">index_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">sequence</span><span class="o">.</span><span class="fm">__setitem__</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sequence</span> <span class="o">=</span> <span class="n">sequence</span><span class="p">[</span><span class="n">index</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="round_floats"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.round_floats">[docs]</a><span class="k">def</span> <span class="nf">round_floats</span><span class="p">(</span>
+    <span class="n">number_to_round</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span> <span class="n">n_digits</span><span class="p">:</span> <span class="nb">int</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Round number if it is an instance of float, otherwise unaltered number.</span>
+
+<span class="sd">    :param number_to_round: The number which shall be rounded.</span>
+<span class="sd">    :type number_to_round: core_constants.Real</span>
+<span class="sd">    :param n_digits: How many digits shall the number be rounded.</span>
+<span class="sd">    :type n_digits: int</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">number_to_round</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="n">number_to_round</span><span class="p">,</span> <span class="n">n_digits</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">number_to_round</span></div>
+
+
+<div class="viewcode-block" id="find_numbers_which_sums_up_to"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.find_numbers_which_sums_up_to">[docs]</a><span class="k">def</span> <span class="nf">find_numbers_which_sums_up_to</span><span class="p">(</span>
+    <span class="n">given_sum</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">number_to_choose_from_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">item_to_sum_up_count_set</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">set</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Find all combinations of numbers which sum is equal to the given sum.</span>
+
+<span class="sd">    :param given_sum: The target sum for which different combinations shall</span>
+<span class="sd">        be searched.</span>
+<span class="sd">    :type given_sum: float</span>
+<span class="sd">    :param number_to_choose_from_sequence: A sequence of numbers which shall be</span>
+<span class="sd">        tried to combine to result in the :attr:`given_sum`. If the user</span>
+<span class="sd">        doesn&#39;t specify this argument mutwo will use all natural numbers</span>
+<span class="sd">        equal or smaller than the :attr:`given_sum`.</span>
+<span class="sd">    :type number_to_choose_from_sequence: typing.Optional[typing.Sequence[float]]</span>
+<span class="sd">    :param item_to_sum_up_count_set: How many numbers can be combined to result</span>
+<span class="sd">        in the :attr:`given_sum`. If the user doesn&#39;t specify this argument</span>
+<span class="sd">        mutwo will use all natural numbers equal or smaller than the</span>
+<span class="sd">        :attr:`given_sum`.</span>
+<span class="sd">    :type item_to_sum_up_count_set: typing.Optional[set[int]]</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import core_utilities</span>
+<span class="sd">    &gt;&gt;&gt; core_utilities.find_numbers_which_sums_up_to(4)</span>
+<span class="sd">    ((4,), (1, 3), (2, 2), (1, 1, 2), (1, 1, 1, 1))</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">number_to_choose_from_sequence</span><span class="p">:</span>
+        <span class="n">number_to_choose_from_sequence</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">given_sum</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">item_to_sum_up_count_set</span><span class="p">:</span>
+        <span class="n">item_to_sum_up_count_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">given_sum</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="n">number_tuple_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">item_to_sum_up_count</span> <span class="ow">in</span> <span class="n">item_to_sum_up_count_set</span><span class="p">:</span>
+        <span class="n">number_tuple_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">pair</span>
+                <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">combinations_with_replacement</span><span class="p">(</span>
+                    <span class="n">number_to_choose_from_sequence</span><span class="p">,</span> <span class="n">item_to_sum_up_count</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="n">pair</span><span class="p">)</span> <span class="o">==</span> <span class="n">given_sum</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">number_tuple_list</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="call_function_except_attribute_error"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.call_function_except_attribute_error">[docs]</a><span class="k">def</span> <span class="nf">call_function_except_attribute_error</span><span class="p">(</span>
+    <span class="n">function</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">],</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">],</span>
+    <span class="n">argument</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+    <span class="n">exception_value</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Run a function with argument as input</span>
+
+<span class="sd">    :param function: The function to be called.</span>
+<span class="sd">    :param argument: The argument with which the function shall be called.</span>
+<span class="sd">    :param exception_value: The alternative value if the function call raises an</span>
+<span class="sd">        `AttributeError`.</span>
+<span class="sd">    :return: Return :obj:`exception_value` in case an attribute error occurs.</span>
+<span class="sd">        In case the function call is successful the function return value will</span>
+<span class="sd">        be returned.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">function</span><span class="p">(</span><span class="n">argument</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">exception_value</span>
+
+    <span class="k">return</span> <span class="n">value</span></div>
+
+
+<div class="viewcode-block" id="test_if_objects_are_equal_by_parameter_tuple"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.test_if_objects_are_equal_by_parameter_tuple">[docs]</a><span class="k">def</span> <span class="nf">test_if_objects_are_equal_by_parameter_tuple</span><span class="p">(</span>
+    <span class="n">object0</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+    <span class="n">object1</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+    <span class="n">parameter_to_compare_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Check if the parameters of two objects have equal values.</span>
+
+<span class="sd">    :param object0: The first object which shall be compared.</span>
+<span class="sd">    :param object1: The second object with which the first object shall be compared.</span>
+<span class="sd">    :parameter_to_compare_tuple: A tuple of attribute names which shall be compared.</span>
+<span class="sd">    :return: `True` if all values of all parameters of the objects are equal and `False`</span>
+<span class="sd">        if not or if an `AttributeError` is raised.</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import core_utilities</span>
+<span class="sd">    &gt;&gt;&gt; class A: pass</span>
+<span class="sd">    &gt;&gt;&gt; first_object = A()</span>
+<span class="sd">    &gt;&gt;&gt; first_object.a = 100</span>
+<span class="sd">    &gt;&gt;&gt; second_object = A()</span>
+<span class="sd">    &gt;&gt;&gt; second_object.a = 100</span>
+<span class="sd">    &gt;&gt;&gt; third_object = A()</span>
+<span class="sd">    &gt;&gt;&gt; third_object.a = 200</span>
+<span class="sd">    &gt;&gt;&gt; core_utilities.test_if_objects_are_equal_by_parameter_tuple(</span>
+<span class="sd">    ...     first_object, second_object, (&quot;a&quot;,)</span>
+<span class="sd">    ... )</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; core_utilities.test_if_objects_are_equal_by_parameter_tuple(</span>
+<span class="sd">    ...     first_object, third_object, (&quot;a&quot;,)</span>
+<span class="sd">    ... )</span>
+<span class="sd">    False</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">for</span> <span class="n">parameter_to_compare</span> <span class="ow">in</span> <span class="n">parameter_to_compare_tuple</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># If the assigned values of the specific parameter aren&#39;t</span>
+            <span class="c1"># equal, both objects can&#39;t be equal.</span>
+            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">object0</span><span class="p">,</span> <span class="n">parameter_to_compare</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">getattr</span><span class="p">(</span>
+                <span class="n">object1</span><span class="p">,</span> <span class="n">parameter_to_compare</span>
+            <span class="p">):</span>
+                <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="c1"># If the other object doesn&#39;t know the essential parameter</span>
+        <span class="c1"># mutwo assumes that both objects can&#39;t be equal.</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="c1"># If all compared parameters are equal, return True.</span>
+    <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="get_all"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.get_all">[docs]</a><span class="k">def</span> <span class="nf">get_all</span><span class="p">(</span><span class="o">*</span><span class="n">submodule_tuple</span><span class="p">:</span> <span class="n">types</span><span class="o">.</span><span class="n">ModuleType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Fetch from all arguments their `__all__` attribute and combine them to one tuple</span>
+
+<span class="sd">    :param submodule_tuple: Submodules which `__all__` attribute shall be fetched.</span>
+
+<span class="sd">    This function is mostly useful in the `__init__` code of each :mod:`mutwo` module.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">functools</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span>
+        <span class="n">operator</span><span class="o">.</span><span class="n">add</span><span class="p">,</span>
+        <span class="nb">map</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">submodule</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">submodule</span><span class="p">,</span> <span class="s2">&quot;__all__&quot;</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">([])),</span> <span class="n">submodule_tuple</span>
+        <span class="p">),</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_cls_logger"><a class="viewcode-back" href="../../../api/mutwo.core_utilities.html#mutwo.core_utilities.get_cls_logger">[docs]</a><span class="k">def</span> <span class="nf">get_cls_logger</span><span class="p">(</span>
+    <span class="bp">cls</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Type</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Get the local logger of your class.</span>
+
+<span class="sd">    :param cls: The class for which the logger should be returned. Simply call</span>
+<span class="sd">        `type(o)` if you only have the instance.</span>
+<span class="sd">    :type cls: typing.Type</span>
+<span class="sd">    :param level: The logging level of the logger. If ``None`` the level</span>
+<span class="sd">        defined in `mutwo.core_configurations.LOGGING_LEVEL` is used. Default</span>
+<span class="sd">        to ``None``.</span>
+<span class="sd">    :type level: int</span>
+<span class="sd">    :return: A :class:`logging.Logger`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">level</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">level</span> <span class="o">=</span> <span class="n">core_configurations</span><span class="o">.</span><span class="n">LOGGING_LEVEL</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__module__</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">logger</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.core_utilities.tools</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Levin Eric Zimmermann.
+    </div>
+  </body>
+</html>

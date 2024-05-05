@@ -1,0 +1,330 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mutwo.music_converters.grace_notes &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.music_converters.grace_notes</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mutwo.music_converters.grace_notes</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Apply grace notes on Events&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_converters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_constants</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_events</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_converters</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;GraceNotesConverter&quot;</span><span class="p">,)</span>
+
+
+<div class="viewcode-block" id="GraceNotesConverter"><a class="viewcode-back" href="../../../api/mutwo.music_converters.html#mutwo.music_converters.GraceNotesConverter">[docs]</a><span class="k">class</span> <span class="nc">GraceNotesConverter</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">EventConverter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Apply grace notes and after grace notes on :class:`core_events.abc.Event`.</span>
+
+<span class="sd">    :param minima_grace_notes_duration_factor: Minimal percentage how much</span>
+<span class="sd">        of the initial duration of the :class:`~mutwo.core_events.SimpleEvent`</span>
+<span class="sd">        shall be moved to the grace notes / after grace notes. This value has to be</span>
+<span class="sd">        smaller than 0.5 (so that the :class:`SimpleEvent` have a</span>
+<span class="sd">        duration &gt; 0 if it has both: grace notes and after grace notes)</span>
+<span class="sd">        and bigger than 0 (so that the grace notes or after grace notes</span>
+<span class="sd">        have a duration &gt; 0). Default to 0.12.</span>
+<span class="sd">    :type minima_grace_notes_duration_factor: float</span>
+<span class="sd">    :param maxima_grace_notes_duration_factor: Maxima percentage how much</span>
+<span class="sd">        of the initial duration of the :class:`~mutwo.core_events.SimpleEvent`</span>
+<span class="sd">        shall be moved to the grace notes / after grace notes. This value has to be</span>
+<span class="sd">        smaller than 0.5 (so that the :class:`SimpleEvent` have a</span>
+<span class="sd">        duration &gt; 0 if it has both: grace notes and after grace notes)</span>
+<span class="sd">        and bigger than 0 (so that the grace notes or after grace notes</span>
+<span class="sd">        have a duration &gt; 0). Default to 0.25.</span>
+<span class="sd">    :type maxima_grace_notes_duration_factor: float</span>
+<span class="sd">    :param minima_number_of_grace_notes: For how many events in the grace</span>
+<span class="sd">        note or after grace note container shall the</span>
+<span class="sd">        `minima_grace_notes_duration_factor` be applied. Default to 1.</span>
+<span class="sd">    :type minima_number_of_grace_notes: int</span>
+<span class="sd">    :param maxima_number_of_grace_notes: For how many events in the grace</span>
+<span class="sd">        note or after grace note container shall the</span>
+<span class="sd">        `maxima_number_of_grace_notes` be applied. Default to 4.</span>
+<span class="sd">    :type maxima_number_of_grace_notes: int</span>
+<span class="sd">    :param chronon_to_grace_note_consecution: Function which</span>
+<span class="sd">        receives as an input a :class:`~mutwo.core_events.SimpleEvent`</span>
+<span class="sd">        and returns a :class:`~mutwo.core_events.Consecution`.</span>
+<span class="sd">        By default the function will ask the event for a</span>
+<span class="sd">        :attr:`~mutwo.events.music.NoteLike.grace_note_consecution`</span>
+<span class="sd">        attribute, because by default `~mutwo.events.music.NoteLike`</span>
+<span class="sd">        objects are expected.</span>
+<span class="sd">    :type chronon_to_grace_note_consecution: typing.Callable[[core_events.SimpleEvent], core_events.Consecution[core_events.SimpleEvent]]</span>
+<span class="sd">    :param chronon_to_after_grace_note_consecution: Function which</span>
+<span class="sd">        receives as an input a :class:`~mutwo.core_events.SimpleEvent`</span>
+<span class="sd">        and returns a :class:`~mutwo.core_events.Consecution`.</span>
+<span class="sd">        By default the function will ask the event for a</span>
+<span class="sd">        :attr:`~mutwo.events.music.NoteLike.grace_note_consecution`</span>
+<span class="sd">        attribute, because by default `~mutwo.events.music.NoteLike`</span>
+<span class="sd">        objects are expected.</span>
+<span class="sd">    :type chronon_to_after_grace_note_consecution: typing.Callable[[core_events.SimpleEvent], core_events.Consecution[core_events.SimpleEvent]]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">minima_grace_notes_duration_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.12</span><span class="p">,</span>
+        <span class="n">maxima_grace_notes_duration_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.25</span><span class="p">,</span>
+        <span class="n">minima_number_of_grace_notes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">maxima_number_of_grace_notes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="n">chronon_to_grace_note_consecution</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">SimpleEventToGraceNoteConsecution</span><span class="p">(),</span>
+        <span class="n">chronon_to_after_grace_note_consecution</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">SimpleEventToAfterGraceNoteConsecution</span><span class="p">(),</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_test_input</span><span class="p">(</span>
+            <span class="n">minima_grace_notes_duration_factor</span><span class="p">,</span>
+            <span class="n">maxima_grace_notes_duration_factor</span><span class="p">,</span>
+            <span class="n">minima_number_of_grace_notes</span><span class="p">,</span>
+            <span class="n">maxima_number_of_grace_notes</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_grace_note_consecution</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">chronon_to_grace_note_consecution</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_after_grace_note_consecution</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">chronon_to_after_grace_note_consecution</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_grace_notes_to_grace_note_duration_factor_envelope</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">Envelope</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="p">(</span><span class="n">minima_number_of_grace_notes</span><span class="p">,</span> <span class="n">minima_grace_notes_duration_factor</span><span class="p">),</span>
+                    <span class="p">(</span><span class="n">maxima_number_of_grace_notes</span><span class="p">,</span> <span class="n">maxima_grace_notes_duration_factor</span><span class="p">),</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_test_input</span><span class="p">(</span>
+        <span class="n">minima_grace_notes_duration_factor</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">maxima_grace_notes_duration_factor</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">minima_number_of_grace_notes</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">maxima_number_of_grace_notes</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">minima_number_of_grace_notes</span> <span class="o">&lt;</span> <span class="n">maxima_number_of_grace_notes</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;&#39;minima_number_of_grace_notes&#39; has to be smaller &quot;</span>
+                <span class="s2">&quot;than &#39;maxima_number_of_grace_notes&#39;!&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="n">minima_grace_notes_duration_factor</span> <span class="o">&lt;</span> <span class="n">maxima_grace_notes_duration_factor</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;&#39;minima_grace_notes_duration_factor&#39; has to &quot;</span>
+                <span class="s2">&quot;be smaller than &#39;maxima_grace_notes_duration_factor&#39;!&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">maxima_grace_notes_duration_factor</span> <span class="o">&lt;</span> <span class="mf">0.5</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;&#39;maxima_grace_notes_duration_factor&#39; has &quot;</span> <span class="s2">&quot;to be smaller than 0.5!&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">minima_grace_notes_duration_factor</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;&#39;minima_grace_notes_duration_factor&#39; has &quot;</span> <span class="s2">&quot;to be bigger than 0!&quot;</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_grace_note_consecution</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">chronon_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_grace_note_consecution</span><span class="p">(</span>
+            <span class="n">chronon_to_convert</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_after_grace_note_consecution</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">chronon_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_after_grace_note_consecution</span><span class="p">(</span>
+            <span class="n">chronon_to_convert</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_convert_chronon</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">event_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">,</span>
+        <span class="n">_</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">DurationType</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Convert instance of :class:`mutwo.core_events.SimpleEvent`.&quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">adjust_grace_note_consecution</span><span class="p">(</span>
+            <span class="n">grace_note_consecution</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">[</span>
+                <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span>
+            <span class="p">],</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">grace_note_consecution</span><span class="p">:</span>
+                <span class="n">factor_to_main_event</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_n_grace_notes_to_grace_note_duration_factor_envelope</span><span class="o">.</span><span class="n">value_at</span><span class="p">(</span>
+                        <span class="nb">len</span><span class="p">(</span><span class="n">grace_note_consecution</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">new_duration</span> <span class="o">=</span> <span class="n">event_to_convert</span><span class="o">.</span><span class="n">duration</span> <span class="o">*</span> <span class="n">factor_to_main_event</span>
+                <span class="n">grace_note_consecution</span> <span class="o">=</span> <span class="n">grace_note_consecution</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">grace_note_consecution</span><span class="o">.</span><span class="n">duration</span> <span class="o">=</span> <span class="n">new_duration</span>
+            <span class="k">return</span> <span class="n">grace_note_consecution</span>
+
+        <span class="n">grace_note_consecution</span> <span class="o">=</span> <span class="n">adjust_grace_note_consecution</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_get_grace_note_consecution</span><span class="p">(</span><span class="n">event_to_convert</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">after_grace_note_consecution</span> <span class="o">=</span> <span class="n">adjust_grace_note_consecution</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_get_after_grace_note_consecution</span><span class="p">(</span><span class="n">event_to_convert</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">copied_event_to_convert</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">event_to_convert</span><span class="p">)</span>
+        <span class="c1"># Remove applied grace notes / after grace notes</span>
+        <span class="n">copied_event_to_convert</span><span class="o">.</span><span class="n">grace_note_consecution</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">([])</span>
+        <span class="p">)</span>
+        <span class="n">copied_event_to_convert</span><span class="o">.</span><span class="n">after_grace_note_consecution</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">([])</span>
+        <span class="p">)</span>
+        <span class="n">copied_event_to_convert</span><span class="o">.</span><span class="n">duration</span> <span class="o">-=</span> <span class="p">(</span>
+            <span class="n">grace_note_consecution</span><span class="o">.</span><span class="n">duration</span>
+            <span class="o">+</span> <span class="n">after_grace_note_consecution</span><span class="o">.</span><span class="n">duration</span>
+        <span class="p">)</span>
+
+        <span class="n">grace_note_consecution</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">copied_event_to_convert</span><span class="p">)</span>
+        <span class="n">grace_note_consecution</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">after_grace_note_consecution</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">grace_note_consecution</span>
+
+    <span class="k">def</span> <span class="nf">_convert_simultaneous_event</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">simultaneous_event</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Concurrence</span><span class="p">,</span>
+        <span class="n">absolute_entry_delay</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">DurationType</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">Concurrence</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;Convert instance of :class:`mutwo.core_events.Concurrence`.&quot;&quot;&quot;</span>
+
+        <span class="n">simultaneous_event_copied</span> <span class="o">=</span> <span class="n">simultaneous_event</span><span class="o">.</span><span class="n">empty_copy</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">simultaneous_event</span><span class="p">:</span>
+            <span class="n">converted_event</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_event</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">absolute_entry_delay</span><span class="p">)</span>
+            <span class="c1"># If we find a chronon, we shouldn&#39;t extend but append it to the</span>
+            <span class="c1"># the Concurrence. A converted chronon will be a</span>
+            <span class="c1"># Consecution. The grace notes and after grace notes should</span>
+            <span class="c1"># happen before and after the respective event. If we extend</span>
+            <span class="c1"># the whole Consecution to the Concurrence the</span>
+            <span class="c1"># grace notes and after grace notes will be played simultaneously</span>
+            <span class="c1"># with the main note, therefore we have to append them.</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">):</span>
+                <span class="n">simultaneous_event_copied</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">converted_event</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">simultaneous_event_copied</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">converted_event</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">simultaneous_event_copied</span><span class="p">,)</span>
+
+    <span class="k">def</span> <span class="nf">_convert_consecution</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">consecution</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">,</span>
+        <span class="n">absolute_entry_delay</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">DurationType</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">]]:</span>
+        <span class="n">consecution_copied</span> <span class="o">=</span> <span class="n">consecution</span><span class="o">.</span><span class="n">empty_copy</span><span class="p">()</span>
+        <span class="n">consecution_copied</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_convert_consecution</span><span class="p">(</span><span class="n">consecution</span><span class="p">,</span> <span class="n">absolute_entry_delay</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">consecution_copied</span><span class="p">,)</span>
+
+<div class="viewcode-block" id="GraceNotesConverter.convert"><a class="viewcode-back" href="../../../api/mutwo.music_converters.html#mutwo.music_converters.GraceNotesConverter.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Apply grace notes and after grace notes of all :class:`SimpleEvent`.</span>
+
+<span class="sd">        :param event_to_convert: The event which grace notes and after grace</span>
+<span class="sd">            notes shall be converted to normal events in the upper</span>
+<span class="sd">            :class:`Consecution`.</span>
+<span class="sd">        :type event_to_convert: core_events.abc.Event</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">converted_event</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_event</span><span class="p">(</span><span class="n">event_to_convert</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">event_to_convert</span><span class="p">,</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">converted_event</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">converted_event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.music_converters.grace_notes</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Levin Eric Zimmermann.
+    </div>
+  </body>
+</html>

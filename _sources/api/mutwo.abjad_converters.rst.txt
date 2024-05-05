@@ -1,0 +1,199 @@
+
+.. currentmodule:: mutwo.abjad_converters
+
+mutwo.abjad_converters
+======================
+
+.. contents:: Table of content
+   :depth: 3
+
+.. automodule:: mutwo.abjad_converters
+   :members:
+
+
+.. list-table::
+   :align: center
+   :width: 95%
+   :header-rows: 1
+
+   * - Object
+     - Documentation
+   * - :class:`mutwo.abjad_converters.ConsecutionToQuantizedAbjadContainer`
+     - Quantize :class:`~mutwo.core_events.Consecution` objects.
+   * - :class:`mutwo.abjad_converters.NauertConsecutionToQuantizedAbjadContainer`
+     - Quantize :class:`~mutwo.core_events.Consecution` objects via :mod:`abjadext.nauert`.
+   * - :class:`mutwo.abjad_converters.NauertConsecutionToDurationLineBasedQuantizedAbjadContainer`
+     - Quantize :class:`~mutwo.core_events.Consecution` objects via :mod:`abjadext.nauert`.
+   * - :class:`mutwo.abjad_converters.LeafMakerConsecutionToQuantizedAbjadContainer`
+     - Quantize :class:`~mutwo.core_events.Consecution` object via :mod:`abjad.LeafMaker`.
+   * - :class:`mutwo.abjad_converters.LeafMakerConsecutionToDurationLineBasedQuantizedAbjadContainer`
+     - Quantize :class:`~mutwo.core_events.Consecution` object via :mod:`abjad.LeafMaker`.
+   * - :class:`mutwo.abjad_converters.CompoundToAbjadContainer`
+     - 
+   * - :class:`mutwo.abjad_converters.ConsecutionToAbjadVoice`
+     - Convert :class:`~mutwo.core_events.Consecution` to :class:`abjad.Voice`.
+   * - :class:`mutwo.abjad_converters.NestedCompoundToAbjadContainer`
+     - 
+   * - :class:`mutwo.abjad_converters.NestedCompoundToCompoundToAbjadContainers`
+     - 
+   * - :class:`mutwo.abjad_converters.CycleBasedNestedCompoundToCompoundToAbjadContainers`
+     - 
+   * - :class:`mutwo.abjad_converters.TagBasedNestedCompoundToCompoundToAbjadContainers`
+     - 
+   * - :class:`mutwo.abjad_converters.MutwoLyricToAbjadString`
+     - 
+   * - :class:`mutwo.abjad_converters.MutwoPitchToAbjadPitch`
+     - Convert Mutwo Pitch objects to Abjad Pitch objects.
+   * - :class:`mutwo.abjad_converters.TempoToAbjadAttachmentTempo`
+     - Convert tempo envelope to :class:`~mutwo.abjad_parameters.Tempo`.
+   * - :class:`mutwo.abjad_converters.ComplexTempoToAbjadAttachmentTempo`
+     - Convert tempo to :class:`~mutwo.abjad_parameters.Tempo`.
+   * - :class:`mutwo.abjad_converters.MutwoVolumeToAbjadAttachmentDynamic`
+     - Convert Mutwo Volume objects to :class:`~mutwo.abjad_parameters.Dynamic`.
+   * - :class:`mutwo.abjad_converters.MutwoPitchToHEJIAbjadPitch`
+     - Convert :class:`~mutwo.music_parameters.JustIntonationPitch` to abjad pitches.
+   * - :class:`mutwo.abjad_converters.ProcessAbjadContainerRoutine`
+     - 
+   * - :class:`mutwo.abjad_converters.AddDurationLineEngraver`
+     - 
+   * - :class:`mutwo.abjad_converters.PrepareForDurationLineBasedNotation`
+     - 
+   * - :class:`mutwo.abjad_converters.AddInstrumentName`
+     - 
+   * - :class:`mutwo.abjad_converters.AddAccidentalStyle`
+     - 
+   * - :class:`mutwo.abjad_converters.SetStaffSize`
+     - 
+
+
+
+
+.. autoclass:: mutwo.abjad_converters.ConsecutionToQuantizedAbjadContainer
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.abjad_converters.NauertConsecutionToQuantizedAbjadContainer
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.abjad_converters.NauertConsecutionToDurationLineBasedQuantizedAbjadContainer
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.abjad_converters.LeafMakerConsecutionToQuantizedAbjadContainer
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.abjad_converters.LeafMakerConsecutionToDurationLineBasedQuantizedAbjadContainer
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.abjad_converters.CompoundToAbjadContainer
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.abjad_converters.ConsecutionToAbjadVoice
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.abjad_converters.NestedCompoundToAbjadContainer
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.abjad_converters.NestedCompoundToCompoundToAbjadContainers
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.abjad_converters.CycleBasedNestedCompoundToCompoundToAbjadContainers
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.abjad_converters.TagBasedNestedCompoundToCompoundToAbjadContainers
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.abjad_converters.MutwoLyricToAbjadString
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.abjad_converters.MutwoPitchToAbjadPitch
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.abjad_converters.TempoToAbjadAttachmentTempo
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.abjad_converters.ComplexTempoToAbjadAttachmentTempo
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.abjad_converters.MutwoVolumeToAbjadAttachmentDynamic
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.abjad_converters.MutwoPitchToHEJIAbjadPitch
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.abjad_converters.ProcessAbjadContainerRoutine
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.abjad_converters.AddDurationLineEngraver
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.abjad_converters.PrepareForDurationLineBasedNotation
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.abjad_converters.AddInstrumentName
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.abjad_converters.AddAccidentalStyle
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.abjad_converters.SetStaffSize
+
+        .. autoclasstoc::
+    
+
+
+mutwo.abjad_converters.configurations
+-------------------------------------
+
+.. automodule:: mutwo.abjad_converters.configurations
+   :members:
+
+
+mutwo.abjad_converters.constants
+--------------------------------
+
+.. automodule:: mutwo.abjad_converters.constants
+   :members:
+

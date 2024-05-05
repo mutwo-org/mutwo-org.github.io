@@ -1,0 +1,655 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mutwo.music_converters.playing_indicators &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.music_converters.playing_indicators</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mutwo.music_converters.playing_indicators</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Apply :class:`~mutwo.music_parameters.abc.PlayingIndicator` on :class:`~mutwo.core_events.abc.Event`.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">abc</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">quicktions</span> <span class="k">as</span> <span class="nn">fractions</span>  <span class="c1"># type: ignore</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">fractions</span>  <span class="c1"># type: ignore</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_constants</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_converters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_events</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_utilities</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_converters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_parameters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_utilities</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;PlayingIndicatorConverter&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ArpeggioConverter&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;StacattoConverter&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ArticulationConverter&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;TrillConverter&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;OptionalConverter&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;PlayingIndicatorsConverter&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="PlayingIndicatorConverter"><a class="viewcode-back" href="../../../api/mutwo.music_converters.html#mutwo.music_converters.PlayingIndicatorConverter">[docs]</a><span class="k">class</span> <span class="nc">PlayingIndicatorConverter</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Converter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Abstract base class to apply :class:`~mutwo.music_parameters.abc.PlayingIndicator` on a :class:`~mutwo.core_events.SimpleEvent`.</span>
+
+<span class="sd">    :param chronon_to_playing_indicator_collection: Function to extract from a</span>
+<span class="sd">        :class:`mutwo.core_events.SimpleEvent` a</span>
+<span class="sd">        :class:`mutwo.music_parameters.PlayingIndicatorCollection`</span>
+<span class="sd">        object. By default it asks the Event for its</span>
+<span class="sd">        :attr:`~mutwo.music_events.NoteLike.playing_indicator_collection`</span>
+<span class="sd">        attribute (because by default :class:`mutwo.music_events.NoteLike`</span>
+<span class="sd">        objects are expected).</span>
+<span class="sd">        When using different Event classes than :class:`~mutwo.music_events.NoteLike`</span>
+<span class="sd">        with a different name for their playing_indicator_collection property, this argument</span>
+<span class="sd">        should be overridden. If the</span>
+<span class="sd">        function call raises an :obj:`AttributeError` (e.g. if no playing indicator</span>
+<span class="sd">        collection can be extracted), mutwo will build a playing indicator collection</span>
+<span class="sd">        from :const:`~mutwo.music_events.configurations.DEFAULT_PLAYING_INDICATORS_COLLECTION_CLASS`.</span>
+<span class="sd">    :type chronon_to_playing_indicator_collection: typing.Callable[[core_events.SimpleEvent], music_parameters.PlayingIndicatorCollection], optional</span>
+
+<span class="sd">    To write a new PlayingIndicatorConverter the abstract method</span>
+<span class="sd">    :func:`_apply_playing_indicator` and the abstract properties</span>
+<span class="sd">    `playing_indicator_name` and `default_playing_indicator` have</span>
+<span class="sd">    to be overridden.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">chronon_to_playing_indicator_collection</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span>
+            <span class="n">music_parameters</span><span class="o">.</span><span class="n">PlayingIndicatorCollection</span><span class="p">,</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">SimpleEventToPlayingIndicatorCollection</span><span class="p">(),</span>  <span class="c1"># type: ignore</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_playing_indicator_collection</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">chronon_to_playing_indicator_collection</span>
+        <span class="p">)</span>
+
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">_apply_playing_indicator</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">chronon_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">,</span>
+        <span class="n">playing_indicator</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PlayingIndicator</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">]:</span>
+        <span class="o">...</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">playing_indicator_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="o">...</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">default_playing_indicator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PlayingIndicator</span><span class="p">:</span>
+        <span class="o">...</span>
+
+<div class="viewcode-block" id="PlayingIndicatorConverter.convert"><a class="viewcode-back" href="../../../api/mutwo.music_converters.html#mutwo.music_converters.PlayingIndicatorConverter.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">chronon_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Apply PlayingIndicator on chronon.</span>
+
+<span class="sd">        :param chronon_to_convert: The event which shall be converted.</span>
+<span class="sd">        :type chronon_to_convert: core_events.SimpleEvent</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">playing_indicator_collection</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_playing_indicator_collection</span><span class="p">(</span>
+                <span class="n">chronon_to_convert</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">playing_indicator</span> <span class="o">=</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">call_function_except_attribute_error</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">playing_indicator_collection</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span>
+                <span class="n">playing_indicator_collection</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">playing_indicator_name</span>
+            <span class="p">),</span>
+            <span class="n">playing_indicator_collection</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">default_playing_indicator</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">playing_indicator</span><span class="o">.</span><span class="n">is_active</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_playing_indicator</span><span class="p">(</span>
+                <span class="n">chronon_to_convert</span><span class="p">,</span> <span class="n">playing_indicator</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">([</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">chronon_to_convert</span><span class="p">)])</span></div></div>
+
+
+<div class="viewcode-block" id="ArpeggioConverter"><a class="viewcode-back" href="../../../api/mutwo.music_converters.html#mutwo.music_converters.ArpeggioConverter">[docs]</a><span class="k">class</span> <span class="nc">ArpeggioConverter</span><span class="p">(</span><span class="n">PlayingIndicatorConverter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Apply arpeggio on :class:`~mutwo.core_events.SimpleEvent`.</span>
+
+<span class="sd">    :param duration_for_each_attack: Set how long each attack of the</span>
+<span class="sd">        Arpeggio lasts. Default to 0.1.</span>
+<span class="sd">    :type duration_for_each_attack: constants.DurationType</span>
+<span class="sd">    :param chronon_to_pitch_list: Function to extract from a</span>
+<span class="sd">        :class:`mutwo.core_events.SimpleEvent` a tuple that contains pitch objects</span>
+<span class="sd">        (objects that inherit from :class:`mutwo.music_parameters.abc.Pitch`).</span>
+<span class="sd">        By default it asks the Event for its</span>
+<span class="sd">        :attr:`~mutwo.music_events.NoteLike.pitch_list` attribute</span>
+<span class="sd">        (because by default :class:`mutwo.music_events.NoteLike` objects are expected).</span>
+<span class="sd">        When using different Event classes than :class:`~mutwo.music_events.NoteLike`</span>
+<span class="sd">        with a different name for their pitch property, this argument</span>
+<span class="sd">        should be overridden.</span>
+<span class="sd">        If the function call raises an :obj:`AttributeError` (e.g. if no pitch can be</span>
+<span class="sd">        extracted), mutwo will assume an event without any pitches.</span>
+<span class="sd">    :type chronon_to_pitch_list: typing.Callable[[core_events.SimpleEvent], music_parameters.abc.Pitch], optional</span>
+<span class="sd">    :param chronon_to_playing_indicator_collection: Function to extract from a</span>
+<span class="sd">        :class:`mutwo.core_events.SimpleEvent` a</span>
+<span class="sd">        :class:`mutwo.music_parameters.PlayingIndicatorCollection`</span>
+<span class="sd">        object. By default it asks the Event for its</span>
+<span class="sd">        :attr:`~mutwo.music_events.NoteLike.playing_indicator_collection`</span>
+<span class="sd">        attribute (because by default :class:`mutwo.music_events.NoteLike`</span>
+<span class="sd">        objects are expected).</span>
+<span class="sd">        When using different Event classes than :class:`~mutwo.music_events.NoteLike`</span>
+<span class="sd">        with a different name for their playing_indicator_collection property, this argument</span>
+<span class="sd">        should be overridden. If the</span>
+<span class="sd">        function call raises an :obj:`AttributeError` (e.g. if no playing indicator</span>
+<span class="sd">        collection can be extracted), mutwo will build a playing indicator collection</span>
+<span class="sd">        from :const:`~mutwo.music_events.configurations.DEFAULT_PLAYING_INDICATORS_COLLECTION_CLASS`.</span>
+<span class="sd">    :type chronon_to_playing_indicator_collection: typing.Callable[[core_events.SimpleEvent], music_parameters.PlayingIndicatorCollection,], optional</span>
+<span class="sd">    :param set_pitch_list_for_chronon: Function which assigns</span>
+<span class="sd">        a list of :class:`~mutwo.music_parameters.abc.Pitch` objects to a</span>
+<span class="sd">        :class:`~mutwo.core_events.SimpleEvent`. By default the</span>
+<span class="sd">        function assigns the passed pitches to the</span>
+<span class="sd">        :attr:`~mutwo.music_events.NoteLike.pitch_list` attribute</span>
+<span class="sd">        (because by default :class:`mutwo.music_events.NoteLike` objects</span>
+<span class="sd">        are expected).</span>
+<span class="sd">    :type set_pitch_list_for_chronon: typing.Callable[[core_events.SimpleEvent, list[music_parameters.abc.Pitch]], None]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">duration_for_each_attack</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">DurationType</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+        <span class="n">chronon_to_pitch_list</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">]</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">SimpleEventToPitchList</span><span class="p">(),</span>
+        <span class="n">chronon_to_playing_indicator_collection</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span>
+            <span class="n">music_parameters</span><span class="o">.</span><span class="n">PlayingIndicatorCollection</span><span class="p">,</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">SimpleEventToPlayingIndicatorCollection</span><span class="p">(),</span>
+        <span class="n">set_pitch_list_for_chronon</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">]],</span> <span class="kc">None</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">chronon</span><span class="p">,</span> <span class="n">pitch_list</span><span class="p">:</span> <span class="n">chronon</span><span class="o">.</span><span class="n">set_parameter</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+            <span class="s2">&quot;pitch_list&quot;</span><span class="p">,</span> <span class="n">pitch_list</span><span class="p">,</span> <span class="n">set_unassigned_parameter</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">),</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">chronon_to_playing_indicator_collection</span><span class="o">=</span><span class="n">chronon_to_playing_indicator_collection</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_duration_for_each_attack</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">UNKNOWN_OBJECT_TO_DURATION</span><span class="p">(</span>
+                <span class="n">duration_for_each_attack</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_pitch_list</span> <span class="o">=</span> <span class="n">chronon_to_pitch_list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_pitch_list_for_chronon</span> <span class="o">=</span> <span class="n">set_pitch_list_for_chronon</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">playing_indicator_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;arpeggio&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">default_playing_indicator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PlayingIndicator</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">Arpeggio</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_apply_playing_indicator</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">chronon_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">,</span>
+        <span class="n">playing_indicator</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">Arpeggio</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">]:</span>
+        <span class="n">pitch_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_pitch_list</span><span class="p">(</span><span class="n">chronon_to_convert</span><span class="p">))</span>
+
+        <span class="c1"># sort pitches according to Arpeggio direction</span>
+        <span class="n">pitch_list</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="n">playing_indicator</span><span class="o">.</span><span class="n">direction</span> <span class="o">!=</span> <span class="s2">&quot;up&quot;</span><span class="p">)</span>
+
+        <span class="n">converted_event</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">[</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">chronon_to_convert</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">pitch_list</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="c1"># apply pitches on events</span>
+        <span class="k">for</span> <span class="n">event_index</span><span class="p">,</span> <span class="n">pitch</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pitch_list</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_pitch_list_for_chronon</span><span class="p">(</span><span class="n">converted_event</span><span class="p">[</span><span class="n">event_index</span><span class="p">],</span> <span class="p">[</span><span class="n">pitch</span><span class="p">])</span>
+
+        <span class="c1"># set correct duration for each event</span>
+        <span class="n">event_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">converted_event</span><span class="p">)</span>
+        <span class="n">duration_of_each_attack</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_duration_for_each_attack</span>
+        <span class="k">if</span> <span class="n">duration_of_each_attack</span> <span class="o">*</span> <span class="n">event_count</span> <span class="o">&gt;</span> <span class="n">chronon_to_convert</span><span class="o">.</span><span class="n">duration</span><span class="p">:</span>
+            <span class="n">duration_of_each_attack</span> <span class="o">=</span> <span class="n">chronon_to_convert</span><span class="o">.</span><span class="n">duration</span> <span class="o">/</span> <span class="n">event_count</span>
+
+        <span class="k">for</span> <span class="n">event_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">event_count</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">converted_event</span><span class="p">[</span><span class="n">event_index</span><span class="p">]</span><span class="o">.</span><span class="n">duration</span> <span class="o">=</span> <span class="n">duration_of_each_attack</span>
+
+        <span class="n">converted_event</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">duration</span> <span class="o">-=</span> <span class="p">(</span>
+            <span class="n">converted_event</span><span class="o">.</span><span class="n">duration</span> <span class="o">-</span> <span class="n">chronon_to_convert</span><span class="o">.</span><span class="n">duration</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">converted_event</span></div>
+
+
+<div class="viewcode-block" id="StacattoConverter"><a class="viewcode-back" href="../../../api/mutwo.music_converters.html#mutwo.music_converters.StacattoConverter">[docs]</a><span class="k">class</span> <span class="nc">StacattoConverter</span><span class="p">(</span><span class="n">PlayingIndicatorConverter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Apply staccato on :class:`~mutwo.core_events.SimpleEvent`.</span>
+
+<span class="sd">    :param factor:</span>
+<span class="sd">    :param allowed_articulation_name_sequence:</span>
+<span class="sd">    :param chronon_to_playing_indicator_collection: Function to extract from a</span>
+<span class="sd">        :class:`mutwo.core_events.SimpleEvent` a</span>
+<span class="sd">        :class:`mutwo.music_parameters.PlayingIndicatorCollection`</span>
+<span class="sd">        object. By default it asks the Event for its</span>
+<span class="sd">        :attr:`~mutwo.music_events.NoteLike.playing_indicator_collection`</span>
+<span class="sd">        attribute (because by default :class:`mutwo.music_events.NoteLike`</span>
+<span class="sd">        objects are expected).</span>
+<span class="sd">        When using different Event classes than :class:`~mutwo.music_events.NoteLike`</span>
+<span class="sd">        with a different name for their playing_indicator_collection property, this argument</span>
+<span class="sd">        should be overridden. If the</span>
+<span class="sd">        function call raises an :obj:`AttributeError` (e.g. if no playing indicator</span>
+<span class="sd">        collection can be extracted), mutwo will build a playing indicator collection</span>
+<span class="sd">        from :const:`~mutwo.music_events.configurations.DEFAULT_PLAYING_INDICATORS_COLLECTION_CLASS`.</span>
+<span class="sd">    :type chronon_to_playing_indicator_collection: typing.Callable[[core_events.SimpleEvent], music_parameters.PlayingIndicatorCollection,], optional</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">allowed_articulation_name_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;staccato&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">),</span>
+        <span class="n">chronon_to_playing_indicator_collection</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span>
+            <span class="n">music_parameters</span><span class="o">.</span><span class="n">PlayingIndicatorCollection</span><span class="p">,</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">SimpleEventToPlayingIndicatorCollection</span><span class="p">(),</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_allowed_articulation_name_sequence</span> <span class="o">=</span> <span class="n">allowed_articulation_name_sequence</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_factor</span> <span class="o">=</span> <span class="n">factor</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">chronon_to_playing_indicator_collection</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_apply_playing_indicator</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">chronon_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">,</span>
+        <span class="n">_</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PlayingIndicator</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">]:</span>
+        <span class="n">duration</span> <span class="o">=</span> <span class="n">chronon_to_convert</span><span class="o">.</span><span class="n">duration</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_factor</span>
+        <span class="n">consecution</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">chronon_to_convert</span><span class="o">.</span><span class="n">set_parameter</span><span class="p">(</span>
+                    <span class="s2">&quot;duration&quot;</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">mutate</span><span class="o">=</span><span class="kc">False</span>
+                <span class="p">),</span>
+                <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">(</span><span class="n">duration</span><span class="p">),</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">consecution</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">playing_indicator_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;articulation&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">default_playing_indicator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PlayingIndicator</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">Articulation</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="ArticulationConverter"><a class="viewcode-back" href="../../../api/mutwo.music_converters.html#mutwo.music_converters.ArticulationConverter">[docs]</a><span class="k">class</span> <span class="nc">ArticulationConverter</span><span class="p">(</span><span class="n">PlayingIndicatorConverter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Apply articulation on :class:`~mutwo.core_events.SimpleEvent`.</span>
+
+<span class="sd">    :param articulation_name_tuple_to_playing_indicator_converter:</span>
+<span class="sd">    :type articulation_name_tuple_to_playing_indicator_converter: dict[tuple[str, ...], PlayingIndicatorConverter]</span>
+<span class="sd">    :param chronon_to_playing_indicator_collection: Function to extract from a</span>
+<span class="sd">        :class:`mutwo.core_events.SimpleEvent` a</span>
+<span class="sd">        :class:`mutwo.music_parameters.PlayingIndicatorCollection`</span>
+<span class="sd">        object. By default it asks the Event for its</span>
+<span class="sd">        :attr:`~mutwo.music_events.NoteLike.playing_indicator_collection`</span>
+<span class="sd">        attribute (because by default :class:`mutwo.music_events.NoteLike`</span>
+<span class="sd">        objects are expected).</span>
+<span class="sd">        When using different Event classes than :class:`~mutwo.music_events.NoteLike`</span>
+<span class="sd">        with a different name for their playing_indicator_collection property, this argument</span>
+<span class="sd">        should be overridden. If the</span>
+<span class="sd">        function call raises an :obj:`AttributeError` (e.g. if no playing indicator</span>
+<span class="sd">        collection can be extracted), mutwo will build a playing indicator collection</span>
+<span class="sd">        from :const:`~mutwo.music_events.configurations.DEFAULT_PLAYING_INDICATORS_COLLECTION_CLASS`.</span>
+<span class="sd">    :type chronon_to_playing_indicator_collection: typing.Callable[[core_events.SimpleEvent], music_parameters.PlayingIndicatorCollection,], optional</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">articulation_name_tuple_to_playing_indicator_converter</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span>
+            <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">PlayingIndicatorConverter</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="p">{(</span><span class="s2">&quot;staccato&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">):</span> <span class="n">StacattoConverter</span><span class="p">()},</span>
+        <span class="n">chronon_to_playing_indicator_collection</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span>
+            <span class="n">music_parameters</span><span class="o">.</span><span class="n">PlayingIndicatorCollection</span><span class="p">,</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">SimpleEventToPlayingIndicatorCollection</span><span class="p">(),</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">get_cls_logger</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="n">articulation_name_to_playing_indicator_converter</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="p">(</span>
+            <span class="n">articulation_name_tuple</span><span class="p">,</span>
+            <span class="n">playing_indicator_converter</span><span class="p">,</span>
+        <span class="p">)</span> <span class="ow">in</span> <span class="n">articulation_name_tuple_to_playing_indicator_converter</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">articulation_name</span> <span class="ow">in</span> <span class="n">articulation_name_tuple</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">articulation_name</span>
+                    <span class="ow">not</span> <span class="ow">in</span> <span class="n">articulation_name_to_playing_indicator_converter</span>
+                <span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                        <span class="n">music_utilities</span><span class="o">.</span><span class="n">DuplicatePlayingIndicatorConverterMappingWarning</span><span class="p">(</span>
+                            <span class="n">articulation_name</span><span class="p">,</span> <span class="n">playing_indicator_converter</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="n">articulation_name_to_playing_indicator_converter</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                    <span class="p">{</span><span class="n">articulation_name</span><span class="p">:</span> <span class="n">playing_indicator_converter</span><span class="p">}</span>
+                <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_articulation_name_to_playing_indicator_converter</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">articulation_name_to_playing_indicator_converter</span>
+        <span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">chronon_to_playing_indicator_collection</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_apply_playing_indicator</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">chronon_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">,</span>
+        <span class="n">playing_indicator</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">Articulation</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">playing_indicator</span><span class="o">.</span><span class="n">name</span>
+            <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_articulation_name_to_playing_indicator_converter</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_articulation_name_to_playing_indicator_converter</span><span class="p">[</span>
+                <span class="n">playing_indicator</span><span class="o">.</span><span class="n">name</span>
+            <span class="p">]</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">chronon_to_convert</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">([</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">chronon_to_convert</span><span class="p">)])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">playing_indicator_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;articulation&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">default_playing_indicator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PlayingIndicator</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">Articulation</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="TrillConverter"><a class="viewcode-back" href="../../../api/mutwo.music_converters.html#mutwo.music_converters.TrillConverter">[docs]</a><span class="k">class</span> <span class="nc">TrillConverter</span><span class="p">(</span><span class="n">PlayingIndicatorConverter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Apply trill on :class:`~mutwo.core_events.SimpleEvent`.</span>
+
+<span class="sd">    :param trill_size:</span>
+<span class="sd">    :type trill_size: constants.DurationType</span>
+<span class="sd">    :param chronon_to_pitch_list: Function to extract from a</span>
+<span class="sd">        :class:`mutwo.core_events.SimpleEvent` a tuple that contains pitch objects</span>
+<span class="sd">        (objects that inherit from :class:`mutwo.music_parameters.abc.Pitch`).</span>
+<span class="sd">        By default it asks the Event for its</span>
+<span class="sd">        :attr:`~mutwo.music_events.NoteLike.pitch_list` attribute</span>
+<span class="sd">        (because by default :class:`mutwo.music_events.NoteLike` objects are expected).</span>
+<span class="sd">        When using different Event classes than :class:`~mutwo.music_events.NoteLike`</span>
+<span class="sd">        with a different name for their pitch property, this argument</span>
+<span class="sd">        should be overridden.</span>
+<span class="sd">        If the function call raises an :obj:`AttributeError` (e.g. if no pitch can be</span>
+<span class="sd">        extracted), mutwo will assume an event without any pitches.</span>
+<span class="sd">    :type chronon_to_pitch_list: typing.Callable[[core_events.SimpleEvent], music_parameters.abc.Pitch], optional</span>
+<span class="sd">    :param chronon_to_playing_indicator_collection: Function to extract from a</span>
+<span class="sd">        :class:`mutwo.core_events.SimpleEvent` a</span>
+<span class="sd">        :class:`mutwo.music_parameters.PlayingIndicatorCollection`</span>
+<span class="sd">        object. By default it asks the Event for its</span>
+<span class="sd">        :attr:`~mutwo.music_events.NoteLike.playing_indicator_collection`</span>
+<span class="sd">        attribute (because by default :class:`mutwo.music_events.NoteLike`</span>
+<span class="sd">        objects are expected).</span>
+<span class="sd">        When using different Event classes than :class:`~mutwo.music_events.NoteLike`</span>
+<span class="sd">        with a different name for their playing_indicator_collection property, this argument</span>
+<span class="sd">        should be overridden. If the</span>
+<span class="sd">        function call raises an :obj:`AttributeError` (e.g. if no playing indicator</span>
+<span class="sd">        collection can be extracted), mutwo will build a playing indicator collection</span>
+<span class="sd">        from :const:`~mutwo.music_events.configurations.DEFAULT_PLAYING_INDICATORS_COLLECTION_CLASS`.</span>
+<span class="sd">    :type chronon_to_playing_indicator_collection: typing.Callable[[core_events.SimpleEvent], music_parameters.PlayingIndicatorCollection,], optional</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">trill_size</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">DurationType</span> <span class="o">=</span> <span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">16</span><span class="p">),</span>
+        <span class="n">chronon_to_pitch_list</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">]</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">SimpleEventToPitchList</span><span class="p">(),</span>
+        <span class="n">chronon_to_playing_indicator_collection</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span>
+            <span class="n">music_parameters</span><span class="o">.</span><span class="n">PlayingIndicatorCollection</span><span class="p">,</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">SimpleEventToPlayingIndicatorCollection</span><span class="p">(),</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trill_size</span> <span class="o">=</span> <span class="n">trill_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_pitch_list</span> <span class="o">=</span> <span class="n">chronon_to_pitch_list</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">chronon_to_playing_indicator_collection</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_apply_trill</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">chronon_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">,</span>
+        <span class="n">trill</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">Trill</span><span class="p">,</span>
+        <span class="n">pitch_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">]:</span>
+        <span class="n">trill_item_count</span> <span class="o">=</span> <span class="n">chronon_to_convert</span><span class="o">.</span><span class="n">duration</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trill_size</span>
+        <span class="n">remaining</span> <span class="o">=</span> <span class="n">chronon_to_convert</span><span class="o">.</span><span class="n">duration</span> <span class="o">-</span> <span class="p">(</span>
+            <span class="n">trill_item_count</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trill_size</span>
+        <span class="p">)</span>
+        <span class="n">consecution</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">([])</span>
+        <span class="n">pitch_cycle</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">((</span><span class="n">pitch_list</span><span class="p">,</span> <span class="n">trill</span><span class="o">.</span><span class="n">pitch</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">trill_item_count</span><span class="p">)):</span>
+            <span class="n">chronon</span> <span class="o">=</span> <span class="n">chronon_to_convert</span><span class="o">.</span><span class="n">set_parameter</span><span class="p">(</span>
+                <span class="s2">&quot;duration&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trill_size</span><span class="p">,</span> <span class="n">mutate</span><span class="o">=</span><span class="kc">False</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">set_parameter</span><span class="p">(</span><span class="s2">&quot;pitch_list&quot;</span><span class="p">,</span> <span class="nb">next</span><span class="p">(</span><span class="n">pitch_cycle</span><span class="p">))</span>
+            <span class="n">consecution</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chronon</span><span class="p">)</span>
+        <span class="n">consecution</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">duration</span> <span class="o">+=</span> <span class="n">remaining</span>
+        <span class="k">return</span> <span class="n">consecution</span>
+
+    <span class="k">def</span> <span class="nf">_apply_playing_indicator</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">chronon_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">,</span>
+        <span class="n">playing_indicator</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">Trill</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">]:</span>
+        <span class="n">pitch_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_pitch_list</span><span class="p">(</span><span class="n">chronon_to_convert</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pitch_list</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_trill</span><span class="p">(</span>
+                <span class="n">chronon_to_convert</span><span class="p">,</span> <span class="n">playing_indicator</span><span class="p">,</span> <span class="n">pitch_list</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">([</span><span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">chronon_to_convert</span><span class="p">)])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">playing_indicator_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;trill&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">default_playing_indicator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PlayingIndicator</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">Trill</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="OptionalConverter"><a class="viewcode-back" href="../../../api/mutwo.music_converters.html#mutwo.music_converters.OptionalConverter">[docs]</a><span class="k">class</span> <span class="nc">OptionalConverter</span><span class="p">(</span><span class="n">PlayingIndicatorConverter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Apply optional on :class:`~mutwo.core_events.SimpleEvent`.</span>
+
+<span class="sd">    :param likelihood: A number between 0 - 1. 1 means that each optional</span>
+<span class="sd">        note is played, 0 means no optional note is played. Default to 0.5.</span>
+<span class="sd">    :type likelihood: float</span>
+<span class="sd">    :param random_seed: Set inner random process. Default to 100.</span>
+<span class="sd">    :type random_seed: int</span>
+<span class="sd">    :param make_rest: A function which takes the original :class:`~mutwo.core_events.SimpleEvent`</span>
+<span class="sd">        and returns a new `SimpleEvent` with the same duration which represents a rest.</span>
+<span class="sd">        By default, `mutwo` simply creates a `SimpleEvent` with the same duration.</span>
+<span class="sd">    :type make_rest: typing.Callable[[core_events.SimpleEvent], core_events.SimpleEvent]</span>
+<span class="sd">    :param chronon_to_playing_indicator_collection: Function to extract from a</span>
+<span class="sd">        :class:`mutwo.core_events.SimpleEvent` a</span>
+<span class="sd">        :class:`mutwo.music_parameters.PlayingIndicatorCollection`</span>
+<span class="sd">        object. By default it asks the Event for its</span>
+<span class="sd">        :attr:`~mutwo.music_events.NoteLike.playing_indicator_collection`</span>
+<span class="sd">        attribute (because by default :class:`mutwo.music_events.NoteLike`</span>
+<span class="sd">        objects are expected).</span>
+<span class="sd">        When using different Event classes than :class:`~mutwo.music_events.NoteLike`</span>
+<span class="sd">        with a different name for their playing_indicator_collection property, this argument</span>
+<span class="sd">        should be overridden. If the</span>
+<span class="sd">        function call raises an :obj:`AttributeError` (e.g. if no playing indicator</span>
+<span class="sd">        collection can be extracted), mutwo will build a playing indicator collection</span>
+<span class="sd">        from :const:`~mutwo.music_events.configurations.DEFAULT_PLAYING_INDICATORS_COLLECTION_CLASS`.</span>
+<span class="sd">    :type chronon_to_playing_indicator_collection: typing.Callable[[core_events.SimpleEvent], music_parameters.PlayingIndicatorCollection,], optional</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">likelihood</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">random_seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">make_rest</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">chronon</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">(</span><span class="n">chronon</span><span class="o">.</span><span class="n">duration</span><span class="p">),</span>
+        <span class="n">chronon_to_playing_indicator_collection</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span>
+            <span class="n">music_parameters</span><span class="o">.</span><span class="n">PlayingIndicatorCollection</span><span class="p">,</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">SimpleEventToPlayingIndicatorCollection</span><span class="p">(),</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_make_rest</span> <span class="o">=</span> <span class="n">make_rest</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_likelihood</span> <span class="o">=</span> <span class="n">likelihood</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_random</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">random_seed</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">chronon_to_playing_indicator_collection</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_apply_playing_indicator</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">chronon_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">,</span>
+        <span class="n">playing_indicator</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ExplicitPlayingIndicator</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">]:</span>
+        <span class="n">consecution</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">([])</span>
+        <span class="k">if</span> <span class="n">playing_indicator</span><span class="o">.</span><span class="n">is_active</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_likelihood</span><span class="p">:</span>
+            <span class="n">rest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_rest</span><span class="p">(</span><span class="n">chronon_to_convert</span><span class="p">)</span>
+            <span class="n">consecution</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rest</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">consecution</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chronon_to_convert</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">consecution</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">playing_indicator_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;optional&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">default_playing_indicator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PlayingIndicator</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ExplicitPlayingIndicator</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="PlayingIndicatorsConverter"><a class="viewcode-back" href="../../../api/mutwo.music_converters.html#mutwo.music_converters.PlayingIndicatorsConverter">[docs]</a><span class="k">class</span> <span class="nc">PlayingIndicatorsConverter</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">SymmetricalEventConverter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Apply :class:`mutwo.music_parameters.abc.PlayingIndicator` on any :class:`~mutwo.core_events.abc.Event`.</span>
+
+<span class="sd">    :param playing_indicator_converter_sequence: A sequence of :class:`PlayingIndicatorConverter` which shall</span>
+<span class="sd">        be applied on each :class:`~mutwo.core_events.SimpleEvent`.</span>
+<span class="sd">    :type playing_indicator_converter_sequence: typing.Sequence[PlayingIndicatorConverter]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">playing_indicator_converter_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span>
+            <span class="n">PlayingIndicatorConverter</span>
+        <span class="p">],</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_playing_indicator_converter_tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="n">playing_indicator_converter_sequence</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_convert_chronon</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">event_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">,</span>
+        <span class="n">_</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">DurationType</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Convert instance of :class:`mutwo.core_events.SimpleEvent`.&quot;&quot;&quot;</span>
+
+        <span class="n">converted_event</span> <span class="o">=</span> <span class="p">[</span><span class="n">event_to_convert</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">playing_indicator_converter</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_playing_indicator_converter_tuple</span><span class="p">:</span>
+            <span class="n">new_converted_event</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">chronon</span> <span class="ow">in</span> <span class="n">converted_event</span><span class="p">:</span>
+                <span class="n">converted_chronon</span> <span class="o">=</span> <span class="n">playing_indicator_converter</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span>
+                    <span class="n">chronon</span>
+                <span class="p">)</span>
+                <span class="n">new_converted_event</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">converted_chronon</span><span class="p">)</span>
+
+            <span class="n">converted_event</span> <span class="o">=</span> <span class="n">new_converted_event</span>
+
+        <span class="k">return</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">(</span><span class="n">converted_event</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PlayingIndicatorsConverter.convert"><a class="viewcode-back" href="../../../api/mutwo.music_converters.html#mutwo.music_converters.PlayingIndicatorsConverter.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">:</span>
+        <span class="n">converted_event</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_event</span><span class="p">(</span><span class="n">event_to_convert</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">converted_event</span></div></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.music_converters.playing_indicators</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Levin Eric Zimmermann.
+    </div>
+  </body>
+</html>

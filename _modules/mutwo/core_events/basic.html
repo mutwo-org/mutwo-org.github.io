@@ -1,0 +1,1314 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mutwo.core_events.basic &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.core_events.basic</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mutwo.core_events.basic</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Generic event classes which can be used in multiple contexts.</span>
+
+<span class="sd">The different events differ in their timing structure and whether they</span>
+<span class="sd">are nested or not:</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">bisect</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">import</span> <span class="nn">types</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="kn">import</span> <span class="nn">ranges</span>
+
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_constants</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_events</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_parameters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_utilities</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;SimpleEvent&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Consecution&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Concurrence&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;TaggedSimpleEvent&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;TaggedConsecution&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;TaggedConcurrence&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="SimpleEvent"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.SimpleEvent">[docs]</a><span class="k">class</span> <span class="nc">SimpleEvent</span><span class="p">(</span><span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Event-Object which doesn&#39;t contain other Event-Objects (the node or leaf).</span>
+
+<span class="sd">    :param duration: The duration of the ``SimpleEvent``. Mutwo will convert</span>
+<span class="sd">        the incoming object to a :class:`mutwo.core_parameters.abc.Duration` object</span>
+<span class="sd">        with the global `core_events.configurations.UNKNOWN_OBJECT_TO_DURATION`</span>
+<span class="sd">        callable.</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import core_events</span>
+<span class="sd">    &gt;&gt;&gt; chronon = core_events.SimpleEvent(2)</span>
+<span class="sd">    &gt;&gt;&gt; print(chronon)</span>
+<span class="sd">    SimpleEvent(duration = DirectDuration(duration = 2))</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">parameter_to_exclude_from_representation_tuple</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;tempo_envelope&quot;</span><span class="p">,)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">duration</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">,</span>
+        <span class="n">tempo_envelope</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">TempoEnvelope</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">tempo_envelope</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">duration</span> <span class="o">=</span> <span class="n">duration</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                           magic methods                                #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Test for checking if two objects are equal.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">parameter_to_compare_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([])</span>
+            <span class="k">for</span> <span class="n">object_</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">parameter_to_compare</span> <span class="ow">in</span> <span class="n">object_</span><span class="o">.</span><span class="n">_parameter_to_compare_tuple</span><span class="p">:</span>
+                    <span class="n">parameter_to_compare_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">parameter_to_compare</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">test_if_objects_are_equal_by_parameter_tuple</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">parameter_to_compare_set</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">attribute_iterator</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> = </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">attribute</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameter_to_print_tuple</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">(</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">attribute_iterator</span><span class="p">))</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                           private methods                              #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">_set_parameter</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parameter_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">object_or_function</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span><span class="p">],</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span>
+        <span class="p">]</span>
+        <span class="o">|</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span><span class="p">,</span>
+        <span class="n">set_unassigned_parameter</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">id_set</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SimpleEvent</span><span class="p">:</span>
+        <span class="n">old_parameter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="n">parameter_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">set_unassigned_parameter</span> <span class="ow">or</span> <span class="n">old_parameter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">object_or_function</span><span class="p">,</span> <span class="s2">&quot;__call__&quot;</span><span class="p">):</span>
+                <span class="n">new_parameter</span> <span class="o">=</span> <span class="n">object_or_function</span><span class="p">(</span><span class="n">old_parameter</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_parameter</span> <span class="o">=</span> <span class="n">object_or_function</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">,</span> <span class="n">new_parameter</span><span class="p">)</span>
+
+    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">_mutate_parameter</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parameter_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">function</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+        <span class="n">id_set</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SimpleEvent</span><span class="p">:</span>
+        <span class="n">parameter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="n">parameter_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">parameter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">function</span><span class="p">(</span><span class="n">parameter</span><span class="p">)</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                           properties                                   #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_parameter_to_print_tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Return tuple of attribute names which shall be printed for repr.&quot;&quot;&quot;</span>
+        <span class="c1"># Fix infinite circular loop (due to &#39;tempo_envelope&#39;)</span>
+        <span class="c1"># and avoid printing too verbose parameters.</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="nb">filter</span><span class="p">(</span>
+                <span class="k">lambda</span> <span class="n">attribute</span><span class="p">:</span> <span class="n">attribute</span>
+                <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameter_to_exclude_from_representation_tuple</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_parameter_to_compare_tuple</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_parameter_to_compare_tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Return tuple of attribute names which values define the :class:`SimpleEvent`.</span>
+
+<span class="sd">        The returned attribute names are used for equality check between two</span>
+<span class="sd">        :class:`SimpleEvent` objects.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="n">attribute</span>
+            <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="c1"># We have to use &#39;and&#39; (lazy evaluation) instead of</span>
+            <span class="c1">#      &#39;all&#39;, to avoid redundant checks!</span>
+            <span class="c1">#</span>
+            <span class="c1"># no private attributes</span>
+            <span class="k">if</span> <span class="n">attribute</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;_&quot;</span>
+            <span class="c1"># no redundant comparisons</span>
+            <span class="ow">and</span> <span class="n">attribute</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;parameter_to_exclude_from_representation_tuple&quot;</span><span class="p">,)</span>
+            <span class="c1"># no methods</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="p">),</span> <span class="n">types</span><span class="o">.</span><span class="n">MethodType</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">duration</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_duration</span>
+
+    <span class="nd">@duration</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">duration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">duration</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_duration</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">UNKNOWN_OBJECT_TO_DURATION</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                           public methods                               #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+<div class="viewcode-block" id="SimpleEvent.destructive_copy"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.SimpleEvent.destructive_copy">[docs]</a>    <span class="k">def</span> <span class="nf">destructive_copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SimpleEvent</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SimpleEvent.get_parameter"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.SimpleEvent.get_parameter">[docs]</a>    <span class="k">def</span> <span class="nf">get_parameter</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">flat</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">filter_undefined</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
+
+    <span class="c1"># Update docstring</span>
+<div class="viewcode-block" id="SimpleEvent.set_parameter"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.SimpleEvent.set_parameter">[docs]</a>    <span class="k">def</span> <span class="nf">set_parameter</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SimpleEvent</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Sets event parameter to new value.</span>
+
+<span class="sd">        :param parameter_name: The name of the parameter which values shall be changed.</span>
+<span class="sd">        :param object_or_function: For setting the parameter either a new value can be</span>
+<span class="sd">            passed directly or a function can be passed. The function gets as an</span>
+<span class="sd">            argument the previous value that has had been assigned to the respective</span>
+<span class="sd">            object and has to return a new value that will be assigned to the object.</span>
+<span class="sd">        :param set_unassigned_parameter: If set to ``False`` a new parameter will only</span>
+<span class="sd">            be assigned to an Event if the Event already has a attribute with the</span>
+<span class="sd">            respective `parameter_name`. If the Event doesn&#39;t know the attribute yet</span>
+<span class="sd">            and `set_unassigned_parameter` is False, the method call will simply be</span>
+<span class="sd">            ignored.</span>
+<span class="sd">        :param mutate: If ``False`` the function will return a copy of the given object.</span>
+<span class="sd">            If set to ``True`` the object itself will be changed and the function will</span>
+<span class="sd">            return the changed object. Default to ``True``.</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo import core_events</span>
+<span class="sd">        &gt;&gt;&gt; chronon = core_events.SimpleEvent(2)</span>
+<span class="sd">        &gt;&gt;&gt; chronon.set_parameter(</span>
+<span class="sd">        ...     &#39;duration&#39;, lambda old_duration: old_duration * 2</span>
+<span class="sd">        ... )</span>
+<span class="sd">        SimpleEvent(duration = DirectDuration(duration = 4))</span>
+<span class="sd">        &gt;&gt;&gt; chronon.duration</span>
+<span class="sd">        DirectDuration(4)</span>
+<span class="sd">        &gt;&gt;&gt; chronon.set_parameter(&#39;duration&#39;, 3)</span>
+<span class="sd">        SimpleEvent(duration = DirectDuration(duration = 3))</span>
+<span class="sd">        &gt;&gt;&gt; chronon.duration</span>
+<span class="sd">        DirectDuration(3)</span>
+<span class="sd">        &gt;&gt;&gt; chronon.set_parameter(</span>
+<span class="sd">        ...     &#39;unknown_parameter&#39;, 10, set_unassigned_parameter=False</span>
+<span class="sd">        ... )  # this will be ignored</span>
+<span class="sd">        SimpleEvent(duration = DirectDuration(duration = 3))</span>
+<span class="sd">        &gt;&gt;&gt; chronon.unknown_parameter</span>
+<span class="sd">        Traceback (most recent call last):</span>
+<span class="sd">          File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;</span>
+<span class="sd">        AttributeError: &#39;SimpleEvent&#39; object has no attribute &#39;unknown_parameter&#39;</span>
+<span class="sd">        &gt;&gt;&gt; chronon.set_parameter(</span>
+<span class="sd">        ...     &#39;unknown_parameter&#39;, 10, set_unassigned_parameter=True</span>
+<span class="sd">        ... )  # this will be written</span>
+<span class="sd">        SimpleEvent(duration = DirectDuration(duration = 3), unknown_parameter = 10)</span>
+<span class="sd">        &gt;&gt;&gt; chronon.unknown_parameter</span>
+<span class="sd">        10</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">set_parameter</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SimpleEvent.metrize"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.SimpleEvent.metrize">[docs]</a>    <span class="k">def</span> <span class="nf">metrize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mutate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SimpleEvent</span><span class="p">:</span>
+        <span class="n">metrized_event</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_to_metrized_event</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mutate</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">duration</span> <span class="o">=</span> <span class="n">metrized_event</span><span class="o">.</span><span class="n">duration</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tempo_envelope</span> <span class="o">=</span> <span class="n">metrized_event</span><span class="o">.</span><span class="n">tempo_envelope</span>
+            <span class="k">return</span> <span class="bp">self</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">metrized_event</span></div>
+
+<div class="viewcode-block" id="SimpleEvent.cut_out"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.SimpleEvent.cut_out">[docs]</a>    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">cut_out</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">start</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">,</span>
+        <span class="n">end</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SimpleEvent</span><span class="p">:</span>
+        <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">UNKNOWN_OBJECT_TO_DURATION</span><span class="p">(</span><span class="n">unknown_object</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">unknown_object</span> <span class="ow">in</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_valid_absolute_time</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_correct_start_and_end_values</span><span class="p">(</span>
+            <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">condition</span><span class="o">=</span><span class="k">lambda</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="n">start</span> <span class="o">&lt;</span> <span class="n">end</span>
+        <span class="p">)</span>
+
+        <span class="n">duration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">duration</span>
+
+        <span class="n">difference_to_duration</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">DirectDuration</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">core_parameters</span><span class="o">.</span><span class="n">DirectDuration</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">start</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">difference_to_duration</span> <span class="o">+=</span> <span class="n">start</span>
+        <span class="k">if</span> <span class="n">end</span> <span class="o">&lt;</span> <span class="n">duration</span><span class="p">:</span>
+            <span class="n">difference_to_duration</span> <span class="o">+=</span> <span class="n">duration</span> <span class="o">-</span> <span class="n">end</span>
+
+        <span class="k">if</span> <span class="n">difference_to_duration</span> <span class="o">&gt;=</span> <span class="n">duration</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">InvalidCutOutStartAndEndValuesError</span><span class="p">(</span>
+                <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">duration</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">duration</span> <span class="o">-=</span> <span class="n">difference_to_duration</span></div>
+
+<div class="viewcode-block" id="SimpleEvent.cut_off"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.SimpleEvent.cut_off">[docs]</a>    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">cut_off</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">start</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">,</span>
+        <span class="n">end</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SimpleEvent</span><span class="p">:</span>
+        <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">UNKNOWN_OBJECT_TO_DURATION</span><span class="p">(</span><span class="n">unknown_object</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">unknown_object</span> <span class="ow">in</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_valid_absolute_time</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_correct_start_and_end_values</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+
+        <span class="n">duration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">duration</span>
+        <span class="k">if</span> <span class="n">start</span> <span class="o">&lt;</span> <span class="n">duration</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">end</span> <span class="o">&gt;</span> <span class="n">duration</span><span class="p">:</span>
+                <span class="n">end</span> <span class="o">=</span> <span class="n">duration</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">duration</span> <span class="o">-=</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span></div></div>
+
+
+<span class="n">T</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Consecution"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.Consecution">[docs]</a><span class="k">class</span> <span class="nc">Consecution</span><span class="p">(</span><span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ComplexEvent</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Generic</span><span class="p">[</span><span class="n">T</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;Event-Object which contains other Events which happen in a linear order.&quot;&quot;&quot;</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                           magic methods                                #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Consecution</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">e</span><span class="o">.</span><span class="n">_concatenate_tempo_envelope</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+        <span class="n">e</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">e</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                    private static methods                              #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_index_at_from_absolute_time_tuple</span><span class="p">(</span>
+        <span class="n">absolute_time</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">absolute_time_tuple</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">duration</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">absolute_time</span> <span class="o">&lt;</span> <span class="n">duration</span> <span class="ow">and</span> <span class="n">absolute_time</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">bisect</span><span class="o">.</span><span class="n">bisect_right</span><span class="p">(</span><span class="n">absolute_time_tuple</span><span class="p">,</span> <span class="n">absolute_time</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                        private  methods                                #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="c1"># We need to have a private &quot;_cut_off&quot; method to simplify</span>
+    <span class="c1"># overriding the public &quot;cut_off&quot; method in children classes</span>
+    <span class="c1"># of Consecution. This is necessary, because the implementation</span>
+    <span class="c1"># of &quot;squash_in&quot; makes use of &quot;_cut_off&quot;. In this way it is possible</span>
+    <span class="c1"># to adjust the meaning of the public &quot;cut_off&quot; method, without</span>
+    <span class="c1"># having to change the meaning of &quot;squash_in&quot; (this happens for instance</span>
+    <span class="c1"># in the mutwo.core_events.Envelope class).</span>
+    <span class="k">def</span> <span class="nf">_cut_off</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">start</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">,</span>
+        <span class="n">end</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">,</span>
+        <span class="n">cut_off_duration</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Consecution</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">cut_off_duration</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cut_off_duration</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span>
+
+        <span class="c1"># Collect core_events which are only active within the</span>
+        <span class="c1"># cut_off - range</span>
+        <span class="n">event_to_delete_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">absolute_time_tuple</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">absolute_time_tuple</span>
+        <span class="k">for</span> <span class="n">event_index</span><span class="p">,</span> <span class="n">event_start</span><span class="p">,</span> <span class="n">event_end</span><span class="p">,</span> <span class="n">event</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+            <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)),</span>
+            <span class="n">absolute_time_tuple</span><span class="p">,</span>
+            <span class="n">absolute_time_tuple</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="p">(</span><span class="kc">None</span><span class="p">,),</span>
+            <span class="bp">self</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="n">event_end</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">event_end</span> <span class="o">=</span> <span class="n">event_start</span> <span class="o">+</span> <span class="n">event</span><span class="o">.</span><span class="n">duration</span>
+
+            <span class="k">if</span> <span class="n">event_start</span> <span class="o">&gt;=</span> <span class="n">start</span> <span class="ow">and</span> <span class="n">event_end</span> <span class="o">&lt;=</span> <span class="n">end</span><span class="p">:</span>
+                <span class="n">event_to_delete_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event_index</span><span class="p">)</span>
+
+            <span class="c1"># Shorten event which are partly active within the</span>
+            <span class="c1"># cut_off - range</span>
+            <span class="k">elif</span> <span class="n">event_start</span> <span class="o">&lt;=</span> <span class="n">start</span> <span class="ow">and</span> <span class="n">event_end</span> <span class="o">&gt;=</span> <span class="n">start</span><span class="p">:</span>
+                <span class="n">difference_to_event_start</span> <span class="o">=</span> <span class="n">start</span> <span class="o">-</span> <span class="n">event_start</span>
+                <span class="n">event</span><span class="o">.</span><span class="n">cut_off</span><span class="p">(</span>
+                    <span class="n">difference_to_event_start</span><span class="p">,</span>
+                    <span class="n">difference_to_event_start</span> <span class="o">+</span> <span class="n">cut_off_duration</span><span class="p">,</span>
+                <span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">event_start</span> <span class="o">&lt;</span> <span class="n">end</span> <span class="ow">and</span> <span class="n">event_end</span> <span class="o">&gt;</span> <span class="n">end</span><span class="p">:</span>
+                <span class="n">difference_to_event_start</span> <span class="o">=</span> <span class="n">event_start</span> <span class="o">-</span> <span class="n">start</span>
+                <span class="n">event</span><span class="o">.</span><span class="n">cut_off</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">cut_off_duration</span> <span class="o">-</span> <span class="n">difference_to_event_start</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">event_to_delete_list</span><span class="p">):</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">_split_child_at</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">absolute_time</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+        <span class="n">absolute_time_in_floats_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+        <span class="n">duration_in_floats</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="n">absolute_time</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">UNKNOWN_OBJECT_TO_DURATION</span><span class="p">(</span>
+            <span class="n">absolute_time</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_valid_absolute_time</span><span class="p">(</span><span class="n">absolute_time</span><span class="p">)</span>
+        <span class="n">absolute_time_in_floats</span> <span class="o">=</span> <span class="n">absolute_time</span><span class="o">.</span><span class="n">duration_in_floats</span>
+
+        <span class="n">event_index</span> <span class="o">=</span> <span class="n">Consecution</span><span class="o">.</span><span class="n">_get_index_at_from_absolute_time_tuple</span><span class="p">(</span>
+            <span class="n">absolute_time_in_floats</span><span class="p">,</span> <span class="n">absolute_time_in_floats_tuple</span><span class="p">,</span> <span class="n">duration_in_floats</span>
+        <span class="p">)</span>
+
+        <span class="c1"># If there is no event at the requested time, raise error</span>
+        <span class="k">if</span> <span class="n">event_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">SplitUnavailableChildError</span><span class="p">(</span><span class="n">absolute_time</span><span class="p">)</span>
+
+        <span class="c1"># Only try to split child event at the requested time if there isn&#39;t</span>
+        <span class="c1"># a segregation already anyway</span>
+        <span class="k">elif</span> <span class="n">absolute_time_in_floats</span> <span class="o">!=</span> <span class="n">absolute_time_in_floats_tuple</span><span class="p">[</span><span class="n">event_index</span><span class="p">]:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">end</span> <span class="o">=</span> <span class="n">absolute_time_in_floats_tuple</span><span class="p">[</span><span class="n">event_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                <span class="n">end</span> <span class="o">=</span> <span class="n">duration_in_floats</span>
+
+            <span class="n">difference</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span> <span class="n">absolute_time_in_floats</span>
+            <span class="n">split_event</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">event_index</span><span class="p">]</span><span class="o">.</span><span class="n">split_at</span><span class="p">(</span><span class="n">difference</span><span class="p">)</span>
+            <span class="n">split_event_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">split_event</span><span class="p">)</span>
+            <span class="k">match</span> <span class="n">split_event_count</span><span class="p">:</span>
+                <span class="k">case</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">pass</span>
+                <span class="k">case</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="p">[</span><span class="n">event_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">split_event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">event_index</span><span class="p">,</span> <span class="n">split_event</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="k">case</span> <span class="k">_</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Unexpected event count!&quot;</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">event_index</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">event_index</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                        private   properties                            #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_absolute_time_tuple_and_duration</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Return start time for each event and the end time of the last event.</span>
+
+<span class="sd">        This property helps to improve performance of various functions</span>
+<span class="sd">        which uses duration and absolute_time_tuple attribute.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">duration_iterator</span> <span class="o">=</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">duration</span> <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">absolute_time_tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="n">core_utilities</span><span class="o">.</span><span class="n">accumulate_from_n</span><span class="p">(</span>
+                <span class="n">duration_iterator</span><span class="p">,</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">DirectDuration</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">absolute_time_tuple</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">absolute_time_tuple</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_absolute_time_in_floats_tuple_and_duration</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Return start time for each event and the end time of the last event.</span>
+
+<span class="sd">        This property helps to improve performance of various functions</span>
+<span class="sd">        which uses duration and absolute_time_tuple attribute.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">duration_iterator</span> <span class="o">=</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">duration</span><span class="o">.</span><span class="n">duration_in_floats</span> <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">absolute_time_tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="c1"># We need to round each duration again after accumulation,</span>
+            <span class="c1"># because floats were summed which could lead to</span>
+            <span class="c1"># potential floating point errors again, which will</span>
+            <span class="c1"># lead to bad errors later (for instance in</span>
+            <span class="c1"># core_utilities.scale).</span>
+            <span class="nb">map</span><span class="p">(</span>
+                <span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">round_floats</span><span class="p">(</span>
+                    <span class="n">d</span><span class="p">,</span>
+                    <span class="n">core_parameters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">ROUND_DURATION_TO_N_DIGITS</span><span class="p">,</span>
+                <span class="p">),</span>
+                <span class="n">core_utilities</span><span class="o">.</span><span class="n">accumulate_from_n</span><span class="p">(</span><span class="n">duration_iterator</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">absolute_time_tuple</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">absolute_time_tuple</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                           properties                                   #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="nd">@core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ComplexEvent</span><span class="o">.</span><span class="n">duration</span><span class="o">.</span><span class="n">getter</span>
+    <span class="k">def</span> <span class="nf">duration</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">functools</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">add</span><span class="p">,</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">duration</span> <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">))</span>
+        <span class="c1"># If Consecution is empty</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">DirectDuration</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">absolute_time_tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Return start time as :class:`core_parameters.abc.Duration` for each event.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_absolute_time_tuple_and_duration</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">absolute_time_in_floats_tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Return start time as `float` for each event.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_absolute_time_in_floats_tuple_and_duration</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">start_and_end_time_per_event</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">ranges</span><span class="o">.</span><span class="n">Range</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Return start and end time for each event.&quot;&quot;&quot;</span>
+
+        <span class="n">duration_iterator</span> <span class="o">=</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">duration</span> <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">absolute_time_tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="n">core_utilities</span><span class="o">.</span><span class="n">accumulate_from_n</span><span class="p">(</span>
+                <span class="n">duration_iterator</span><span class="p">,</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">DirectDuration</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="n">ranges</span><span class="o">.</span><span class="n">Range</span><span class="p">(</span><span class="o">*</span><span class="n">start_and_end_time</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">start_and_end_time</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">absolute_time_tuple</span><span class="p">,</span> <span class="n">absolute_time_tuple</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+        <span class="p">)</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                           public methods                               #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+<div class="viewcode-block" id="Consecution.get_event_index_at"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.Consecution.get_event_index_at">[docs]</a>    <span class="k">def</span> <span class="nf">get_event_index_at</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">absolute_time</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Get index of event which is active at the passed absolute_time.</span>
+
+<span class="sd">        :param absolute_time: The absolute time where the method shall search</span>
+<span class="sd">            for the active event.</span>
+<span class="sd">        :type absolute_time: core_parameters.abc.Duration | typing.Any</span>
+<span class="sd">        :return: Index of event if there is any event at the requested absolute time</span>
+<span class="sd">            and ``None`` if there isn&#39;t any event.</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo import core_events</span>
+<span class="sd">        &gt;&gt;&gt; consecution = core_events.Consecution([core_events.SimpleEvent(2), core_events.SimpleEvent(3)])</span>
+<span class="sd">        &gt;&gt;&gt; consecution.get_event_index_at(1)</span>
+<span class="sd">        0</span>
+<span class="sd">        &gt;&gt;&gt; consecution.get_event_index_at(3)</span>
+<span class="sd">        1</span>
+<span class="sd">        &gt;&gt;&gt; consecution.get_event_index_at(100)</span>
+
+<span class="sd">        **Warning:**</span>
+
+<span class="sd">        This method ignores events with duration == 0.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">absolute_time_in_floats</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">UNKNOWN_OBJECT_TO_DURATION</span><span class="p">(</span>
+            <span class="n">absolute_time</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">duration_in_floats</span>
+        <span class="p">(</span>
+            <span class="n">absolute_time_in_floats_tuple</span><span class="p">,</span>
+            <span class="n">duration_in_floats</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_absolute_time_in_floats_tuple_and_duration</span>
+        <span class="k">return</span> <span class="n">Consecution</span><span class="o">.</span><span class="n">_get_index_at_from_absolute_time_tuple</span><span class="p">(</span>
+            <span class="n">absolute_time_in_floats</span><span class="p">,</span> <span class="n">absolute_time_in_floats_tuple</span><span class="p">,</span> <span class="n">duration_in_floats</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Consecution.get_event_at"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.Consecution.get_event_at">[docs]</a>    <span class="k">def</span> <span class="nf">get_event_at</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">absolute_time</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Get event which is active at the passed absolute_time.</span>
+
+<span class="sd">        :param absolute_time: The absolute time where the method shall search</span>
+<span class="sd">            for the active event.</span>
+<span class="sd">        :type absolute_time: core_parameters.abc.Duration | typing.Any</span>
+<span class="sd">        :return: Event if there is any event at the requested absolute time</span>
+<span class="sd">            and ``None`` if there isn&#39;t any event.</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo import core_events</span>
+<span class="sd">        &gt;&gt;&gt; consecution = core_events.Consecution([core_events.SimpleEvent(2), core_events.SimpleEvent(3)])</span>
+<span class="sd">        &gt;&gt;&gt; consecution.get_event_at(1)</span>
+<span class="sd">        SimpleEvent(duration = DirectDuration(duration = 2))</span>
+<span class="sd">        &gt;&gt;&gt; consecution.get_event_at(3)</span>
+<span class="sd">        SimpleEvent(duration = DirectDuration(duration = 3))</span>
+<span class="sd">        &gt;&gt;&gt; consecution.get_event_at(100)</span>
+
+<span class="sd">        **Warning:**</span>
+
+<span class="sd">        This method ignores events with duration == 0.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">event_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_event_index_at</span><span class="p">(</span><span class="n">absolute_time</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">event_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">event_index</span><span class="p">]</span>  <span class="c1"># type: ignore</span></div>
+
+<div class="viewcode-block" id="Consecution.cut_out"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.Consecution.cut_out">[docs]</a>    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">cut_out</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">start</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">DurationType</span><span class="p">,</span>
+        <span class="n">end</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">DurationType</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Consecution</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
+        <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">UNKNOWN_OBJECT_TO_DURATION</span><span class="p">(</span><span class="n">unknown_object</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">unknown_object</span> <span class="ow">in</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_valid_absolute_time</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_correct_start_and_end_values</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+
+        <span class="n">event_to_remove_index_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">event_index</span><span class="p">,</span> <span class="n">event_start</span><span class="p">,</span> <span class="n">event</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+            <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)),</span> <span class="bp">self</span><span class="o">.</span><span class="n">absolute_time_tuple</span><span class="p">,</span> <span class="bp">self</span>
+        <span class="p">):</span>
+            <span class="n">event_duration</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">duration</span>
+            <span class="n">event_end</span> <span class="o">=</span> <span class="n">event_start</span> <span class="o">+</span> <span class="n">event_duration</span>
+
+            <span class="n">cut_out_start</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">DirectDuration</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">core_parameters</span><span class="o">.</span><span class="n">DirectDuration</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">cut_out_end</span> <span class="o">=</span> <span class="n">event_duration</span>
+
+            <span class="k">if</span> <span class="n">event_start</span> <span class="o">&lt;</span> <span class="n">start</span><span class="p">:</span>
+                <span class="n">cut_out_start</span> <span class="o">+=</span> <span class="n">start</span> <span class="o">-</span> <span class="n">event_start</span>
+
+            <span class="k">if</span> <span class="n">event_end</span> <span class="o">&gt;</span> <span class="n">end</span><span class="p">:</span>
+                <span class="n">cut_out_end</span> <span class="o">-=</span> <span class="n">event_end</span> <span class="o">-</span> <span class="n">end</span>
+
+            <span class="k">if</span> <span class="n">cut_out_start</span> <span class="o">&lt;</span> <span class="n">cut_out_end</span><span class="p">:</span>
+                <span class="n">event</span><span class="o">.</span><span class="n">cut_out</span><span class="p">(</span><span class="n">cut_out_start</span><span class="p">,</span> <span class="n">cut_out_end</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="p">(</span>
+                <span class="c1"># Support special case of events with duration = 0.</span>
+                <span class="n">event</span><span class="o">.</span><span class="n">duration</span> <span class="o">==</span> <span class="mi">0</span>
+                <span class="ow">and</span> <span class="n">event_start</span> <span class="o">&gt;=</span> <span class="n">start</span>
+                <span class="ow">and</span> <span class="n">event_start</span> <span class="o">&lt;=</span> <span class="n">end</span>
+            <span class="p">):</span>
+                <span class="n">event_to_remove_index_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event_index</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">event_to_remove_index</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">event_to_remove_index_list</span><span class="p">):</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="p">[</span><span class="n">event_to_remove_index</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Consecution.cut_off"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.Consecution.cut_off">[docs]</a>    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">cut_off</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">start</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">DurationType</span><span class="p">,</span>
+        <span class="n">end</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">DurationType</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Consecution</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
+        <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">UNKNOWN_OBJECT_TO_DURATION</span><span class="p">(</span><span class="n">unknown_object</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">unknown_object</span> <span class="ow">in</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_valid_absolute_time</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+
+        <span class="n">cut_off_duration</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span>
+
+        <span class="c1"># Avoid unnecessary iterations</span>
+        <span class="k">if</span> <span class="n">cut_off_duration</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cut_off</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">cut_off_duration</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Consecution.squash_in"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.Consecution.squash_in">[docs]</a>    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">squash_in</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">start</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+        <span class="n">event_to_squash_in</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Consecution</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">UNKNOWN_OBJECT_TO_DURATION</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_valid_absolute_time</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+        <span class="n">start_in_floats</span> <span class="o">=</span> <span class="n">start</span><span class="o">.</span><span class="n">duration_in_floats</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_start_in_range</span><span class="p">(</span><span class="n">start_in_floats</span><span class="p">)</span>
+
+        <span class="c1"># Only run cut_off if necessary -&gt; Improve performance</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">event_to_squash_in_duration</span> <span class="o">:=</span> <span class="n">event_to_squash_in</span><span class="o">.</span><span class="n">duration</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">cut_off_end</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="n">event_to_squash_in_duration</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cut_off</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">cut_off_end</span><span class="p">,</span> <span class="n">event_to_squash_in_duration</span><span class="p">)</span>
+
+        <span class="c1"># We already know that the given start is within the</span>
+        <span class="c1"># range of the event. This means that if the start</span>
+        <span class="c1"># is bigger than the duration, it is only due to a</span>
+        <span class="c1"># floating point rounding error. To avoid odd bugs</span>
+        <span class="c1"># we therefore have to define the bigger-equal</span>
+        <span class="c1"># relationship.</span>
+        <span class="p">(</span>
+            <span class="n">absolute_time_in_floats_tuple</span><span class="p">,</span>
+            <span class="n">duration_in_floats</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_absolute_time_in_floats_tuple_and_duration</span>
+        <span class="k">if</span> <span class="n">start_in_floats</span> <span class="o">&gt;=</span> <span class="n">duration_in_floats</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event_to_squash_in</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">insert_index</span> <span class="o">=</span> <span class="n">absolute_time_in_floats_tuple</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+            <span class="c1"># There is an event on the given point which need to be</span>
+            <span class="c1"># split.</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="n">active_event_index</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">Consecution</span><span class="o">.</span><span class="n">_get_index_at_from_absolute_time_tuple</span><span class="p">(</span>
+                        <span class="n">start_in_floats</span><span class="p">,</span>
+                        <span class="n">absolute_time_in_floats_tuple</span><span class="p">,</span>
+                        <span class="n">duration_in_floats</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">split_position</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">start_in_floats</span> <span class="o">-</span> <span class="n">absolute_time_in_floats_tuple</span><span class="p">[</span><span class="n">active_event_index</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">split_position</span> <span class="o">&gt;</span> <span class="mi">0</span>
+                    <span class="ow">and</span> <span class="n">split_position</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="p">[</span><span class="n">active_event_index</span><span class="p">]</span><span class="o">.</span><span class="n">duration</span>
+                <span class="p">):</span>
+                    <span class="n">split_active_event</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">active_event_index</span><span class="p">]</span><span class="o">.</span><span class="n">split_at</span><span class="p">(</span>
+                        <span class="n">split_position</span>
+                    <span class="p">)</span>
+                    <span class="bp">self</span><span class="p">[</span><span class="n">active_event_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">split_active_event</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">active_event_index</span><span class="p">,</span> <span class="n">split_active_event</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">active_event_index</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                <span class="n">insert_index</span> <span class="o">=</span> <span class="n">active_event_index</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">insert_index</span><span class="p">,</span> <span class="n">event_to_squash_in</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Consecution.slide_in"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.Consecution.slide_in">[docs]</a>    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">slide_in</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">start</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">,</span>
+        <span class="n">event_to_slide_in</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Consecution</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">UNKNOWN_OBJECT_TO_DURATION</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_valid_absolute_time</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+        <span class="n">start_in_floats</span> <span class="o">=</span> <span class="n">start</span><span class="o">.</span><span class="n">duration_in_floats</span>
+        <span class="k">if</span> <span class="n">start_in_floats</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">event_to_slide_in</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_start_in_range</span><span class="p">(</span><span class="n">start_in_floats</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">[:],</span> <span class="n">b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">split_at</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>  <span class="c1"># Only one event =&gt; start == duration.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event_to_slide_in</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">event_to_slide_in</span><span class="p">]</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Consecution.split_child_at"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.Consecution.split_child_at">[docs]</a>    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">split_child_at</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">absolute_time</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Consecution</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
+        <span class="p">(</span>
+            <span class="n">absolute_time_in_floats_tuple</span><span class="p">,</span>
+            <span class="n">duration_in_floats</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_absolute_time_in_floats_tuple_and_duration</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_child_at</span><span class="p">(</span>
+            <span class="n">absolute_time</span><span class="p">,</span> <span class="n">absolute_time_in_floats_tuple</span><span class="p">,</span> <span class="n">duration_in_floats</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Consecution.split_at"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.Consecution.split_at">[docs]</a>    <span class="k">def</span> <span class="nf">split_at</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">absolute_time</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">,</span>
+        <span class="n">ignore_invalid_split_point</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Consecution</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">absolute_time</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">NoSplitTimeError</span><span class="p">()</span>
+
+        <span class="p">(</span>
+            <span class="n">absolute_time_in_floats_tuple</span><span class="p">,</span>
+            <span class="n">duration_in_floats</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_absolute_time_in_floats_tuple_and_duration</span>
+
+        <span class="n">absolute_time_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">absolute_time_in_floats_tuple</span><span class="p">)</span>
+
+        <span class="c1"># NOTE: maybe we can add a &#39;mutate=False&#39; keyword in case</span>
+        <span class="c1"># someone doesn&#39;t care about keeping the old event and wants</span>
+        <span class="c1"># to save some seconds of expensive copy-operation?</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="n">index_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">is_first</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">absolute_time</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">is_first</span><span class="p">:</span>  <span class="c1"># First is smallest, check if t &lt; 0</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_assert_valid_absolute_time</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+                <span class="n">is_first</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="c1"># Improve performance: don&#39;t try to split if we know it is</span>
+            <span class="c1"># already split here. We also need to be sure to not</span>
+            <span class="c1"># add any duplicates to &#39;absolute_time_list&#39;, so we need</span>
+            <span class="c1"># to check anyway.</span>
+            <span class="k">if</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">absolute_time_list</span><span class="p">:</span>
+                <span class="n">index_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">absolute_time_list</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+                <span class="k">continue</span>
+            <span class="c1"># It&#39;s okay to ignore, this is still within the given event</span>
+            <span class="c1"># (if we don&#39;t continue &#39;split_child_at&#39; raises an error).</span>
+            <span class="k">if</span> <span class="n">t</span> <span class="o">==</span> <span class="n">duration_in_floats</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">_split_child_at</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">absolute_time_list</span><span class="p">),</span> <span class="n">duration_in_floats</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">SplitUnavailableChildError</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">ignore_invalid_split_point</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">SplitError</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+                <span class="c1"># We can stop, because if there isn&#39;t any child at this time</span>
+                <span class="c1"># there won&#39;t be any child at a later time (remember: our</span>
+                <span class="c1"># absolute times are sorted).</span>
+                <span class="k">break</span>
+            <span class="n">index_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">absolute_time_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+            <span class="n">absolute_time_list</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+        <span class="c1"># Add frame indices (if not already present)</span>
+        <span class="k">if</span> <span class="mi">0</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">index_list</span><span class="p">:</span>
+            <span class="n">index_list</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">event_count</span> <span class="o">:=</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="p">))</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">index_list</span><span class="p">:</span>
+            <span class="n">index_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event_count</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="n">i0</span><span class="p">:</span><span class="n">i1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i0</span><span class="p">,</span> <span class="n">i1</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">index_list</span><span class="p">,</span> <span class="n">index_list</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span></div>
+
+<div class="viewcode-block" id="Consecution.extend_until"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.Consecution.extend_until">[docs]</a>    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">extend_until</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">duration</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">,</span>
+        <span class="n">duration_to_white_space</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+            <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">],</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">]</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">prolong_chronon</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Consecution</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
+        <span class="n">duration</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">UNKNOWN_OBJECT_TO_DURATION</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span>
+        <span class="n">duration_to_white_space</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">duration_to_white_space</span>
+            <span class="ow">or</span> <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_DURATION_TO_WHITE_SPACE</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">difference</span> <span class="o">:=</span> <span class="n">duration</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">duration</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">duration_to_white_space</span><span class="p">(</span><span class="n">difference</span><span class="p">))</span></div></div>
+
+
+<div class="viewcode-block" id="Concurrence"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.Concurrence">[docs]</a><span class="k">class</span> <span class="nc">Concurrence</span><span class="p">(</span><span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ComplexEvent</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Generic</span><span class="p">[</span><span class="n">T</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;Event-Object which contains other Event-Objects which happen at the same time.&quot;&quot;&quot;</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                       private static methods                           #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_extend_ancestor</span><span class="p">(</span><span class="n">ancestor</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ancestor</span><span class="o">.</span><span class="n">_concatenate_tempo_envelope</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+        <span class="c1"># We can&#39;t concatenate to a chronon.</span>
+        <span class="c1"># We also can&#39;t concatenate to anything else.</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">ConcatenationError</span><span class="p">(</span><span class="n">ancestor</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+        <span class="k">match</span> <span class="n">ancestor</span><span class="p">:</span>
+            <span class="k">case</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">():</span>
+                <span class="n">ancestor</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+            <span class="k">case</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Concurrence</span><span class="p">():</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">ancestor</span><span class="o">.</span><span class="n">concatenate_by_tag</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">NoTagError</span><span class="p">:</span>
+                    <span class="n">ancestor</span><span class="o">.</span><span class="n">concatenate_by_index</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+            <span class="c1"># This should already fail above, but if this strange object</span>
+            <span class="c1"># somehow owned &#39;_concatenate_tempo_envelope&#39;, it should</span>
+            <span class="c1"># fail here.</span>
+            <span class="k">case</span> <span class="k">_</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">ConcatenationError</span><span class="p">(</span><span class="n">ancestor</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                           private methods                              #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="k">def</span> <span class="nf">_make_event_slice_tuple</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">absolute_time_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">],</span>
+        <span class="n">slice_tuple_to_event</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span>
+        <span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Split at given times and cast split events into new events.&quot;&quot;&quot;</span>
+
+        <span class="c1"># Slice all child events</span>
+        <span class="n">slices</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">slices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="nb">list</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">split_at</span><span class="p">(</span><span class="o">*</span><span class="n">absolute_time_list</span><span class="p">,</span> <span class="n">ignore_invalid_split_point</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Ensure all slices have the same amount of entries,</span>
+        <span class="c1"># because we use &#39;zip&#39; later and if one of them is</span>
+        <span class="c1"># shorter we loose some parts of our event.</span>
+        <span class="k">if</span> <span class="n">slices</span><span class="p">:</span>
+            <span class="n">slices_count_tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">slices</span><span class="p">)</span>
+            <span class="n">max_slice_count</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">slices_count_tuple</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">slices</span><span class="p">,</span> <span class="n">slices_count_tuple</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">delta</span> <span class="o">:=</span> <span class="n">max_slice_count</span> <span class="o">-</span> <span class="n">c</span><span class="p">:</span>
+                    <span class="n">s</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">delta</span><span class="p">)</span>
+
+        <span class="c1"># Finally, build new sequence from event slices</span>
+        <span class="n">event_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">slice_tuple</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">slices</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">slice_tuple</span> <span class="o">:=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="n">slice_tuple</span><span class="p">)):</span>
+                <span class="n">e</span> <span class="o">=</span> <span class="n">slice_tuple_to_event</span><span class="p">(</span><span class="n">slice_tuple</span><span class="p">)</span>
+                <span class="n">event_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">event_list</span><span class="p">)</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                           properties                                   #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="nd">@core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ComplexEvent</span><span class="o">.</span><span class="n">duration</span><span class="o">.</span><span class="n">getter</span>
+    <span class="k">def</span> <span class="nf">duration</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">DurationType</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">duration</span> <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="c1"># If Concurrence is empty</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">DirectDuration</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                           public methods                               #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+<div class="viewcode-block" id="Concurrence.cut_out"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.Concurrence.cut_out">[docs]</a>    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">cut_out</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">start</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+        <span class="n">end</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Concurrence</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
+        <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">UNKNOWN_OBJECT_TO_DURATION</span><span class="p">(</span><span class="n">unknown_object</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">unknown_object</span> <span class="ow">in</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_valid_absolute_time</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_correct_start_and_end_values</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+        <span class="p">[</span><span class="n">event</span><span class="o">.</span><span class="n">cut_out</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span> <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Concurrence.cut_off"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.Concurrence.cut_off">[docs]</a>    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">cut_off</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">start</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">DurationType</span><span class="p">,</span>
+        <span class="n">end</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">DurationType</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Concurrence</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
+        <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">UNKNOWN_OBJECT_TO_DURATION</span><span class="p">(</span><span class="n">unknown_object</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">unknown_object</span> <span class="ow">in</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_valid_absolute_time</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_correct_start_and_end_values</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+        <span class="p">[</span><span class="n">event</span><span class="o">.</span><span class="n">cut_off</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span> <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Concurrence.squash_in"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.Concurrence.squash_in">[docs]</a>    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">squash_in</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">start</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+        <span class="n">event_to_squash_in</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Concurrence</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">UNKNOWN_OBJECT_TO_DURATION</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_valid_absolute_time</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_start_in_range</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">event</span><span class="o">.</span><span class="n">squash_in</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">event_to_squash_in</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+            <span class="c1"># Simple events don&#39;t have a &#39;squash_in&#39; method.</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">ImpossibleToSquashInError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event_to_squash_in</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Concurrence.slide_in"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.Concurrence.slide_in">[docs]</a>    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">slide_in</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">start</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">,</span>
+        <span class="n">event_to_slide_in</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Concurrence</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">UNKNOWN_OBJECT_TO_DURATION</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_valid_absolute_time</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_start_in_range</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">event</span><span class="o">.</span><span class="n">slide_in</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">event_to_slide_in</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+            <span class="c1"># Simple events don&#39;t have a &#39;slide_in&#39; method.</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">ImpossibleToSlideInError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event_to_slide_in</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Concurrence.split_child_at"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.Concurrence.split_child_at">[docs]</a>    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">split_child_at</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">absolute_time</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">DurationType</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Concurrence</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">event_index</span><span class="p">,</span> <span class="n">event</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">event</span><span class="o">.</span><span class="n">split_child_at</span><span class="p">(</span><span class="n">absolute_time</span><span class="p">)</span>
+            <span class="c1"># chronons don&#39;t have a &#39;split_child_at&#39; method</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="n">split_event</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">split_at</span><span class="p">(</span><span class="n">absolute_time</span><span class="p">)</span>
+                <span class="bp">self</span><span class="p">[</span><span class="n">event_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">Consecution</span><span class="p">(</span><span class="n">split_event</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Concurrence.extend_until"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.Concurrence.extend_until">[docs]</a>    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">extend_until</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">duration</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">duration_to_white_space</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+            <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">],</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">]</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">prolong_chronon</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Concurrence</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
+        <span class="n">duration</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">duration</span>
+            <span class="k">if</span> <span class="n">duration</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">UNKNOWN_OBJECT_TO_DURATION</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">duration_to_white_space</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">duration_to_white_space</span>
+            <span class="ow">or</span> <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_DURATION_TO_WHITE_SPACE</span>
+        <span class="p">)</span>
+        <span class="c1"># We only append chronons to consecutions, because there</span>
+        <span class="c1"># are many problems with the Concurrence[SimpleEvent] construct</span>
+        <span class="c1"># (&#39;extend_until&#39; and &#39;squash_in&#39; will fail on such a container).</span>
+        <span class="c1"># Therefore calling &#39;extend_until&#39; on an empty Concurrence is</span>
+        <span class="c1"># in fact ineffective: The user would get a Concurrence which</span>
+        <span class="c1"># still has duration = 0, which is absolutely unexpected. Therefore</span>
+        <span class="c1"># we raise an error, to avoid confusion by the user.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">IneffectiveExtendUntilError</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">event</span><span class="o">.</span><span class="n">extend_until</span><span class="p">(</span>
+                    <span class="n">duration</span><span class="p">,</span> <span class="n">duration_to_white_space</span><span class="p">,</span> <span class="n">prolong_chronon</span>
+                <span class="p">)</span>
+            <span class="c1"># SimpleEvent</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">prolong_chronon</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">difference</span> <span class="o">:=</span> <span class="n">duration</span> <span class="o">-</span> <span class="n">event</span><span class="o">.</span><span class="n">duration</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">event</span><span class="o">.</span><span class="n">duration</span> <span class="o">+=</span> <span class="n">difference</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">ImpossibleToExtendUntilError</span><span class="p">(</span><span class="n">event</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Concurrence.concatenate_by_index"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.Concurrence.concatenate_by_index">[docs]</a>    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">concatenate_by_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Concurrence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Concurrence</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Concatenate with other :class:`~mutwo.core_events.Concurrence` along their indices.</span>
+
+<span class="sd">        :param other: The other `Concurrence` with which to concatenate.</span>
+<span class="sd">            The other `Concurrence` can contain more or less events.</span>
+<span class="sd">        :type other: Concurrence</span>
+<span class="sd">        :param mutate: If ``False`` the function will return a copy of the given object.</span>
+<span class="sd">            If set to ``True`` the object itself will be changed and the function will</span>
+<span class="sd">            return the changed object. Default to ``True``.</span>
+<span class="sd">        :type mutate: bool</span>
+<span class="sd">        :raises core_utilities.ConcatenationError: If there are any :class:`SimpleEvent`</span>
+<span class="sd">            inside a :class:`Concurrence`.</span>
+
+<span class="sd">        **Hint:**</span>
+
+<span class="sd">        Similarly to Pythons ``list.extend`` the concatenation simply appends</span>
+<span class="sd">        the children of the other event to the sequence without copying them.</span>
+<span class="sd">        This means when changing the children in the new event, it also changes</span>
+<span class="sd">        the child event in the original sequence. If you want to avoid this,</span>
+<span class="sd">        call ``event.copy()`` before concatenating it to the host event.</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo import core_events</span>
+<span class="sd">        &gt;&gt;&gt; s = core_events.Concurrence(</span>
+<span class="sd">        ...     [core_events.Consecution([core_events.SimpleEvent(1)])]</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &gt;&gt;&gt; s.concatenate_by_index(s)</span>
+<span class="sd">        Concurrence([Consecution([SimpleEvent(duration = DirectDuration(duration = 1)), SimpleEvent(duration = DirectDuration(duration = 1))])])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">self_duration</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">duration</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">extend_until</span><span class="p">(</span><span class="n">self_duration</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">event</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">other</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">ancestor</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">self_duration</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c1"># Shallow copy before &#39;slide_in&#39;: We use the same</span>
+                    <span class="c1"># events, but we don&#39;t want to change the other sequence.</span>
+                    <span class="n">event_new</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">empty_copy</span><span class="p">()</span>
+                    <span class="n">event_new</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">event</span><span class="p">[:])</span>
+                    <span class="n">event</span> <span class="o">=</span> <span class="n">event_new</span><span class="o">.</span><span class="n">slide_in</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">(</span><span class="n">self_duration</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_extend_ancestor</span><span class="p">(</span><span class="n">ancestor</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Concurrence.concatenate_by_tag"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.Concurrence.concatenate_by_tag">[docs]</a>    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">concatenate_by_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Concurrence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Concurrence</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Concatenate with other :class:`~mutwo.core_events.Concurrence` along their tags.</span>
+
+<span class="sd">        :param other: The other `Concurrence` with which to concatenate.</span>
+<span class="sd">            The other `Concurrence` can contain more or less events.</span>
+<span class="sd">        :type other: Concurrence</span>
+<span class="sd">        :param mutate: If ``False`` the function will return a copy of the given object.</span>
+<span class="sd">            If set to ``True`` the object itself will be changed and the function will</span>
+<span class="sd">            return the changed object. Default to ``True``.</span>
+<span class="sd">        :type mutate: bool</span>
+<span class="sd">        :return: Concatenated event.</span>
+<span class="sd">        :raises core_utilities.NoTagError: If any child event doesn&#39;t have a &#39;tag&#39;</span>
+<span class="sd">            attribute.</span>
+<span class="sd">        :raises core_utilities.ConcatenationError: If there are any :class:`SimpleEvent`</span>
+<span class="sd">            inside a :class:`Concurrence`.</span>
+
+<span class="sd">        **Hint:**</span>
+
+<span class="sd">        Similarly to Pythons ``list.extend`` the concatenation simply appends</span>
+<span class="sd">        the children of the other event to the sequence without copying them.</span>
+<span class="sd">        This means when changing the children in the new event, it also changes</span>
+<span class="sd">        the child event in the original sequence. If you want to avoid this,</span>
+<span class="sd">        call ``event.copy()`` before concatenating it to the host event.</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo import core_events</span>
+<span class="sd">        &gt;&gt;&gt; s = core_events.Concurrence(</span>
+<span class="sd">        ...      [core_events.TaggedConsecution([core_events.SimpleEvent(1)], tag=&quot;test&quot;)]</span>
+<span class="sd">        ...  )</span>
+<span class="sd">        &gt;&gt;&gt; s.concatenate_by_tag(s)</span>
+<span class="sd">        Concurrence([TaggedConsecution([SimpleEvent(duration = DirectDuration(duration = 1)), SimpleEvent(duration = DirectDuration(duration = 1))])])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">self_duration</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">duration</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">extend_until</span><span class="p">(</span><span class="n">self_duration</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">tagged_event</span> <span class="ow">in</span> <span class="n">other</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">tagged_event</span><span class="p">,</span> <span class="s2">&quot;tag&quot;</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">NoTagError</span><span class="p">(</span><span class="n">tagged_event</span><span class="p">)</span>
+            <span class="n">tag</span> <span class="o">=</span> <span class="n">tagged_event</span><span class="o">.</span><span class="n">tag</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">ancestor</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">self_duration</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c1"># Shallow copy before &#39;slide_in&#39;: We use the same</span>
+                    <span class="c1"># events, but we don&#39;t want to change the other sequence.</span>
+                    <span class="n">event_new</span> <span class="o">=</span> <span class="n">tagged_event</span><span class="o">.</span><span class="n">empty_copy</span><span class="p">()</span>
+                    <span class="n">event_new</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">tagged_event</span><span class="p">[:])</span>
+                    <span class="n">tagged_event</span> <span class="o">=</span> <span class="n">event_new</span><span class="o">.</span><span class="n">slide_in</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">(</span><span class="n">self_duration</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tagged_event</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_extend_ancestor</span><span class="p">(</span><span class="n">ancestor</span><span class="p">,</span> <span class="n">tagged_event</span><span class="p">)</span></div>
+
+    <span class="c1"># NOTE: &#39;sequentalize&#39; is very generic, it works for all type of child</span>
+    <span class="c1"># event structure. This is good, but in it&#39;s current form it&#39;s mostly</span>
+    <span class="c1"># only useful with rather long and complex user defined &#39;slice_tuple_to_event&#39;</span>
+    <span class="c1"># definitions. For instance when sequentializing</span>
+    <span class="c1"># Concurrence[Consecution[SimpleEvent]] the returned event will be</span>
+    <span class="c1"># Consecution[Concurrence[Consecution[SimpleEvent]]]. Here the</span>
+    <span class="c1"># inner consecutions are always pointless, since they will always only</span>
+    <span class="c1"># contain one chronon.</span>
+<div class="viewcode-block" id="Concurrence.sequentialize"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.Concurrence.sequentialize">[docs]</a>    <span class="k">def</span> <span class="nf">sequentialize</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">slice_tuple_to_event</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+            <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+                <span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span>
+            <span class="p">]</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Convert parallel structure to a sequential structure.</span>
+
+<span class="sd">        :param slice_tuple_to_event: In order to sequentialize the event</span>
+<span class="sd">            `mutwo` splits each child event into small &#39;event slices&#39;. These</span>
+<span class="sd">            &#39;event slices&#39; are simply events created by the `split_at` method.</span>
+<span class="sd">            Each of those parallel slice groups need to be bound together to</span>
+<span class="sd">            one new event. These new events are sequentially ordered to result</span>
+<span class="sd">            in a new sequential structure. The simplest and default way to</span>
+<span class="sd">            archive this is by simply putting all event parts into a new</span>
+<span class="sd">            :class:`Concurrence`, so the resulting :class:`Consecution`</span>
+<span class="sd">            will be a sequence of `Concurrence`. This parameter is</span>
+<span class="sd">            available so that users can convert her/his parallel structure in</span>
+<span class="sd">            meaningful ways (for instance to imitate the ``.chordify``</span>
+<span class="sd">            `method from music21 &lt;https://web.mit.edu/music21/doc/usersGuide/usersGuide_09_chordify.html&gt;`</span>
+<span class="sd">            which transforms polyphonic music to a chord structure).</span>
+<span class="sd">            If ``None`` `slice_tuple_to_event` is set to</span>
+<span class="sd">            :class:`Concurrence`. Default to ``None``.</span>
+<span class="sd">        :type slice_tuple_to_event: typing.Optional[typing.Callable[[tuple[core_parameters.abc.Event, ...]], core_parameters.abc.Event]]</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo import core_events</span>
+<span class="sd">        &gt;&gt;&gt; e = core_events.Concurrence(</span>
+<span class="sd">        ...     [</span>
+<span class="sd">        ...         core_events.Consecution(</span>
+<span class="sd">        ...             [core_events.SimpleEvent(2), core_events.SimpleEvent(1)]</span>
+<span class="sd">        ...         ),</span>
+<span class="sd">        ...         core_events.Consecution(</span>
+<span class="sd">        ...             [core_events.SimpleEvent(3)]</span>
+<span class="sd">        ...         ),</span>
+<span class="sd">        ...     ]</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &gt;&gt;&gt; e.sequentialize()</span>
+<span class="sd">        Consecution([Concurrence([Consecution([SimpleEvent(duration = DirectDuration(duration = 2))]), Consecution([SimpleEvent(duration = DirectDuration(duration = 2))])]), Concurrence([Consecution([SimpleEvent(duration = DirectDuration(duration = 1))]), Consecution([SimpleEvent(duration = DirectDuration(duration = 1))])])])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">slice_tuple_to_event</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">slice_tuple_to_event</span> <span class="o">=</span> <span class="n">Concurrence</span>
+
+        <span class="c1"># Find all start/end times</span>
+        <span class="n">absolute_time_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([])</span>
+        <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>  <span class="c1"># Consecution</span>
+                <span class="p">(</span>
+                    <span class="n">absolute_time_tuple</span><span class="p">,</span>
+                    <span class="n">duration</span><span class="p">,</span>
+                <span class="p">)</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">_absolute_time_in_floats_tuple_and_duration</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>  <span class="c1"># SimpleEvent or Concurrence</span>
+                <span class="n">absolute_time_tuple</span><span class="p">,</span> <span class="n">duration</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,),</span> <span class="n">e</span><span class="o">.</span><span class="n">duration</span><span class="o">.</span><span class="n">duration_in_floats</span>
+            <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">absolute_time_tuple</span> <span class="o">+</span> <span class="p">(</span><span class="n">duration</span><span class="p">,):</span>
+                <span class="n">absolute_time_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+
+        <span class="c1"># Sort, but also remove the last entry: we don&#39;t need</span>
+        <span class="c1"># to split at complete duration, because after duration</span>
+        <span class="c1"># there isn&#39;t any event left in any child.</span>
+        <span class="n">absolute_time_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">absolute_time_set</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_make_event_slice_tuple</span><span class="p">(</span><span class="n">absolute_time_list</span><span class="p">,</span> <span class="n">slice_tuple_to_event</span><span class="p">)</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Concurrence.split_at"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.Concurrence.split_at">[docs]</a>    <span class="k">def</span> <span class="nf">split_at</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">absolute_time</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">,</span>
+        <span class="n">ignore_invalid_split_point</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Concurrence</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">absolute_time</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">NoSplitTimeError</span><span class="p">()</span>
+
+        <span class="n">absolute_time</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">absolute_time</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_valid_absolute_time</span><span class="p">(</span><span class="n">absolute_time</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">absolute_time</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">duration</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">ignore_invalid_split_point</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">SplitError</span><span class="p">(</span><span class="n">absolute_time</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="k">def</span> <span class="nf">slice_tuple_to_event</span><span class="p">(</span><span class="n">slice_tuple</span><span class="p">):</span>
+            <span class="n">e</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">empty_copy</span><span class="p">()</span>
+            <span class="n">e</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">slice_tuple</span>
+            <span class="k">return</span> <span class="n">e</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_event_slice_tuple</span><span class="p">(</span><span class="n">absolute_time</span><span class="p">,</span> <span class="n">slice_tuple_to_event</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="TaggedSimpleEvent"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.TaggedSimpleEvent">[docs]</a><span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_tag_to_class</span>
+<span class="k">class</span> <span class="nc">TaggedSimpleEvent</span><span class="p">(</span><span class="n">SimpleEvent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;:class:`SimpleEvent` with tag.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="TaggedConsecution"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.TaggedConsecution">[docs]</a><span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_tag_to_class</span>
+<span class="k">class</span> <span class="nc">TaggedConsecution</span><span class="p">(</span>
+    <span class="n">Consecution</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Generic</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">class_specific_side_attribute_tuple</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;tag&quot;</span><span class="p">,)</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;:class:`Consecution` with tag.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="TaggedConcurrence"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.TaggedConcurrence">[docs]</a><span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_tag_to_class</span>
+<span class="k">class</span> <span class="nc">TaggedConcurrence</span><span class="p">(</span>
+    <span class="n">Concurrence</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Generic</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">class_specific_side_attribute_tuple</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;tag&quot;</span><span class="p">,)</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;:class:`Concurrence` with tag.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TaggedConcurrence.sequentialize"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.TaggedConcurrence.sequentialize">[docs]</a>    <span class="k">def</span> <span class="nf">sequentialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">consecution</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">sequentialize</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">TaggedConsecution</span><span class="p">(</span><span class="n">consecution</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tag</span><span class="p">)</span></div></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.core_events.basic</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Levin Eric Zimmermann.
+    </div>
+  </body>
+</html>

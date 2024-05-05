@@ -1,0 +1,418 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mutwo.core_converters.tempos &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.core_converters.tempos</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mutwo.core_converters.tempos</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Apply tempo curve on any :class:`~mutwo.core_events.abc.Event` and convert :class:`~mutwo.core_parameters.abc.TempoPoint` to beat-length-in-seconds.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_constants</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_converters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_events</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_parameters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_utilities</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;TempoPointToBeatLengthInSeconds&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;TempoConverter&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;EventToMetrizedEvent&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="TempoPointToBeatLengthInSeconds"><a class="viewcode-back" href="../../../api/mutwo.core_converters.html#mutwo.core_converters.TempoPointToBeatLengthInSeconds">[docs]</a><span class="k">class</span> <span class="nc">TempoPointToBeatLengthInSeconds</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Converter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert a :class:`~mutwo.core_parameters.abc.TempoPoint` with BPM to beat-length-in-seconds.</span>
+
+<span class="sd">    A :class:`TempoPoint` is defined as an object that has a particular tempo in</span>
+<span class="sd">    beats per seconds (BPM) and a reference value (1 for a quarter note, 4</span>
+<span class="sd">    for a whole note, etc.). Besides elaborate :class:`mutwo.core_parameters.abc.TempoPoint`</span>
+<span class="sd">    objects, any number can also be interpreted as a `TempoPoint`. In this case</span>
+<span class="sd">    the number simply represents the BPM number and the reference will be set to 1.</span>
+<span class="sd">    The returned beat-length-in-seconds always indicates the length for one quarter</span>
+<span class="sd">    note.</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import core_converters</span>
+<span class="sd">    &gt;&gt;&gt; tempo_point_converter = core_converters.TempoPointToBeatLengthInSeconds()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">TempoPoint</span> <span class="o">=</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">TempoPoint</span> <span class="o">|</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">get_cls_logger</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_beats_per_minute_to_seconds_per_beat</span><span class="p">(</span>
+        <span class="n">beats_per_minute</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="mi">60</span> <span class="o">/</span> <span class="n">beats_per_minute</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_extract_beats_per_minute_and_reference_from_tempo_point</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">tempo_point</span><span class="p">:</span> <span class="n">TempoPoint</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">]:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">beats_per_minute</span> <span class="o">=</span> <span class="n">tempo_point</span><span class="o">.</span><span class="n">tempo_in_beats_per_minute</span>  <span class="c1"># type: ignore</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">beats_per_minute</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tempo_point</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">reference</span> <span class="o">=</span> <span class="n">tempo_point</span><span class="o">.</span><span class="n">reference</span>  <span class="c1"># type: ignore</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">core_utilities</span><span class="o">.</span><span class="n">UndefinedReferenceWarning</span><span class="p">(</span><span class="n">tempo_point</span><span class="p">))</span>
+            <span class="n">reference</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="n">beats_per_minute</span><span class="p">,</span> <span class="n">reference</span>
+
+<div class="viewcode-block" id="TempoPointToBeatLengthInSeconds.convert"><a class="viewcode-back" href="../../../api/mutwo.core_converters.html#mutwo.core_converters.TempoPointToBeatLengthInSeconds.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tempo_point_to_convert</span><span class="p">:</span> <span class="n">TempoPoint</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Converts a :class:`TempoPoint` to beat-length-in-seconds.</span>
+
+<span class="sd">        :param tempo_point_to_convert: A tempo point defines the active tempo</span>
+<span class="sd">            from which the beat-length-in-seconds shall be calculated. The argument</span>
+<span class="sd">            can either be any number (which will be interpreted as beats per</span>
+<span class="sd">            minute [BPM]) or a ``mutwo.core_parameters.abc.TempoPoint`` object.</span>
+<span class="sd">        :return: The duration of one beat in seconds within the passed tempo.</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo import core_converters</span>
+<span class="sd">        &gt;&gt;&gt; converter = core_converters.TempoPointToBeatLengthInSeconds()</span>
+<span class="sd">        &gt;&gt;&gt; converter.convert(60)  # one beat in tempo 60 bpm takes 1 second</span>
+<span class="sd">        1.0</span>
+<span class="sd">        &gt;&gt;&gt; converter.convert(120)  # one beat in tempo 120 bpm takes 0.5 second</span>
+<span class="sd">        0.5</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="p">(</span>
+            <span class="n">beats_per_minute</span><span class="p">,</span>
+            <span class="n">reference</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_beats_per_minute_and_reference_from_tempo_point</span><span class="p">(</span>
+            <span class="n">tempo_point_to_convert</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">TempoPointToBeatLengthInSeconds</span><span class="o">.</span><span class="n">_beats_per_minute_to_seconds_per_beat</span><span class="p">(</span>
+                <span class="n">beats_per_minute</span>
+            <span class="p">)</span>
+            <span class="o">/</span> <span class="n">reference</span>
+        <span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="TempoConverter"><a class="viewcode-back" href="../../../api/mutwo.core_converters.html#mutwo.core_converters.TempoConverter">[docs]</a><span class="k">class</span> <span class="nc">TempoConverter</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">EventConverter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Apply tempo curves on mutwo events</span>
+
+<span class="sd">    :param tempo_envelope: The tempo curve that shall be applied on the</span>
+<span class="sd">        mutwo events. This is expected to be a :class:`core_events.TempoEnvelope`</span>
+<span class="sd">        which values are filled with numbers that will be interpreted as BPM</span>
+<span class="sd">        [beats per minute]) or with :class:`mutwo.core_parameters.abc.TempoPoint`</span>
+<span class="sd">        objects.</span>
+<span class="sd">    :param apply_converter_on_events_tempo_envelope: If set to `True` the</span>
+<span class="sd">        converter will also adjust the :attr:`tempo_envelope` attribute of</span>
+<span class="sd">        each converted event. Default to `True`.</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import core_converters</span>
+<span class="sd">    &gt;&gt;&gt; from mutwo import core_events</span>
+<span class="sd">    &gt;&gt;&gt; from mutwo import core_parameters</span>
+<span class="sd">    &gt;&gt;&gt; tempo_envelope = core_events.Envelope(</span>
+<span class="sd">    ...     [[0, core_parameters.DirectTempoPoint(60)], [3, 60], [3, 30], [5, 50]],</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; my_tempo_converter = core_converters.TempoConverter(tempo_envelope)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_tempo_point_to_beat_length_in_seconds</span> <span class="o">=</span> <span class="n">TempoPointToBeatLengthInSeconds</span><span class="p">()</span><span class="o">.</span><span class="n">convert</span>
+
+    <span class="c1"># Define private tempo envelope class which catches its</span>
+    <span class="c1"># &#39;_absolute_time_in_floats_tuple_and_duration&#39;. With this we can</span>
+    <span class="c1"># improve the performance of the &#39;value_at&#39; method and with this</span>
+    <span class="c1"># improvment we can have a faster converter.</span>
+    <span class="c1">#</span>
+    <span class="c1"># This is actually not safe, because the envelope is still mutable.</span>
+    <span class="c1"># But we trust that no one changes anything with our internal envelope</span>
+    <span class="c1"># and hope everything goes well. The long term solution is to implement</span>
+    <span class="c1"># a &#39;freeze&#39; method for all mutwo objects, which auto-converts all</span>
+    <span class="c1"># properties to catched properties. But this may still takes some time</span>
+    <span class="c1"># and we already want to have faster converters now.</span>
+    <span class="k">class</span> <span class="nc">_CatchedTempoEnvelope</span><span class="p">(</span><span class="n">core_events</span><span class="o">.</span><span class="n">TempoEnvelope</span><span class="p">):</span>
+        <span class="nd">@functools</span><span class="o">.</span><span class="n">cached_property</span>
+        <span class="k">def</span> <span class="nf">_absolute_time_in_floats_tuple_and_duration</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="nb">float</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_absolute_time_in_floats_tuple_and_duration</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">tempo_envelope</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">TempoEnvelope</span><span class="p">,</span>
+        <span class="n">apply_converter_on_events_tempo_envelope</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tempo_envelope</span> <span class="o">=</span> <span class="n">tempo_envelope</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_beat_length_in_seconds_envelope</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">TempoConverter</span><span class="o">.</span><span class="n">_tempo_envelope_to_beat_length_in_seconds_envelope</span><span class="p">(</span>
+                <span class="n">tempo_envelope</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_converter_on_events_tempo_envelope</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">apply_converter_on_events_tempo_envelope</span>
+        <span class="p">)</span>
+        <span class="c1"># Catches for better performance</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start_and_end_to_tempo_converter_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start_and_end_to_integration</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                          static methods                                #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_tempo_envelope_to_beat_length_in_seconds_envelope</span><span class="p">(</span>
+        <span class="n">tempo_envelope</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Envelope</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Envelope</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Convert bpm / TempoPoint based env to beat-length-in-seconds env.&quot;&quot;&quot;</span>
+
+        <span class="n">level_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">tempo_point</span> <span class="ow">in</span> <span class="n">tempo_envelope</span><span class="o">.</span><span class="n">parameter_tuple</span><span class="p">:</span>
+            <span class="n">beat_length_in_seconds</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">TempoConverter</span><span class="o">.</span><span class="n">_tempo_point_to_beat_length_in_seconds</span><span class="p">(</span><span class="n">tempo_point</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">level_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">beat_length_in_seconds</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">TempoConverter</span><span class="o">.</span><span class="n">_CatchedTempoEnvelope</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">[</span><span class="n">absolute_time</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">curve_shape</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">absolute_time</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">curve_shape</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                    <span class="n">tempo_envelope</span><span class="o">.</span><span class="n">absolute_time_tuple</span><span class="p">,</span>
+                    <span class="n">level_list</span><span class="p">,</span>
+                    <span class="n">tempo_envelope</span><span class="o">.</span><span class="n">curve_shape_tuple</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                         private methods                                #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="k">def</span> <span class="nf">_start_and_end_to_tempo_converter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="n">start</span><span class="o">.</span><span class="n">duration</span><span class="p">,</span> <span class="n">end</span><span class="o">.</span><span class="n">duration</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_and_end_to_tempo_converter_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_and_end_to_tempo_converter_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">TempoConverter</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_tempo_envelope</span><span class="o">.</span><span class="n">cut_out</span><span class="p">(</span>
+                    <span class="n">start</span><span class="p">,</span>
+                    <span class="n">end</span><span class="p">,</span>
+                    <span class="n">mutate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="p">),</span>
+                <span class="n">apply_converter_on_events_tempo_envelope</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">t</span>
+
+    <span class="k">def</span> <span class="nf">_integrate</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span>
+    <span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="n">start</span><span class="o">.</span><span class="n">duration</span><span class="p">,</span> <span class="n">end</span><span class="o">.</span><span class="n">duration</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_and_end_to_integration</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_and_end_to_integration</span><span class="p">[</span>
+                <span class="n">key</span>
+            <span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_beat_length_in_seconds_envelope</span><span class="o">.</span><span class="n">integrate_interval</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">i</span>
+
+    <span class="k">def</span> <span class="nf">_convert_chronon</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">chronon</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">,</span>
+        <span class="n">absolute_entry_delay</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="n">chronon</span><span class="o">.</span><span class="n">duration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_integrate</span><span class="p">(</span>
+            <span class="n">absolute_entry_delay</span><span class="p">,</span> <span class="n">absolute_entry_delay</span> <span class="o">+</span> <span class="n">chronon</span><span class="o">.</span><span class="n">duration</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">([])</span>
+
+    <span class="k">def</span> <span class="nf">_convert_event</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">event_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">,</span>
+        <span class="n">absolute_entry_delay</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ComplexEvent</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">]:</span>
+        <span class="n">tempo_envelope</span> <span class="o">=</span> <span class="n">event_to_convert</span><span class="o">.</span><span class="n">tempo_envelope</span>
+        <span class="n">is_tempo_envelope_effectless</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">tempo_envelope</span><span class="o">.</span><span class="n">is_static</span> <span class="ow">and</span> <span class="n">tempo_envelope</span><span class="o">.</span><span class="n">value_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">60</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_apply_converter_on_events_tempo_envelope</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_tempo_envelope_effectless</span>
+        <span class="p">):</span>
+            <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">absolute_entry_delay</span><span class="p">,</span>
+                <span class="n">absolute_entry_delay</span> <span class="o">+</span> <span class="n">event_to_convert</span><span class="o">.</span><span class="n">duration</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">local_tempo_converter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_and_end_to_tempo_converter</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+            <span class="n">event_to_convert</span><span class="o">.</span><span class="n">tempo_envelope</span> <span class="o">=</span> <span class="n">local_tempo_converter</span><span class="p">(</span><span class="n">tempo_envelope</span><span class="p">)</span>
+        <span class="n">rvalue</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_convert_event</span><span class="p">(</span><span class="n">event_to_convert</span><span class="p">,</span> <span class="n">absolute_entry_delay</span><span class="p">,</span> <span class="n">depth</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">is_tempo_envelope_effectless</span><span class="p">:</span>
+            <span class="c1"># Yes we simply override the tempo_envelope of the event which we</span>
+            <span class="c1"># just converted. This is because the TempoConverter copies the</span>
+            <span class="c1"># event at the start of the algorithm and simply mutates this</span>
+            <span class="c1"># copied event.</span>
+            <span class="n">event_to_convert</span><span class="o">.</span><span class="n">tempo_envelope</span><span class="o">.</span><span class="n">duration</span> <span class="o">=</span> <span class="n">event_to_convert</span><span class="o">.</span><span class="n">duration</span>
+        <span class="k">return</span> <span class="n">rvalue</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#               public methods for interaction with the user             #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+<div class="viewcode-block" id="TempoConverter.convert"><a class="viewcode-back" href="../../../api/mutwo.core_converters.html#mutwo.core_converters.TempoConverter.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Apply tempo curve of the converter to the entered event.</span>
+
+<span class="sd">        The method doesn&#39;t change the original event, but returns a copied</span>
+<span class="sd">        version with different values for its duration attributes depending</span>
+<span class="sd">        on the tempo curve.</span>
+
+<span class="sd">        :param event_to_convert: The event to convert. Can be any object</span>
+<span class="sd">            that inherits from ``mutwo.core_events.abc.Event``. If the event that</span>
+<span class="sd">            shall be converted is longer than the tempo curve of the</span>
+<span class="sd">            ``TempoConverter``, then the last tempo of the curve will be hold.</span>
+<span class="sd">        :return: A new ``Event`` object which duration property has been adapted</span>
+<span class="sd">            by the tempo curve of the ``TempoConverter``.</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo import core_converters</span>
+<span class="sd">        &gt;&gt;&gt; from mutwo import core_events</span>
+<span class="sd">        &gt;&gt;&gt; from mutwo import core_parameters</span>
+<span class="sd">        &gt;&gt;&gt; tempo_envelope = core_events.Envelope(</span>
+<span class="sd">        ...     [[0, core_parameters.DirectTempoPoint(60)], [3, 60], [3, 30], [5, 50]],</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &gt;&gt;&gt; my_tempo_converter = core_converters.TempoConverter(tempo_envelope)</span>
+<span class="sd">        &gt;&gt;&gt; my_events = core_events.Consecution([core_events.SimpleEvent(d) for d in (3, 2, 5)])</span>
+<span class="sd">        &gt;&gt;&gt; my_tempo_converter.convert(my_events)</span>
+<span class="sd">        Consecution([SimpleEvent(duration = DirectDuration(duration = 3)), SimpleEvent(duration = DirectDuration(duration = 7205759403792795/2251799813685248)), SimpleEvent(duration = DirectDuration(duration = 6))])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">copied_event_to_convert</span> <span class="o">=</span> <span class="n">event_to_convert</span><span class="o">.</span><span class="n">destructive_copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_convert_event</span><span class="p">(</span><span class="n">copied_event_to_convert</span><span class="p">,</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">DirectDuration</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">copied_event_to_convert</span></div></div>
+
+
+<div class="viewcode-block" id="EventToMetrizedEvent"><a class="viewcode-back" href="../../../api/mutwo.core_converters.html#mutwo.core_converters.EventToMetrizedEvent">[docs]</a><span class="k">class</span> <span class="nc">EventToMetrizedEvent</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">SymmetricalEventConverter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Apply tempo envelope of event on itself&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">skip_level_count</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">maxima_depth_count</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_skip_level_count</span> <span class="o">=</span> <span class="n">skip_level_count</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_maxima_depth_count</span> <span class="o">=</span> <span class="n">maxima_depth_count</span>
+
+    <span class="k">def</span> <span class="nf">_convert_chronon</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">event_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">,</span>
+        <span class="n">absolute_entry_delay</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">event_to_convert</span>
+
+    <span class="k">def</span> <span class="nf">_convert_event</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">event_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">,</span>
+        <span class="n">absolute_entry_delay</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ComplexEvent</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_skip_level_count</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_skip_level_count</span> <span class="o">&lt;</span> <span class="n">depth</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_maxima_depth_count</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">depth</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_maxima_depth_count</span>
+        <span class="p">):</span>
+            <span class="n">tempo_converter</span> <span class="o">=</span> <span class="n">TempoConverter</span><span class="p">(</span><span class="n">event_to_convert</span><span class="o">.</span><span class="n">tempo_envelope</span><span class="p">)</span>
+            <span class="n">event_to_convert</span> <span class="o">=</span> <span class="n">tempo_converter</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">event_to_convert</span><span class="p">)</span>
+            <span class="n">event_to_convert</span><span class="o">.</span><span class="n">reset_tempo_envelope</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Ensure we return copied event!</span>
+            <span class="n">event_to_convert</span> <span class="o">=</span> <span class="n">event_to_convert</span><span class="o">.</span><span class="n">destructive_copy</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_convert_event</span><span class="p">(</span><span class="n">event_to_convert</span><span class="p">,</span> <span class="n">absolute_entry_delay</span><span class="p">,</span> <span class="n">depth</span><span class="p">)</span>
+
+<div class="viewcode-block" id="EventToMetrizedEvent.convert"><a class="viewcode-back" href="../../../api/mutwo.core_converters.html#mutwo.core_converters.EventToMetrizedEvent.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Apply tempo envelope of event on itself&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_event</span><span class="p">(</span><span class="n">event_to_convert</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.core_converters.tempos</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Levin Eric Zimmermann.
+    </div>
+  </body>
+</html>

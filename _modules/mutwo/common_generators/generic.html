@@ -1,0 +1,154 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mutwo.common_generators.generic &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.common_generators.generic</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mutwo.common_generators.generic</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Generic algorithms which are designed by mutwo authors.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">numbers</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_events</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;DynamicChoice&quot;</span><span class="p">,)</span>
+
+
+<div class="viewcode-block" id="DynamicChoice"><a class="viewcode-back" href="../../../api/mutwo.common_generators.html#mutwo.common_generators.DynamicChoice">[docs]</a><span class="k">class</span> <span class="nc">DynamicChoice</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Weighted random choices with dynamically changing weights.</span>
+
+<span class="sd">    :param value_sequence: The items to choose from.</span>
+<span class="sd">    :type value_sequence: typing.Sequence[typing.Any]</span>
+<span class="sd">    :param curve_sequence: The dynamically changing weight for each value.</span>
+<span class="sd">    :type curve_sequence: typing.Sequence[core_events.Envelope]</span>
+<span class="sd">    :param random_seed: The seed which shall be set at class initialisation.</span>
+<span class="sd">    :type random_seed: int</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import core_events</span>
+<span class="sd">    &gt;&gt;&gt; from mutwo import common_generators</span>
+<span class="sd">    &gt;&gt;&gt; dynamic_choice = common_generators.DynamicChoice(</span>
+<span class="sd">    ...    [0, 1, 2],</span>
+<span class="sd">    ...    [</span>
+<span class="sd">    ...        core_events.Envelope([(0, 0), (0.5, 1), (1, 0)]),</span>
+<span class="sd">    ...        core_events.Envelope([(0, 0.5), (0.5, 0), (1, 0.5)]),</span>
+<span class="sd">    ...        core_events.Envelope([(0, 0.5), (1, 1)]),</span>
+<span class="sd">    ...    ],</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; dynamic_choice.gamble_at(0.3)</span>
+<span class="sd">    0</span>
+<span class="sd">    &gt;&gt;&gt; dynamic_choice.gamble_at(0.3)</span>
+<span class="sd">    1</span>
+<span class="sd">    &gt;&gt;&gt; dynamic_choice.gamble_at(0.3)</span>
+<span class="sd">    2</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">value_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">],</span>
+        <span class="n">curve_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">Envelope</span><span class="p">],</span>
+        <span class="n">random_seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">value_sequence</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">curve_sequence</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_value_sequence</span> <span class="o">=</span> <span class="n">value_sequence</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_curve_sequence</span> <span class="o">=</span> <span class="n">curve_sequence</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_random</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">Random</span><span class="p">(</span><span class="n">random_seed</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_value_sequence</span><span class="si">}</span><span class="s2">)&quot;</span>
+
+<div class="viewcode-block" id="DynamicChoice.items"><a class="viewcode-back" href="../../../api/mutwo.common_generators.html#mutwo.common_generators.DynamicChoice.items">[docs]</a>    <span class="k">def</span> <span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Envelope</span><span class="p">]]:</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_value_sequence</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_curve_sequence</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="DynamicChoice.gamble_at"><a class="viewcode-back" href="../../../api/mutwo.common_generators.html#mutwo.common_generators.DynamicChoice.gamble_at">[docs]</a>    <span class="k">def</span> <span class="nf">gamble_at</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Real</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return value at requested time.</span>
+
+<span class="sd">        :param time: At which position on the x-Axis shall be gambled.</span>
+<span class="sd">        :type time: numbers.Real</span>
+<span class="sd">        :return: The chosen value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">weight_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">curve</span><span class="o">.</span><span class="n">value_at</span><span class="p">(</span><span class="n">time</span><span class="p">)</span> <span class="k">for</span> <span class="n">curve</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_curve_sequence</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_random</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_value_sequence</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weight_list</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.common_generators.generic</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2024, mutwo authors.
+    </div>
+  </body>
+</html>

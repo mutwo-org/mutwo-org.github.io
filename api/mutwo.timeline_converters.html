@@ -1,0 +1,403 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>mutwo.timeline_converters &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+    
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="mutwo.timeline_interfaces" href="mutwo.timeline_interfaces.html" />
+    <link rel="prev" title="mutwo.reaper_version" href="mutwo.reaper_version.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mutwo.timeline_interfaces.html" title="mutwo.timeline_interfaces"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="mutwo.reaper_version.html" title="mutwo.reaper_version"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="api_documentation.html" accesskey="U">mutwo API documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.timeline_converters</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="mutwo-timeline-converters">
+<h1><a class="toc-backref" href="#id5" role="doc-backlink">mutwo.timeline_converters</a><a class="headerlink" href="#mutwo-timeline-converters" title="Permalink to this heading">¶</a></h1>
+<nav class="contents" id="table-of-content">
+<p class="topic-title">Table of content</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#mutwo-timeline-converters" id="id5">mutwo.timeline_converters</a></p></li>
+</ul>
+</nav>
+<span class="target" id="module-mutwo.timeline_converters"></span><p>Convert <a class="reference internal" href="mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.TimeLine" title="mutwo.timeline_interfaces.TimeLine"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.timeline_interfaces.TimeLine</span></code></a> to objects useable by other parts of <cite>mutwo</cite>.</p>
+<table class="docutils align-center" style="width: 95%">
+<thead>
+<tr class="row-odd"><th class="head"><p>Object</p></th>
+<th class="head"><p>Documentation</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.timeline_converters.TimeLineToEventPlacementDict" title="mutwo.timeline_converters.TimeLineToEventPlacementDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.timeline_converters.TimeLineToEventPlacementDict</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.timeline_converters.TimeLineToConcurrence" title="mutwo.timeline_converters.TimeLineToConcurrence"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.timeline_converters.TimeLineToConcurrence</span></code></a></p></td>
+<td><p>Create event with Concurrence for each tag.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.timeline_converters.TimeLineToEventPlacementTuple" title="mutwo.timeline_converters.TimeLineToEventPlacementTuple"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.timeline_converters.TimeLineToEventPlacementTuple</span></code></a></p></td>
+<td><p>Fetch from <a class="reference internal" href="mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.TimeLine" title="mutwo.timeline_interfaces.TimeLine"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeLine</span></code></a> all <a class="reference internal" href="mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a> which contains of user defined tags.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.timeline_converters.EventPlacementTupleToGaplessEventPlacementTuple" title="mutwo.timeline_converters.EventPlacementTupleToGaplessEventPlacementTuple"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.timeline_converters.EventPlacementTupleToGaplessEventPlacementTuple</span></code></a></p></td>
+<td><p>Fill empty <a class="reference internal" href="mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a> into the gaps between two <cite>EventPlacement</cite>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.timeline_converters.EventPlacementTupleToSplitEventPlacementDict" title="mutwo.timeline_converters.EventPlacementTupleToSplitEventPlacementDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.timeline_converters.EventPlacementTupleToSplitEventPlacementDict</span></code></a></p></td>
+<td><p>Split <a class="reference internal" href="mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a> into new <a href="#id1"><span class="problematic" id="id2">`</span></a>EventPlacement`s by tags.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.timeline_converters.TimeLineToEventPlacementDict">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TimeLineToEventPlacementDict</span></span><a class="reference internal" href="../_modules/mutwo/timeline_converters/timelines.html#TimeLineToEventPlacementDict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.timeline_converters.TimeLineToEventPlacementDict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(timeline_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.timeline_converters.TimeLineToEventPlacementDict.convert">
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeline_to_convert</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/timeline_converters/timelines.html#TimeLineToEventPlacementDict.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.timeline_converters.TimeLineToEventPlacementDict.convert" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>timeline_to_convert</strong> (<a class="reference internal" href="mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.TimeLine" title="mutwo.timeline_interfaces.timelines.TimeLine"><em>TimeLine</em></a>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict[‘str’, tuple[<a class="reference internal" href="mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.timelines.EventPlacement">mutwo.timeline_interfaces.timelines.EventPlacement</a>, …]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.timeline_converters.TimeLineToConcurrence">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TimeLineToConcurrence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">random_seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/timeline_converters/timelines.html#TimeLineToConcurrence"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.timeline_converters.TimeLineToConcurrence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></p>
+<p>Create event with Concurrence for each tag.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>random_seed</strong> (<em>int</em>) – Seed for random operation in case
+<cite>start_or_start_range</cite> or <cite>end_or_end_range</cite> of an
+<a class="reference internal" href="mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.timeline_interfaces.EventPlacement</span></code></a> is a
+<cite>ranges.Range</cite> and <a class="reference internal" href="#mutwo.timeline_converters.TimeLineToConcurrence" title="mutwo.timeline_converters.TimeLineToConcurrence"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeLineToConcurrence</span></code></a>
+needs to pick a value within the given range.</p>
+</dd>
+</dl>
+<p>The main intention of this converter is to convert a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">TimeLine</span></code> into a representation which is useable
+for concrete third party converters like
+<a class="reference internal" href="mutwo.midi_converters.html#mutwo.midi_converters.EventToMidiFile" title="mutwo.midi_converters.EventToMidiFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.midi_converters.EventToMidiFile</span></code></a>.</p>
+<p>To be successful the tagged events in the
+<a class="reference internal" href="mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.timeline_interfaces.EventPlacement</span></code></a> in the
+<a class="reference internal" href="mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.TimeLine" title="mutwo.timeline_interfaces.TimeLine"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.timeline_interfaces.TimeLine</span></code></a> which is
+converted need a specific structure: the deepest nested
+structure they can follow is:</p>
+<blockquote>
+<div><dl>
+<dt>core_events.Concurrence[</dt><dd><dl class="simple">
+<dt>core_events.Consecution[</dt><dd><p>core_events.Chronon</p>
+</dd>
+</dl>
+<p>]</p>
+</dd>
+</dl>
+<p>]</p>
+</div></blockquote>
+<p>Because this will be the final structure. This clean
+ordering is necessary to be functional with various third
+party converters as e.g.
+<a class="reference internal" href="mutwo.midi_converters.html#mutwo.midi_converters.EventToMidiFile" title="mutwo.midi_converters.EventToMidiFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.midi_converters.EventToMidiFile</span></code></a>.</p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(timeline_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.timeline_converters.TimeLineToConcurrence.convert">
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeline_to_convert</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/timeline_converters/timelines.html#TimeLineToConcurrence.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.timeline_converters.TimeLineToConcurrence.convert" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>timeline_to_convert</strong> (<a class="reference internal" href="mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.TimeLine" title="mutwo.timeline_interfaces.timelines.TimeLine"><em>TimeLine</em></a>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Concurrence" title="mutwo.core_events.basic.Concurrence"><em>Concurrence</em></a>[<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Concurrence" title="mutwo.core_events.basic.Concurrence"><em>Concurrence</em></a>[<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.basic.Consecution"><em>Consecution</em></a>[<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.basic.Chronon"><em>Chronon</em></a>]]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.timeline_converters.TimeLineToEventPlacementTuple">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TimeLineToEventPlacementTuple</span></span><a class="reference internal" href="../_modules/mutwo/timeline_converters/timelines.html#TimeLineToEventPlacementTuple"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.timeline_converters.TimeLineToEventPlacementTuple" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></p>
+<p>Fetch from <a class="reference internal" href="mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.TimeLine" title="mutwo.timeline_interfaces.TimeLine"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeLine</span></code></a> all <a class="reference internal" href="mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a> which contains of user defined tags.</p>
+<p>Unlike <a class="reference internal" href="#mutwo.timeline_converters.TimeLineToEventPlacementDict" title="mutwo.timeline_converters.TimeLineToEventPlacementDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeLineToEventPlacementDict</span></code></a> this converter
+doesn’t split the fetched <code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.timeline_interfaces.EventPlacement`s</span>
+<span class="pre">into</span> <span class="pre">different</span> <span class="pre">`tuples</span></code>, but returns all of them in one common <cite>tuple</cite>.</p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(timeline_to_convert, tag_tuple)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.timeline_converters.TimeLineToEventPlacementTuple.convert">
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeline_to_convert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag_tuple</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/timeline_converters/timelines.html#TimeLineToEventPlacementTuple.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.timeline_converters.TimeLineToEventPlacementTuple.convert" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timeline_to_convert</strong> (<a class="reference internal" href="mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.TimeLine" title="mutwo.timeline_interfaces.timelines.TimeLine"><em>TimeLine</em></a>) – </p></li>
+<li><p><strong>tag_tuple</strong> (<em>tuple</em><em>[</em><em>'str'</em><em>, </em><em>...</em><em>]</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple[<a class="reference internal" href="mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.timelines.EventPlacement">mutwo.timeline_interfaces.timelines.EventPlacement</a>, …]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.timeline_converters.EventPlacementTupleToGaplessEventPlacementTuple">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EventPlacementTupleToGaplessEventPlacementTuple</span></span><a class="reference internal" href="../_modules/mutwo/timeline_converters/timelines.html#EventPlacementTupleToGaplessEventPlacementTuple"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.timeline_converters.EventPlacementTupleToGaplessEventPlacementTuple" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></p>
+<p>Fill empty <a class="reference internal" href="mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a> into the gaps between two <cite>EventPlacement</cite>.</p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(event_placement_tuple_to_convert[, ...])</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.timeline_converters.EventPlacementTupleToGaplessEventPlacementTuple.convert">
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_placement_tuple_to_convert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/timeline_converters/timelines.html#EventPlacementTupleToGaplessEventPlacementTuple.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.timeline_converters.EventPlacementTupleToGaplessEventPlacementTuple.convert" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>event_placement_tuple_to_convert</strong> (<em>tuple</em><em>[</em><a class="reference internal" href="mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.timelines.EventPlacement"><em>mutwo.timeline_interfaces.timelines.EventPlacement</em></a><em>, </em><em>...</em><em>]</em>) – </p></li>
+<li><p><strong>duration</strong> (<em>Optional</em><em>[</em><a class="reference internal" href="mutwo.core_parameters.html#mutwo.core_parameters.abc.Duration" title="mutwo.core_parameters.abc.Duration"><em>Duration</em></a><em>]</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple[<a class="reference internal" href="mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.timelines.EventPlacement">mutwo.timeline_interfaces.timelines.EventPlacement</a>, …]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.timeline_converters.EventPlacementTupleToSplitEventPlacementDict">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EventPlacementTupleToSplitEventPlacementDict</span></span><a class="reference internal" href="../_modules/mutwo/timeline_converters/timelines.html#EventPlacementTupleToSplitEventPlacementDict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.timeline_converters.EventPlacementTupleToSplitEventPlacementDict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></p>
+<p>Split <a class="reference internal" href="mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventPlacement</span></code></a> into new <a href="#id3"><span class="problematic" id="id4">`</span></a>EventPlacement`s by tags.</p>
+<p>So the returned <cite>event</cite> attribute of each returned
+<a class="reference internal" href="mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.EventPlacement"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.timeline_interfaces.EventPlacement</span></code></a> only
+contains one specific tagged event.</p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(event_placement_tuple_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.timeline_converters.EventPlacementTupleToSplitEventPlacementDict.convert">
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_placement_tuple_to_convert</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/timeline_converters/timelines.html#EventPlacementTupleToSplitEventPlacementDict.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.timeline_converters.EventPlacementTupleToSplitEventPlacementDict.convert" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>event_placement_tuple_to_convert</strong> (<em>tuple</em><em>[</em><a class="reference internal" href="mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.timelines.EventPlacement"><em>mutwo.timeline_interfaces.timelines.EventPlacement</em></a><em>, </em><em>...</em><em>]</em>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict[‘str’, tuple[<a class="reference internal" href="mutwo.timeline_interfaces.html#mutwo.timeline_interfaces.EventPlacement" title="mutwo.timeline_interfaces.timelines.EventPlacement">mutwo.timeline_interfaces.timelines.EventPlacement</a>, …]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mutwo.timeline_interfaces.html" title="mutwo.timeline_interfaces"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="mutwo.reaper_version.html" title="mutwo.reaper_version"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="api_documentation.html" >mutwo API documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.timeline_converters</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2024, mutwo authors.
+    </div>
+  </body>
+</html>

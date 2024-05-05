@@ -1,0 +1,138 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Understanding converters &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Understanding generators" href="generators.html" />
+    <link rel="prev" title="Understanding parameters" href="parameters.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="generators.html" title="Understanding generators"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="parameters.html" title="Understanding parameters"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">mutwo  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Understanding converters</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="understanding-converters">
+<span id="converters"></span><h1>Understanding converters<a class="headerlink" href="#understanding-converters" title="Permalink to this heading">¶</a></h1>
+<p>With <a class="reference internal" href="parameters.html#parameters"><span class="std std-ref">Understanding parameters</span></a> we are now able to actually describe some meaningful musical content in <em>mutwo</em>.
+But what’s the purpose to describe this musical content if it only resides in our text file or python interpreter?</p>
+<p>This is where <strong>converters</strong> are needed:
+by using converters <a class="reference internal" href="api/api_documentation.html#module-mutwo" title="mutwo"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mutwo</span></code></a> communicates with the outer world.
+Some converters import data into <a class="reference internal" href="api/api_documentation.html#module-mutwo" title="mutwo"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mutwo</span></code></a> and some converters export data from <a class="reference internal" href="api/api_documentation.html#module-mutwo" title="mutwo"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mutwo</span></code></a> into another format.</p>
+<p>Finally there are converters that translate between two different data types within <em>mutwo</em>.
+For instance, if we want to write a transposed score for a <a class="reference external" href="https://en.wikipedia.org/wiki/Transposing_instrument">transposing instrument</a>, we may want to use a converter which translates from the sounding music to the written music.</p>
+<section id="using-the-midi-converter">
+<h2>Using the MIDI converter<a class="headerlink" href="#using-the-midi-converter" title="Permalink to this heading">¶</a></h2>
+<p>In order to illustrate converters, let’s export our musical content to a <a class="reference external" href="https://www.midi.org/specifications-old/item/standard-midi-files-smf">Standard MIDI file</a>.
+For this example, you need to install the <a class="reference external" href="https://pypi.org/project/mutwo.midi/">mutwo.midi</a> package.</p>
+<p>Let’s first define a small melody that we export to the MIDI file:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_events</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_events</span>
+
+<span class="n">melody</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="n">music_events</span><span class="o">.</span><span class="n">NoteLike</span><span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">),</span>
+        <span class="n">music_events</span><span class="o">.</span><span class="n">NoteLike</span><span class="p">(</span><span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span>
+        <span class="n">music_events</span><span class="o">.</span><span class="n">NoteLike</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">),</span>
+        <span class="n">music_events</span><span class="o">.</span><span class="n">NoteLike</span><span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Now let’s convert this melody to MIDI:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">midi_converters</span>
+
+<span class="n">e2m</span> <span class="o">=</span> <span class="n">midi_converters</span><span class="o">.</span><span class="n">EventToMidiFile</span><span class="p">()</span>
+<span class="n">e2m</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">melody</span><span class="p">,</span> <span class="s1">&#39;melody.mid&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>By using a MIDI player (for instance <a class="reference external" href="https://timidity.sourceforge.net/">TiMidity++</a>) we can listen to this melody now:</p>
+<audio controls="controls">
+  <source src="melody.ogg" type="audio/ogg">
+  Your browser does not support the <code>audio</code> element.
+</audio></section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="generators.html" title="Understanding generators"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="parameters.html" title="Understanding parameters"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">mutwo  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Understanding converters</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2024, mutwo authors.
+    </div>
+  </body>
+</html>

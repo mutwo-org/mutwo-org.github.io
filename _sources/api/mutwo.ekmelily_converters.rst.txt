@@ -1,0 +1,59 @@
+
+.. currentmodule:: mutwo.ekmelily_converters
+
+mutwo.ekmelily_converters
+=========================
+
+.. contents:: Table of content
+   :depth: 3
+
+.. automodule:: mutwo.ekmelily_converters
+   :members:
+
+
+.. list-table::
+   :align: center
+   :width: 95%
+   :header-rows: 1
+
+   * - Object
+     - Documentation
+   * - :class:`mutwo.ekmelily_converters.EkmelilyAccidental`
+     - Representation of an Ekmelily accidental.
+   * - :class:`mutwo.ekmelily_converters.EkmelilyTuningFileConverter`
+     - Build Ekmelily tuning files from Ekmelily accidentals.
+   * - :class:`mutwo.ekmelily_converters.HEJIEkmelilyTuningFileConverter`
+     - Build Ekmelily tuning files for `Helmholtz-Ellis JI Pitch Notation <https://marsbat.space/pdfs/notation.pdf>`_.
+
+
+
+
+.. autoclass:: mutwo.ekmelily_converters.EkmelilyAccidental
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.ekmelily_converters.EkmelilyTuningFileConverter
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.ekmelily_converters.HEJIEkmelilyTuningFileConverter
+
+        .. autoclasstoc::
+    
+
+
+mutwo.ekmelily_converters.configurations
+----------------------------------------
+
+.. automodule:: mutwo.ekmelily_converters.configurations
+   :members:
+
+
+mutwo.ekmelily_converters.constants
+-----------------------------------
+
+.. automodule:: mutwo.ekmelily_converters.constants
+   :members:
+

@@ -1,0 +1,319 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mutwo.core_converters.abc &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.core_converters.abc</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mutwo.core_converters.abc</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Defining the public API for any converter class.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">abc</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_events</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_parameters</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Converter&quot;</span><span class="p">,</span> <span class="s2">&quot;EventConverter&quot;</span><span class="p">,</span> <span class="s2">&quot;SymmetricalEventConverter&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Converter"><a class="viewcode-back" href="../../../api/mutwo.core_converters.html#mutwo.core_converters.abc.Converter">[docs]</a><span class="k">class</span> <span class="nc">Converter</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Abstract base class for all Converter classes.</span>
+
+<span class="sd">    Converter classes are defined as classes that convert data between</span>
+<span class="sd">    two different encodings. Their only public method (besides initialisation)</span>
+<span class="sd">    should be a `convert` method. The first argument of the convert method</span>
+<span class="sd">    should be the data to convert.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Converter.convert"><a class="viewcode-back" href="../../../api/mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">event_or_parameter_or_file_to_convert</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
+        <span class="o">...</span></div>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="EventConverter"><a class="viewcode-back" href="../../../api/mutwo.core_converters.html#mutwo.core_converters.abc.EventConverter">[docs]</a><span class="k">class</span> <span class="nc">EventConverter</span><span class="p">(</span><span class="n">Converter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Abstract base class for Converter which handle mutwo events.</span>
+
+<span class="sd">    This class helps building new classes which convert mutwo events</span>
+<span class="sd">    with few general private methods (and without adding any new public</span>
+<span class="sd">    method). Converting mutwo event often involves the same pattern:</span>
+<span class="sd">    due to the nested structure of an Event, the converter has</span>
+<span class="sd">    to iterate through the different layers until it reaches leaves</span>
+<span class="sd">    (any class that inherits from :class:`mutwo.core_events.SimpleEvent`).</span>
+<span class="sd">    This common iteration process and the different time treatment</span>
+<span class="sd">    between :class:`mutwo.core_events.Consecution` and</span>
+<span class="sd">    :class:`mutwo.core_events.Concurrence` are implemented in</span>
+<span class="sd">    :class:`EventConverter`.  For writing a new EventConverter class,</span>
+<span class="sd">    one only has to override the abstract method :func:`_convert_chronon`</span>
+<span class="sd">    and the abstract method :func:`convert` (where one will perhaps call</span>
+<span class="sd">    :func:`_convert_event`.).</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    The following example defines a dummy class for demonstrating how</span>
+<span class="sd">    to use EventConverter.</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import core_converters</span>
+<span class="sd">    &gt;&gt;&gt; class DurationPrintConverter(core_converters.abc.EventConverter):</span>
+<span class="sd">    ...     def _convert_chronon(self, event_to_convert, absolute_entry_delay):</span>
+<span class="sd">    ...         return &quot;{}: {}&quot;.format(absolute_entry_delay, event_to_convert.duration),</span>
+<span class="sd">    ...     def convert(self, event_to_convert):</span>
+<span class="sd">    ...         data_per_event = self._convert_event(event_to_convert, 0)</span>
+<span class="sd">    ...         [print(data) for data in data_per_event]</span>
+<span class="sd">    &gt;&gt;&gt; # now test with random event</span>
+<span class="sd">    &gt;&gt;&gt; import random</span>
+<span class="sd">    &gt;&gt;&gt; from mutwo import core_events</span>
+<span class="sd">    &gt;&gt;&gt; random.seed(100)</span>
+<span class="sd">    &gt;&gt;&gt; random_event = core_events.Concurrence(</span>
+<span class="sd">    ...     [</span>
+<span class="sd">    ...        core_events.Consecution(</span>
+<span class="sd">    ...             [</span>
+<span class="sd">    ...                core_events.SimpleEvent(random.uniform(0.5, 2))</span>
+<span class="sd">    ...                 for _ in range(random.randint(2, 5))</span>
+<span class="sd">    ...             ]</span>
+<span class="sd">    ...         )</span>
+<span class="sd">    ...         for _ in range(random.randint(1, 3))</span>
+<span class="sd">    ...     ]</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; DurationPrintConverter().convert(random_event)</span>
+<span class="sd">    DirectDuration(duration = 0): DirectDuration(duration = 332813340356277/281474976710656)</span>
+<span class="sd">    DirectDuration(duration = 332813340356277/281474976710656): DirectDuration(duration = 3729376151804513/2251799813685248)</span>
+<span class="sd">    DirectDuration(duration = 6391882874654729/2251799813685248): DirectDuration(duration = 7017823472572815/4503599627370496)</span>
+<span class="sd">    DirectDuration(duration = 19801589221882273/4503599627370496): DirectDuration(duration = 449779690686865/281474976710656)</span>
+<span class="sd">    DirectDuration(duration = 26998064272872113/4503599627370496): DirectDuration(duration = 5180362984867255/4503599627370496)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">_convert_chronon</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">event_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">,</span>
+        <span class="n">absolute_entry_delay</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Convert instance of :class:`mutwo.core_events.SimpleEvent`.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_convert_simultaneous_event</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">simultaneous_event</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Concurrence</span><span class="p">,</span>
+        <span class="n">absolute_entry_delay</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Convert instance of :class:`mutwo.core_events.Concurrence`.&quot;&quot;&quot;</span>
+
+        <span class="n">data_per_chronon_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">simultaneous_event</span><span class="p">:</span>
+            <span class="n">data_per_chronon_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_convert_event</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">absolute_entry_delay</span><span class="p">,</span> <span class="n">depth</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">data_per_chronon_list</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_convert_consecution</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">consecution</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">,</span>
+        <span class="n">absolute_entry_delay</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Convert instance of :class:`mutwo.core_events.Consecution`.&quot;&quot;&quot;</span>
+
+        <span class="n">data_per_chronon_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">event_start</span><span class="p">,</span> <span class="n">event</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+            <span class="n">consecution</span><span class="o">.</span><span class="n">absolute_time_tuple</span><span class="p">,</span> <span class="n">consecution</span>
+        <span class="p">):</span>
+            <span class="n">data_per_chronon_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_convert_event</span><span class="p">(</span>
+                    <span class="n">event</span><span class="p">,</span> <span class="n">event_start</span> <span class="o">+</span> <span class="n">absolute_entry_delay</span><span class="p">,</span> <span class="n">depth</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">data_per_chronon_list</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_convert_event</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">event_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">,</span>
+        <span class="n">absolute_entry_delay</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Convert :class:`mutwo.core_events.abc.Event` of unknown type.</span>
+
+<span class="sd">        The method calls different subroutines depending on whether</span>
+<span class="sd">        the passed event either are instances from:</span>
+
+<span class="sd">            1. :class:`mutwo.core_events.SimpleEvent` or</span>
+<span class="sd">            2. :class:`mutwo.core_events.Consecution` or</span>
+<span class="sd">            3. :class:`mutwo.core_events.Concurrence`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">absolute_entry_delay</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">UNKNOWN_OBJECT_TO_DURATION</span><span class="p">(</span>
+            <span class="n">absolute_entry_delay</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">event_to_convert</span><span class="p">,</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">):</span>
+            <span class="n">conversion_method</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_consecution</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">event_to_convert</span><span class="p">,</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">Concurrence</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="n">conversion_method</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_simultaneous_event</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">event_to_convert</span><span class="p">,</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="n">conversion_method</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_chronon</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Can&#39;t convert object &#39;</span><span class="si">{</span><span class="n">event_to_convert</span><span class="si">}</span><span class="s2">&#39; of type &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">event_to_convert</span><span class="p">)</span><span class="si">}</span><span class="s2">&#39; with EventConverter.&quot;</span>
+                <span class="s2">&quot; Supported types only include all inherited classes &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;from &#39;</span><span class="si">{</span><span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">conversion_method</span><span class="p">(</span><span class="n">event_to_convert</span><span class="p">,</span> <span class="n">absolute_entry_delay</span><span class="p">,</span> <span class="n">depth</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">conversion_method</span><span class="p">(</span><span class="n">event_to_convert</span><span class="p">,</span> <span class="n">absolute_entry_delay</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SymmetricalEventConverter"><a class="viewcode-back" href="../../../api/mutwo.core_converters.html#mutwo.core_converters.abc.SymmetricalEventConverter">[docs]</a><span class="k">class</span> <span class="nc">SymmetricalEventConverter</span><span class="p">(</span><span class="n">EventConverter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Abstract base class for Converter which handle mutwo core_events.</span>
+
+<span class="sd">    This converter is a more specified version of the :class:`EventConverter`.</span>
+<span class="sd">    It helps for building converters which aim to return mutwo core_events.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">_convert_chronon</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">event_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">,</span>
+        <span class="n">absolute_entry_delay</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Convert instance of :class:`mutwo.core_events.SimpleEvent`.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_convert_simultaneous_event</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">simultaneous_event</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Concurrence</span><span class="p">,</span>
+        <span class="n">absolute_entry_delay</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Concurrence</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Convert instance of :class:`mutwo.core_events.Concurrence`.&quot;&quot;&quot;</span>
+
+        <span class="n">converted_simultaneous_event</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Concurrence</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">simultaneous_event</span><span class="o">.</span><span class="n">empty_copy</span><span class="p">()</span>
+        <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">simultaneous_event</span><span class="p">:</span>
+            <span class="n">converted_simultaneous_event</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_convert_event</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">absolute_entry_delay</span><span class="p">,</span> <span class="n">depth</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">converted_simultaneous_event</span>
+
+    <span class="k">def</span> <span class="nf">_convert_consecution</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">consecution</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">,</span>
+        <span class="n">absolute_entry_delay</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Convert instance of :class:`mutwo.core_events.Consecution`.&quot;&quot;&quot;</span>
+
+        <span class="n">converted_consecution</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">consecution</span><span class="o">.</span><span class="n">empty_copy</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">event_start</span><span class="p">,</span> <span class="n">event</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+            <span class="n">consecution</span><span class="o">.</span><span class="n">absolute_time_tuple</span><span class="p">,</span> <span class="n">consecution</span>
+        <span class="p">):</span>
+            <span class="n">converted_consecution</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_convert_event</span><span class="p">(</span>
+                    <span class="n">event</span><span class="p">,</span> <span class="n">event_start</span> <span class="o">+</span> <span class="n">absolute_entry_delay</span><span class="p">,</span> <span class="n">depth</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">converted_consecution</span>
+
+    <span class="k">def</span> <span class="nf">_convert_event</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">event_to_convert</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">,</span>
+        <span class="n">absolute_entry_delay</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">ComplexEvent</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_convert_event</span><span class="p">(</span><span class="n">event_to_convert</span><span class="p">,</span> <span class="n">absolute_entry_delay</span><span class="p">,</span> <span class="n">depth</span><span class="p">)</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.core_converters.abc</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Levin Eric Zimmermann.
+    </div>
+  </body>
+</html>

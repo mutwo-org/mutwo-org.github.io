@@ -1,0 +1,943 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mutwo.midi_converters.frontends &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.midi_converters.frontends</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mutwo.midi_converters.frontends</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Render midi files (SMF) from mutwo data.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="kn">import</span> <span class="nn">mido</span>  <span class="c1"># type: ignore</span>
+
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_constants</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_converters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_events</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_parameters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_utilities</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">midi_converters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_converters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_parameters</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;SimpleEventToControlMessageTuple&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CentDeviationToPitchBendingNumber&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;MutwoPitchToMidiPitch&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;EventToMidiFile&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">ConvertableEvent</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span>
+    <span class="o">|</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">]</span>
+    <span class="o">|</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Concurrence</span><span class="p">[</span>
+        <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">]</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="SimpleEventToControlMessageTuple"><a class="viewcode-back" href="../../../api/mutwo.midi_converters.html#mutwo.midi_converters.SimpleEventToControlMessageTuple">[docs]</a><span class="k">class</span> <span class="nc">SimpleEventToControlMessageTuple</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">SimpleEventToAttribute</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert :class:`mutwo.core_events.SimpleEvent` to a tuple of control messages&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">attribute_name</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">exception_value</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">mido</span><span class="o">.</span><span class="n">Message</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([]),</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">attribute_name</span>
+            <span class="ow">or</span> <span class="n">midi_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_CONTROL_MESSAGE_TUPLE_ATTRIBUTE_NAME</span><span class="p">,</span>
+            <span class="n">exception_value</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CentDeviationToPitchBendingNumber"><a class="viewcode-back" href="../../../api/mutwo.midi_converters.html#mutwo.midi_converters.CentDeviationToPitchBendingNumber">[docs]</a><span class="k">class</span> <span class="nc">CentDeviationToPitchBendingNumber</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Converter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert cent deviation to midi pitch bend number.</span>
+
+<span class="sd">    :param maximum_pitch_bend_deviation: sets the maximum pitch bending range in cents.</span>
+<span class="sd">        This value depends on the particular used software synthesizer and its settings,</span>
+<span class="sd">        because it is up to the respective synthesizer how to interpret the pitch</span>
+<span class="sd">        bending messages. By default mutwo sets the value to 200 cents which</span>
+<span class="sd">        seems to be the most common interpretation among different manufacturers.</span>
+<span class="sd">    :type maximum_pitch_bend_deviation: int</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maximum_pitch_bend_deviation</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">get_cls_logger</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_maximum_pitch_bend_deviation</span> <span class="o">=</span> <span class="n">maximum_pitch_bend_deviation</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">maximum_pitch_bend_deviation</span>
+            <span class="ow">or</span> <span class="n">midi_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_MAXIMUM_PITCH_BEND_DEVIATION_IN_CENTS</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pitch_bending_warning</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Maximum pitch bending is </span><span class="si">{</span><span class="n">maximum_pitch_bend_deviation</span><span class="si">}</span><span class="s2"> cents up or down!&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_warn_pitch_bending</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cent_deviation</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Maximum pitch bending is </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_maximum_pitch_bend_deviation</span><span class="si">}</span><span class="s2"> &quot;</span>
+            <span class="s2">&quot;cents up or down! Found prohibited necessity for pitch &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;bending with cent_deviation = </span><span class="si">{</span><span class="n">cent_deviation</span><span class="si">}</span><span class="s2">. &quot;</span>
+            <span class="s2">&quot;Mutwo normalized pitch bending to the allowed border.&quot;</span>
+            <span class="s2">&quot; Increase the &#39;maximum_pitch_bend_deviation&#39; argument in the &quot;</span>
+            <span class="s2">&quot;CentDeviationToPitchBendingNumber instance.&quot;</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="CentDeviationToPitchBendingNumber.convert"><a class="viewcode-back" href="../../../api/mutwo.midi_converters.html#mutwo.midi_converters.CentDeviationToPitchBendingNumber.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">cent_deviation</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cent_deviation</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_maximum_pitch_bend_deviation</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_warn_pitch_bending</span><span class="p">(</span><span class="n">cent_deviation</span><span class="p">)</span>
+            <span class="n">cent_deviation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_maximum_pitch_bend_deviation</span>
+        <span class="k">elif</span> <span class="n">cent_deviation</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_maximum_pitch_bend_deviation</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_warn_pitch_bending</span><span class="p">(</span><span class="n">cent_deviation</span><span class="p">)</span>
+            <span class="n">cent_deviation</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_maximum_pitch_bend_deviation</span>
+
+        <span class="k">return</span> <span class="nb">round</span><span class="p">(</span>
+            <span class="n">core_utilities</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span>
+                <span class="n">cent_deviation</span><span class="p">,</span>
+                <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_maximum_pitch_bend_deviation</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_maximum_pitch_bend_deviation</span><span class="p">,</span>
+                <span class="o">-</span><span class="n">midi_converters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">NEUTRAL_PITCH_BEND</span><span class="p">,</span>
+                <span class="n">midi_converters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">NEUTRAL_PITCH_BEND</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="MutwoPitchToMidiPitch"><a class="viewcode-back" href="../../../api/mutwo.midi_converters.html#mutwo.midi_converters.MutwoPitchToMidiPitch">[docs]</a><span class="k">class</span> <span class="nc">MutwoPitchToMidiPitch</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Converter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert mutwo pitch to midi pitch number and midi pitch bend number.</span>
+
+<span class="sd">    :param maximum_pitch_bend_deviation: sets the maximum pitch bending range in cents.</span>
+<span class="sd">        This value depends on the particular used software synthesizer and its settings,</span>
+<span class="sd">        because it is up to the respective synthesizer how to interpret the pitch</span>
+<span class="sd">        bending messages. By default mutwo sets the value to 200 cents which</span>
+<span class="sd">        seems to be the most common interpretation among different manufacturers.</span>
+<span class="sd">    :type maximum_pitch_bend_deviation: int</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">cent_deviation_to_pitch_bending_number</span><span class="p">:</span> <span class="n">CentDeviationToPitchBendingNumber</span> <span class="o">=</span> <span class="n">CentDeviationToPitchBendingNumber</span><span class="p">(),</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cent_deviation_to_pitch_bending_number</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">cent_deviation_to_pitch_bending_number</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="MutwoPitchToMidiPitch.convert"><a class="viewcode-back" href="../../../api/mutwo.midi_converters.html#mutwo.midi_converters.MutwoPitchToMidiPitch.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">mutwo_pitch_to_convert</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">,</span>
+        <span class="n">midi_note</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">midi_converters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">MidiPitch</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Find midi note and pitch bending for given mutwo pitch</span>
+
+<span class="sd">        :param mutwo_pitch_to_convert: The mutwo pitch which shall be converted.</span>
+<span class="sd">        :type mutwo_pitch_to_convert: music_parameters.abc.Pitch</span>
+<span class="sd">        :param midi_note: Can be set to a midi note value if one wants to force</span>
+<span class="sd">            the converter to calculate the pitch bending deviation for the passed</span>
+<span class="sd">            midi note. If this argument is ``None`` the converter will simply use</span>
+<span class="sd">            the closest midi pitch number to the passed mutwo pitch. Default to ``None``.</span>
+<span class="sd">        :type midi_note: typing.Optional[int]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">mutwo_pitch_to_convert</span><span class="o">.</span><span class="n">frequency</span>
+        <span class="k">if</span> <span class="n">midi_note</span><span class="p">:</span>
+            <span class="n">closest_midi_pitch</span> <span class="o">=</span> <span class="n">midi_note</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">closest_midi_pitch</span> <span class="o">=</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">find_closest_index</span><span class="p">(</span>
+                <span class="n">f</span><span class="p">,</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">MIDI_PITCH_FREQUENCY_TUPLE</span>
+            <span class="p">)</span>
+        <span class="n">Δcents_to_closest_midi_pitch</span> <span class="o">=</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="o">.</span><span class="n">hertz_to_cents</span><span class="p">(</span>
+            <span class="n">music_parameters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">MIDI_PITCH_FREQUENCY_TUPLE</span><span class="p">[</span><span class="n">closest_midi_pitch</span><span class="p">],</span>
+            <span class="n">f</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">pb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cent_deviation_to_pitch_bending_number</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span>
+            <span class="n">Δcents_to_closest_midi_pitch</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">closest_midi_pitch</span><span class="p">,</span> <span class="n">pb</span></div></div>
+
+
+<div class="viewcode-block" id="EventToMidiFile"><a class="viewcode-back" href="../../../api/mutwo.midi_converters.html#mutwo.midi_converters.EventToMidiFile">[docs]</a><span class="k">class</span> <span class="nc">EventToMidiFile</span><span class="p">(</span><span class="n">core_converters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Converter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class for rendering standard midi files (SMF) from mutwo data.</span>
+
+<span class="sd">    Mutwo offers a wide range of options how the respective midi file shall</span>
+<span class="sd">    be rendered and how mutwo data shall be translated. This is necessary due</span>
+<span class="sd">    to the limited and not always unambiguous nature of musical encodings in</span>
+<span class="sd">    midi files. In this way the user can tweak the conversion routine to her</span>
+<span class="sd">    or his individual needs.</span>
+
+<span class="sd">    :param chronon_to_pitch_list: Function to extract from a</span>
+<span class="sd">        :class:`mutwo.core_events.SimpleEvent` a tuple that contains pitch objects</span>
+<span class="sd">        (objects that inherit from :class:`mutwo.music_parameters.abc.Pitch`).</span>
+<span class="sd">        By default it asks the Event for its :attr:`pitch_list` attribute</span>
+<span class="sd">        (because by default :class:`mutwo.music_events.NoteLike` objects are expected).</span>
+<span class="sd">        When using different Event classes than ``NoteLike`` with a different name for</span>
+<span class="sd">        their pitch property, this argument should be overridden. If the function call</span>
+<span class="sd">        raises an :obj:`AttributeError` (e.g. if no pitch can be extracted),</span>
+<span class="sd">        mutwo will interpret the event as a rest.</span>
+<span class="sd">    :type chronon_to_pitch_list: typing.Callable[</span>
+<span class="sd">            [core_events.SimpleEvent], tuple[music_parameters.abc.Pitch, ...]]</span>
+<span class="sd">    :param chronon_to_volume: Function to extract the volume from a</span>
+<span class="sd">        :class:`mutwo.core_events.SimpleEvent` in the purpose of generating midi notes.</span>
+<span class="sd">        The function should return an object that inhertis from</span>
+<span class="sd">        :class:`mutwo.music_parameters.abc.Volume`. By default it asks the Event for</span>
+<span class="sd">        its :attr:`volume` attribute (because by default</span>
+<span class="sd">        :class:`mutwo.music_events.NoteLike` objects are expected).</span>
+<span class="sd">        When using different Event classes than ``NoteLike`` with a</span>
+<span class="sd">        different name for their volume property, this argument should be overridden.</span>
+<span class="sd">        If the function call raises an :obj:`AttributeError` (e.g. if no volume can be</span>
+<span class="sd">        extracted), mutwo will interpret the event as a rest.</span>
+<span class="sd">    :type chronon_to_volume: typing.Callable[</span>
+<span class="sd">            [core_events.SimpleEvent], music_parameters.abc.Volume]</span>
+<span class="sd">    :param chronon_to_control_message_tuple: Function to generate midi control messages</span>
+<span class="sd">        from a chronon. By default no control messages are generated. If the</span>
+<span class="sd">        function call raises an AttributeError (e.g. if an expected control value isn&#39;t</span>
+<span class="sd">        available) mutwo will interpret the event as a rest.</span>
+<span class="sd">    :type chronon_to_control_message_tuple: typing.Callable[</span>
+<span class="sd">            [core_events.SimpleEvent], tuple[mido.Message, ...]]</span>
+<span class="sd">    :param midi_file_type: Can either be 0 (for one-track midi files) or 1 (for</span>
+<span class="sd">         synchronous multi-track midi files). Mutwo doesn&#39;t offer support for generating</span>
+<span class="sd">         type 2 midi files (midi files with asynchronous tracks).</span>
+<span class="sd">    :type midi_file_type: int</span>
+<span class="sd">    :param available_midi_channel_tuple: tuple containing integer where each integer</span>
+<span class="sd">        represents the number of the used midi channel. Integer can range from 0 to 15.</span>
+<span class="sd">        Higher numbers of available_midi_channel_tuple (like all 16) are recommended when</span>
+<span class="sd">        rendering microtonal music. It shall be remarked that midi-channel 9 (or midi</span>
+<span class="sd">        channel 10 when starting to count from 1) is often ignored by several software</span>
+<span class="sd">        synthesizer, because this channel is reserved for percussion instruments.</span>
+<span class="sd">    :type available_midi_channel_tuple: tuple[int, ...]</span>
+<span class="sd">    :param distribute_midi_channels: This parameter is only relevant if more than one</span>
+<span class="sd">        :class:`~mutwo.core_events.Consecution` is passed to the convert method.</span>
+<span class="sd">        If set to ``True`` each :class:`~mutwo.core_events.Consecution`</span>
+<span class="sd">        only makes use of exactly n_midi_channel (see next parameter).</span>
+<span class="sd">        If set to ``False`` each converted :class:`Consecution` is allowed to make use of all</span>
+<span class="sd">        available channels. If set to ``True`` and the amount of necessary MidiTracks is</span>
+<span class="sd">        higher than the amount of available channels, mutwo will silently cycle through</span>
+<span class="sd">        the list of available midi channel.</span>
+<span class="sd">    :type distribute_midi_channels: bool</span>
+<span class="sd">    :param midi_channel_count_per_track: This parameter is only relevant for</span>
+<span class="sd">        distribute_midi_channels == True. It sets how many midi channels are assigned</span>
+<span class="sd">        to one Consecution. If microtonal chords shall be played by</span>
+<span class="sd">        one Consecution (via pitch bending messages) a higher number than 1 is</span>
+<span class="sd">        recommended. Defaults to 1.</span>
+<span class="sd">    :type midi_channel_count_per_track: int</span>
+<span class="sd">    :param mutwo_pitch_to_midi_pitch: class to convert from mutwo pitches</span>
+<span class="sd">        to midi pitches. Default to :class:`MutwoPitchToMidiPitch`.</span>
+<span class="sd">    :type mutwo_pitch_to_midi_pitch: :class:`MutwoPitchToMidiPitch`</span>
+<span class="sd">    :param ticks_per_beat: Sets the timing precision of the midi file. From the mido</span>
+<span class="sd">        documentation: &quot;Typical values range from 96 to 480 but some use even more</span>
+<span class="sd">        ticks per beat&quot;.</span>
+<span class="sd">    :type ticks_per_beat: int</span>
+<span class="sd">    :param instrument_name: Sets the midi instrument of all channels.</span>
+<span class="sd">    :type instrument_name: str</span>
+<span class="sd">    :param tempo_envelope: All Midi files should specify their tempo. The default</span>
+<span class="sd">        value of mutwo is 120 BPM (this is also the value that is assumed by any</span>
+<span class="sd">        midi-file-reading-software if no tempo has been specified). Tempo changes</span>
+<span class="sd">        are supported (and will be written to the resulting midi file).</span>
+<span class="sd">    :type tempo_envelope: core_events.TempoEnvelope</span>
+
+<span class="sd">    **Example**:</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import midi_converters</span>
+<span class="sd">    &gt;&gt;&gt; from mutwo import music_parameters</span>
+<span class="sd">    &gt;&gt;&gt; # midi file converter that assign a middle c to all events</span>
+<span class="sd">    &gt;&gt;&gt; midi_converter = midi_converters.EventToMidiFile(</span>
+<span class="sd">    ...     chronon_to_pitch_list=lambda event: (music_parameters.WesternPitch(&#39;c&#39;),)</span>
+<span class="sd">    ... )</span>
+
+<span class="sd">    **Disclaimer**:</span>
+<span class="sd">        The current implementation doesn&#39;t support time-signatures (the written time</span>
+<span class="sd">        signature is always 4/4 for now).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_tempo_point_converter</span> <span class="o">=</span> <span class="n">core_converters</span><span class="o">.</span><span class="n">TempoPointToBeatLengthInSeconds</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">chronon_to_pitch_list</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">SimpleEventToPitchList</span><span class="p">(),</span>  <span class="c1"># type: ignore</span>
+        <span class="n">chronon_to_volume</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Volume</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">music_converters</span><span class="o">.</span><span class="n">SimpleEventToVolume</span><span class="p">(),</span>  <span class="c1"># type: ignore</span>
+        <span class="n">chronon_to_control_message_tuple</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">mido</span><span class="o">.</span><span class="n">Message</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">SimpleEventToControlMessageTuple</span><span class="p">(),</span>
+        <span class="n">midi_file_type</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">available_midi_channel_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">distribute_midi_channels</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">midi_channel_count_per_track</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">mutwo_pitch_to_midi_pitch</span><span class="p">:</span> <span class="n">MutwoPitchToMidiPitch</span> <span class="o">=</span> <span class="n">MutwoPitchToMidiPitch</span><span class="p">(),</span>
+        <span class="n">ticks_per_beat</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">instrument_name</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">tempo_envelope</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">TempoEnvelope</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">get_cls_logger</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_midi_file_type</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">midi_file_type</span> <span class="ow">or</span> <span class="n">midi_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_MIDI_FILE_TYPE</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_available_midi_channel_tuple</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">available_midi_channel_tuple</span>
+            <span class="ow">or</span> <span class="n">midi_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_AVAILABLE_MIDI_CHANNEL_TUPLE</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_midi_channel_count_per_track</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">midi_channel_count_per_track</span>
+            <span class="ow">or</span> <span class="n">midi_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_MIDI_CHANNEL_COUNT_PER_TRACK</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ticks_per_beat</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">ticks_per_beat</span> <span class="ow">or</span> <span class="n">midi_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_TICKS_PER_BEAT</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_instrument_name</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">instrument_name</span>
+            <span class="ow">or</span> <span class="n">midi_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_MIDI_INSTRUMENT_NAME</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tempo_envelope</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">tempo_envelope</span> <span class="ow">or</span> <span class="n">midi_converters</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_TEMPO_ENVELOPE</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_pitch_list</span> <span class="o">=</span> <span class="n">chronon_to_pitch_list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_volume</span> <span class="o">=</span> <span class="n">chronon_to_volume</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_control_message_tuple</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">chronon_to_control_message_tuple</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_distribute_midi_channels</span> <span class="o">=</span> <span class="n">distribute_midi_channels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mutwo_pitch_to_midi_pitch</span> <span class="o">=</span> <span class="n">mutwo_pitch_to_midi_pitch</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_midi_file_type_has_correct_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_midi_file_type</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_available_midi_channel_tuple_has_correct_value</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_available_midi_channel_tuple</span>
+        <span class="p">)</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                          static methods                                #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_assert_midi_file_type_has_correct_value</span><span class="p">(</span><span class="n">midi_file_type</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">midi_file_type</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Unknown midi_file_type &#39;</span><span class="si">{</span><span class="n">midi_file_type</span><span class="si">}</span><span class="s2">&#39;. &quot;</span>
+                <span class="s2">&quot;Only midi type 0 and 1 are supported.&quot;</span>
+            <span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_assert_available_midi_channel_tuple_has_correct_value</span><span class="p">(</span>
+        <span class="n">available_midi_channel_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+    <span class="p">):</span>
+        <span class="c1"># check for correct range of each number</span>
+        <span class="k">for</span> <span class="n">mc</span> <span class="ow">in</span> <span class="n">available_midi_channel_tuple</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">mc</span> <span class="ow">in</span> <span class="n">midi_converters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">ALLOWED_MIDI_CHANNEL_TUPLE</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Found unknown midi channel &#39;</span><span class="si">{</span><span class="n">mc</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
+                    <span class="s2">&quot;in available_midi_channel_tuple.&quot;</span>
+                    <span class="s2">&quot; Only midi channel &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">midi_converters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">ALLOWED_MIDI_CHANNEL_TUPLE</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
+                    <span class="s2">&quot;are allowed.&quot;</span>
+                <span class="p">)</span>
+
+        <span class="c1"># check for duplicate</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">available_midi_channel_tuple</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">available_midi_channel_tuple</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Found duplicate in available_midi_channel_tuple &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">available_midi_channel_tuple</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>
+            <span class="p">)</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                         helper methods                                 #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="k">def</span> <span class="nf">_adjust_beat_length_in_microseconds</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">tempo_point</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span> <span class="o">|</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">DirectTempoPoint</span><span class="p">,</span>
+        <span class="n">beat_length_in_microseconds</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;This method makes sure that ``beat_length_in_microseconds`` isn&#39;t too big.</span>
+
+<span class="sd">        Standard midi files define a slowest allowed tempo which is around 3.5 BPM.</span>
+<span class="sd">        In case the tempo is lower than this slowest allowed tempo, `mutwo` will</span>
+<span class="sd">        automatically set the tempo to the lowest allowed tempo.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">bl</span> <span class="o">=</span> <span class="n">beat_length_in_microseconds</span>
+        <span class="k">if</span> <span class="n">bl</span> <span class="o">&gt;=</span> <span class="n">midi_converters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">MAXIMUM_MICROSECONDS_PER_BEAT</span><span class="p">:</span>
+            <span class="n">bl</span> <span class="o">=</span> <span class="n">midi_converters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">MAXIMUM_MICROSECONDS_PER_BEAT</span>
+            <span class="n">bpm</span> <span class="o">=</span> <span class="n">mido</span><span class="o">.</span><span class="n">tempo2bpm</span><span class="p">(</span>
+                <span class="n">midi_converters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">MAXIMUM_MICROSECONDS_PER_BEAT</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;TempoPoint &#39;</span><span class="si">{</span><span class="n">tempo_point</span><span class="si">}</span><span class="s2">&#39; is too slow for &quot;</span>
+                <span class="s2">&quot;Standard Midi Files. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;The slowest possible tempo is &#39;</span><span class="si">{</span><span class="n">bpm</span><span class="si">}</span><span class="s2">&#39; BPM.&quot;</span>
+                <span class="s2">&quot;Tempo has been set to&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; &#39;</span><span class="si">{</span><span class="n">bpm</span><span class="si">}</span><span class="s2">&#39; BPM.&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">bl</span>
+
+    <span class="k">def</span> <span class="nf">_beats_per_minute_to_beat_length_in_microseconds</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">beats_per_minute</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Method for converting beats per minute (BPM) to midi tempo.</span>
+<span class="sd">        Midi tempo is stated in beat length in microseconds.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">bl_in_seconds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tempo_point_converter</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">beats_per_minute</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">bl_in_seconds</span> <span class="o">*</span> <span class="n">midi_converters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">MIDI_TEMPO_FACTOR</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_find_available_midi_channel_tuple_per_consecution</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">simultaneous_event</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Concurrence</span><span class="p">[</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">]</span>
+        <span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Find midi channels for each Consecution.</span>
+
+<span class="sd">        Depending on whether distribute_midi_channels has been set</span>
+<span class="sd">        to True this method distributes all available midi channels</span>
+<span class="sd">        on the respective Consecutions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_distribute_midi_channels</span><span class="p">:</span>
+            <span class="n">mchannel_cycle</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_available_midi_channel_tuple</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span>
+                <span class="nb">tuple</span><span class="p">(</span>
+                    <span class="nb">next</span><span class="p">(</span><span class="n">mchannel_cycle</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_midi_channel_count_per_track</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">simultaneous_event</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_available_midi_channel_tuple</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">simultaneous_event</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_beats_to_ticks</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">absolute_time</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="n">abs_t</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">UNKNOWN_OBJECT_TO_DURATION</span><span class="p">(</span><span class="n">absolute_time</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ticks_per_beat</span> <span class="o">*</span> <span class="n">abs_t</span><span class="o">.</span><span class="n">duration</span><span class="p">)</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#             methods for converting mutwo data to midi data             #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="k">def</span> <span class="nf">_tempo_envelope_to_midi_message_tuple</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">tempo_envelope</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">TempoEnvelope</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">mido</span><span class="o">.</span><span class="n">MetaMessage</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Converts a Consecution of ``EnvelopeEvent`` to midi Tempo messages.&quot;&quot;&quot;</span>
+
+        <span class="n">offset_iterator</span> <span class="o">=</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">accumulate_from_n</span><span class="p">(</span>
+            <span class="n">tempo_envelope</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s2">&quot;duration&quot;</span><span class="p">),</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">DirectDuration</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">mlist</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">abs_t</span><span class="p">,</span> <span class="n">tempo_point</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">offset_iterator</span><span class="p">,</span> <span class="n">tempo_envelope</span><span class="o">.</span><span class="n">value_tuple</span><span class="p">):</span>
+            <span class="n">absolute_tick</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_beats_to_ticks</span><span class="p">(</span><span class="n">abs_t</span><span class="p">)</span>
+            <span class="n">bl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_beats_per_minute_to_beat_length_in_microseconds</span><span class="p">(</span><span class="n">tempo_point</span><span class="p">)</span>
+            <span class="n">bl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_adjust_beat_length_in_microseconds</span><span class="p">(</span><span class="n">tempo_point</span><span class="p">,</span> <span class="n">bl</span><span class="p">)</span>
+            <span class="n">tempom</span> <span class="o">=</span> <span class="n">mido</span><span class="o">.</span><span class="n">MetaMessage</span><span class="p">(</span><span class="s2">&quot;set_tempo&quot;</span><span class="p">,</span> <span class="n">tempo</span><span class="o">=</span><span class="n">bl</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">absolute_tick</span><span class="p">)</span>
+            <span class="n">mlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tempom</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">mlist</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_tune_pitch</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">absolute_tick_start</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">absolute_tick_end</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">pitch_to_tune</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">,</span>
+        <span class="n">midi_channel</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">midi_converters</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">MidiNote</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">mido</span><span class="o">.</span><span class="n">Message</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
+        <span class="n">tick_count</span> <span class="o">=</span> <span class="n">absolute_tick_end</span> <span class="o">-</span> <span class="n">absolute_tick_start</span>
+        <span class="c1"># We replace the original pitch object with a pitch object that doesn&#39;t</span>
+        <span class="c1"># start any complex computations when asking for its &#39;frequency&#39; attribute.</span>
+        <span class="n">pitch_to_tune</span> <span class="o">=</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">DirectPitch</span><span class="p">(</span>
+            <span class="n">pitch_to_tune</span><span class="o">.</span><span class="n">frequency</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="n">pitch_to_tune</span><span class="o">.</span><span class="n">envelope</span>
+        <span class="p">)</span>
+        <span class="c1"># We have to use one tick less, so that at</span>
+        <span class="c1"># &quot;pitch_envelope.value_at(tick_count)&quot; we already reached the</span>
+        <span class="c1"># end of the envelope.</span>
+        <span class="n">penvelope</span> <span class="o">=</span> <span class="n">pitch_to_tune</span><span class="o">.</span><span class="n">resolve_envelope</span><span class="p">(</span><span class="n">tick_count</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># We will convert the pitch envelope to numerical values for better performance</span>
+        <span class="n">numerical_penvelope</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Envelope</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">[</span><span class="n">absolute_time</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">curve_shape</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">absolute_time</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">event</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                    <span class="n">penvelope</span><span class="o">.</span><span class="n">absolute_time_tuple</span><span class="p">,</span>
+                    <span class="n">penvelope</span><span class="o">.</span><span class="n">value_tuple</span><span class="p">,</span>
+                    <span class="n">penvelope</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">penvelope</span><span class="o">.</span><span class="n">duration</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">avg_cent</span> <span class="o">=</span> <span class="n">numerical_penvelope</span><span class="o">.</span><span class="n">get_average_parameter</span><span class="p">(</span><span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">)</span>
+        <span class="n">avg_p</span> <span class="o">=</span> <span class="n">penvelope</span><span class="o">.</span><span class="n">value_to_parameter</span><span class="p">(</span><span class="n">avg_cent</span><span class="p">)</span>
+        <span class="n">midi_pitch</span><span class="p">,</span> <span class="n">pb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mutwo_pitch_to_midi_pitch</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">avg_p</span><span class="p">)</span>
+        <span class="n">first_pitch_bending_message_time</span> <span class="o">=</span> <span class="n">absolute_tick_start</span>
+        <span class="k">if</span> <span class="n">absolute_tick_start</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># if possible add bending one tick earlier to avoid glitches</span>
+            <span class="n">first_pitch_bending_message_time</span> <span class="o">-=</span> <span class="mi">1</span>
+
+        <span class="n">pbm_list</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># pitch bending messages</span>
+        <span class="k">if</span> <span class="n">numerical_penvelope</span><span class="o">.</span><span class="n">is_static</span><span class="p">:</span>
+            <span class="n">pbm_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">mido</span><span class="o">.</span><span class="n">Message</span><span class="p">(</span>
+                    <span class="s2">&quot;pitchwheel&quot;</span><span class="p">,</span>
+                    <span class="n">channel</span><span class="o">=</span><span class="n">midi_channel</span><span class="p">,</span>
+                    <span class="n">pitch</span><span class="o">=</span><span class="n">pb</span><span class="p">,</span>
+                    <span class="n">time</span><span class="o">=</span><span class="n">first_pitch_bending_message_time</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">avg_p_f</span> <span class="o">=</span> <span class="n">avg_p</span><span class="o">.</span><span class="n">frequency</span>
+            <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">tick_count</span><span class="p">):</span>
+                <span class="n">abstract_cents</span> <span class="o">=</span> <span class="n">numerical_penvelope</span><span class="o">.</span><span class="n">parameter_at</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="n">penvelope</span><span class="o">.</span><span class="n">value_to_parameter</span><span class="p">(</span><span class="n">abstract_cents</span><span class="p">)</span><span class="o">.</span><span class="n">frequency</span>
+                <span class="n">pb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mutwo_pitch_to_midi_pitch</span><span class="o">.</span><span class="n">_cent_deviation_to_pitch_bending_number</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span>
+                    <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="o">.</span><span class="n">hertz_to_cents</span><span class="p">(</span><span class="n">avg_p_f</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">pitch_bending_message</span> <span class="o">=</span> <span class="n">mido</span><span class="o">.</span><span class="n">Message</span><span class="p">(</span>
+                    <span class="s2">&quot;pitchwheel&quot;</span><span class="p">,</span>
+                    <span class="n">channel</span><span class="o">=</span><span class="n">midi_channel</span><span class="p">,</span>
+                    <span class="n">pitch</span><span class="o">=</span><span class="n">pb</span><span class="p">,</span>
+                    <span class="n">time</span><span class="o">=</span><span class="n">t</span> <span class="o">+</span> <span class="n">absolute_tick_start</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">pbm_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pitch_bending_message</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">midi_pitch</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">pbm_list</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_note_information_to_midi_message_tuple</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">absolute_tick_start</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">absolute_tick_end</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">velocity</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">pitch</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">,</span>
+        <span class="n">midi_channel</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">mido</span><span class="o">.</span><span class="n">Message</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Generate &#39;pitch bending&#39;, &#39;note on&#39; and &#39;note off&#39; messages for one tone.&quot;&quot;&quot;</span>
+        <span class="n">p</span><span class="p">,</span> <span class="n">pitch_bending_message_tuple</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tune_pitch</span><span class="p">(</span>
+            <span class="n">absolute_tick_start</span><span class="p">,</span>
+            <span class="n">absolute_tick_end</span><span class="p">,</span>
+            <span class="n">pitch</span><span class="p">,</span>
+            <span class="n">midi_channel</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">midi_message_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">pitch_bending_message_tuple</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">m</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="p">(</span><span class="n">absolute_tick_start</span><span class="p">,</span> <span class="s2">&quot;note_on&quot;</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">absolute_tick_end</span><span class="p">,</span> <span class="s2">&quot;note_off&quot;</span><span class="p">),</span>
+        <span class="p">):</span>
+            <span class="n">midi_message_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">mido</span><span class="o">.</span><span class="n">Message</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="n">p</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="n">velocity</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">t</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="n">midi_channel</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">midi_message_list</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_extracted_data_to_midi_message_tuple</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">absolute_time</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">,</span>
+        <span class="n">duration</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">DurationType</span><span class="p">,</span>
+        <span class="n">available_midi_channel_tuple_cycle</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Iterator</span><span class="p">,</span>
+        <span class="n">pitch_list</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+        <span class="n">volume</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Volume</span><span class="p">,</span>
+        <span class="n">control_message_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">mido</span><span class="o">.</span><span class="n">Message</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">mido</span><span class="o">.</span><span class="n">Message</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Generates pitch-bend / note-on / note-off messages for each tone in a chord.</span>
+
+<span class="sd">        Concatenates the midi messages for every played tone with the global control</span>
+<span class="sd">        messages.</span>
+
+<span class="sd">        Gets as an input relevant data for midi message generation that has been</span>
+<span class="sd">        extracted from a :class:`mutwo.core_events.abc.Event` object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">abs_tick_start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_beats_to_ticks</span><span class="p">(</span><span class="n">absolute_time</span><span class="p">)</span>
+        <span class="n">abs_tick_end</span> <span class="o">=</span> <span class="n">abs_tick_start</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_beats_to_ticks</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span>
+        <span class="n">velocity</span> <span class="o">=</span> <span class="n">volume</span><span class="o">.</span><span class="n">midi_velocity</span>
+
+        <span class="n">mlist</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># add control messages</span>
+        <span class="k">for</span> <span class="n">cm</span> <span class="ow">in</span> <span class="n">control_message_tuple</span><span class="p">:</span>
+            <span class="n">cm</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">abs_tick_start</span>
+            <span class="n">mlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cm</span><span class="p">)</span>
+
+        <span class="c1"># add note related messages</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pitch_list</span><span class="p">:</span>
+            <span class="n">mlist</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_note_information_to_midi_message_tuple</span><span class="p">(</span>
+                    <span class="n">abs_tick_start</span><span class="p">,</span>
+                    <span class="n">abs_tick_end</span><span class="p">,</span>
+                    <span class="n">velocity</span><span class="p">,</span>
+                    <span class="n">p</span><span class="p">,</span>
+                    <span class="nb">next</span><span class="p">(</span><span class="n">available_midi_channel_tuple_cycle</span><span class="p">),</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">mlist</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_chronon_to_midi_message_tuple</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">chronon</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">,</span>
+        <span class="n">absolute_time</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">,</span>
+        <span class="n">available_midi_channel_tuple_cycle</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Iterator</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">mido</span><span class="o">.</span><span class="n">Message</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Converts ``SimpleEvent`` (or any object that inherits from ``SimpleEvent``).</span>
+
+<span class="sd">        Return tuple filled with midi messages that represent the mutwo data in the</span>
+<span class="sd">        midi format.</span>
+
+<span class="sd">        The timing here is absolute. Only later at the</span>
+<span class="sd">        `_midi_message_tuple_to_midi_track` method the timing</span>
+<span class="sd">        becomes relative</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">extracted_data_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># try to extract the relevant data</span>
+        <span class="n">is_rest</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">extraction_function</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="p">(</span><span class="s2">&quot;pitch_list&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_pitch_list</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;volume&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_volume</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;control_message_tuple&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_control_message_tuple</span><span class="p">),</span>
+        <span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">d</span> <span class="o">=</span> <span class="n">extraction_function</span><span class="p">(</span><span class="n">chronon</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="n">is_rest</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">d</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                        <span class="s2">&quot;Extracting &#39;</span><span class="si">{p}</span><span class="s2">&#39; from event &#39;</span><span class="si">{chronon}</span><span class="s2">&#39; &quot;</span>
+                        <span class="s2">&quot;returned &#39;None&#39;! Converter autoset this event to &quot;</span>
+                        <span class="s2">&quot;a rest.&quot;</span>
+                    <span class="p">)</span>
+                    <span class="n">is_rest</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">is_rest</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">extracted_data_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+
+        <span class="c1"># if not all relevant data could be extracted, simply ignore the</span>
+        <span class="c1"># event</span>
+        <span class="k">if</span> <span class="n">is_rest</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">tuple</span><span class="p">([])</span>
+
+        <span class="c1"># otherwise generate midi messages from the extracted data</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extracted_data_to_midi_message_tuple</span><span class="p">(</span>
+            <span class="n">absolute_time</span><span class="p">,</span>
+            <span class="n">chronon</span><span class="o">.</span><span class="n">duration</span><span class="p">,</span>
+            <span class="n">available_midi_channel_tuple_cycle</span><span class="p">,</span>
+            <span class="o">*</span><span class="n">extracted_data_list</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_consecution_to_midi_message_tuple</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">consecution</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">[</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span> <span class="o">|</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span>
+        <span class="p">],</span>
+        <span class="n">available_midi_channel_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+        <span class="n">absolute_time</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span> <span class="o">=</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">DirectDuration</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">mido</span><span class="o">.</span><span class="n">Message</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Iterates through the ``Consecution`` and converts each ``SimpleEvent``.</span>
+
+<span class="sd">        Return unsorted tuple of Midi messages where the time attribute of each message</span>
+<span class="sd">        is the absolute time in ticks.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">mlist</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">mido</span><span class="o">.</span><span class="n">Message</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">mchannel_cycle</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">(</span><span class="n">available_midi_channel_tuple</span><span class="p">)</span>
+
+        <span class="c1"># fill midi track with the content of the consecution</span>
+        <span class="k">for</span> <span class="n">local_abs_time</span><span class="p">,</span> <span class="n">sim_or_seq</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+            <span class="n">consecution</span><span class="o">.</span><span class="n">absolute_time_tuple</span><span class="p">,</span> <span class="n">consecution</span>
+        <span class="p">):</span>
+            <span class="n">global_abs_time</span> <span class="o">=</span> <span class="n">local_abs_time</span> <span class="o">+</span> <span class="n">absolute_time</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sim_or_seq</span><span class="p">,</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">):</span>
+                <span class="n">mtuple</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chronon_to_midi_message_tuple</span><span class="p">(</span>
+                    <span class="n">sim_or_seq</span><span class="p">,</span> <span class="n">global_abs_time</span><span class="p">,</span> <span class="n">mchannel_cycle</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;SimpleEvent -&gt; MidiMessageData:</span><span class="se">\n\t</span><span class="si">{</span><span class="n">sim_or_seq</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">mtuple</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">mtuple</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_consecution_to_midi_message_tuple</span><span class="p">(</span>
+                    <span class="n">sim_or_seq</span><span class="p">,</span>
+                    <span class="n">available_midi_channel_tuple</span><span class="p">,</span>
+                    <span class="n">global_abs_time</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="n">mlist</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">mtuple</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">mlist</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_midi_message_tuple_to_midi_track</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">midi_message_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">mido</span><span class="o">.</span><span class="n">Message</span> <span class="o">|</span> <span class="n">mido</span><span class="o">.</span><span class="n">MetaMessage</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+        <span class="n">duration</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">DurationType</span><span class="p">,</span>
+        <span class="n">is_first_track</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">mido</span><span class="o">.</span><span class="n">MidiTrack</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Convert unsorted midi message with absolute timing to a midi track.</span>
+
+<span class="sd">        In the resulting midi track the timing of the messages is relative.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="s2">&quot;Convert midi messages -&gt; MidiTrack</span><span class="se">\n\t</span><span class="s2">&quot;</span> <span class="sa">f</span><span class="s2">&quot;msg-tuple: </span><span class="si">{</span><span class="n">midi_message_tuple</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+        <span class="n">track</span> <span class="o">=</span> <span class="n">mido</span><span class="o">.</span><span class="n">MidiTrack</span><span class="p">([])</span>
+        <span class="n">track</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mido</span><span class="o">.</span><span class="n">MetaMessage</span><span class="p">(</span><span class="s2">&quot;instrument_name&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_instrument_name</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">is_first_track</span><span class="p">:</span>
+            <span class="c1"># standard time signature 4/4</span>
+            <span class="n">track</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mido</span><span class="o">.</span><span class="n">MetaMessage</span><span class="p">(</span><span class="s2">&quot;time_signature&quot;</span><span class="p">,</span> <span class="n">numerator</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">denominator</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span>
+            <span class="n">midi_message_tuple</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tempo_envelope_to_midi_message_tuple</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_tempo_envelope</span>
+            <span class="p">)</span>
+
+        <span class="c1"># If event is empty and it isn&#39;t the first track</span>
+        <span class="c1"># (e.g. no tempo envelope was added)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">midi_message_tuple</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">track</span>
+
+        <span class="n">sorted_m</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">midi_message_tuple</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">message</span><span class="p">:</span> <span class="n">message</span><span class="o">.</span><span class="n">time</span><span class="p">)</span>
+        <span class="n">sorted_m</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">mido</span><span class="o">.</span><span class="n">MetaMessage</span><span class="p">(</span>
+                <span class="s2">&quot;end_of_track&quot;</span><span class="p">,</span>
+                <span class="n">time</span><span class="o">=</span><span class="nb">max</span><span class="p">((</span><span class="n">sorted_m</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_beats_to_ticks</span><span class="p">(</span><span class="n">duration</span><span class="p">))),</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1"># absolute time =&gt; relative time</span>
+        <span class="n">Δticks</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">m1</span><span class="o">.</span><span class="n">time</span> <span class="o">-</span> <span class="n">m0</span><span class="o">.</span><span class="n">time</span> <span class="k">for</span> <span class="n">m0</span><span class="p">,</span> <span class="n">m1</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">sorted_m</span><span class="p">,</span> <span class="n">sorted_m</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
+        <span class="n">Δticks</span> <span class="o">=</span> <span class="p">(</span><span class="n">sorted_m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">time</span><span class="p">,)</span> <span class="o">+</span> <span class="n">Δticks</span>
+        <span class="k">for</span> <span class="n">Δt</span><span class="p">,</span> <span class="n">message</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">Δticks</span><span class="p">,</span> <span class="n">sorted_m</span><span class="p">):</span>
+            <span class="n">message</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">Δt</span>
+
+        <span class="n">track</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">sorted_m</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">track</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#           methods for filling the midi file (only called once)         #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="k">def</span> <span class="nf">_add_chronon_to_midi_file</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">chronon</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">,</span> <span class="n">midi_file</span><span class="p">:</span> <span class="n">mido</span><span class="o">.</span><span class="n">MidiFile</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_consecution_to_midi_file</span><span class="p">(</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">([</span><span class="n">chronon</span><span class="p">]),</span> <span class="n">midi_file</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_add_consecution_to_midi_file</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">consecution</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">],</span>
+        <span class="n">midi_file</span><span class="p">:</span> <span class="n">mido</span><span class="o">.</span><span class="n">MidiFile</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_simultaneous_event_to_midi_file</span><span class="p">(</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">Concurrence</span><span class="p">([</span><span class="n">consecution</span><span class="p">]),</span> <span class="n">midi_file</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_add_simultaneous_event_to_midi_file</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">simultaneous_event</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Concurrence</span><span class="p">[</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">]</span>
+        <span class="p">],</span>
+        <span class="n">midi_file</span><span class="p">:</span> <span class="n">mido</span><span class="o">.</span><span class="n">MidiFile</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Depending on the midi_file_type either adds a tuple of MidiTrack</span>
+        <span class="c1"># objects (for midi_file_type = 1) or adds only one MidiTrack</span>
+        <span class="c1"># (for midi_file_type = 0).</span>
+        <span class="n">midi_channel_data</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_find_available_midi_channel_tuple_per_consecution</span><span class="p">(</span>
+                <span class="n">simultaneous_event</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">midi_data_per_seq_tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_consecution_to_midi_message_tuple</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">seq</span><span class="p">,</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">simultaneous_event</span><span class="p">,</span> <span class="n">midi_channel_data</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">duration</span> <span class="o">=</span> <span class="n">simultaneous_event</span><span class="o">.</span><span class="n">duration</span>
+
+        <span class="c1"># midi file type 0 -&gt; only one track</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_midi_file_type</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">midi_data_for_one_track</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span>
+                <span class="n">operator</span><span class="o">.</span><span class="n">add</span><span class="p">,</span> <span class="n">midi_data_per_seq_tuple</span>
+            <span class="p">)</span>
+            <span class="n">midi_track</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_midi_message_tuple_to_midi_track</span><span class="p">(</span>
+                <span class="n">midi_data_for_one_track</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">is_first_track</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
+            <span class="n">midi_file</span><span class="o">.</span><span class="n">tracks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">midi_track</span><span class="p">)</span>
+
+        <span class="c1"># midi file type 1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">midi_track_iterator</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_midi_message_tuple_to_midi_track</span><span class="p">(</span>
+                    <span class="n">m</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">is_first_track</span><span class="o">=</span><span class="n">i</span> <span class="o">==</span> <span class="mi">0</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">midi_data_per_seq_tuple</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">midi_file</span><span class="o">.</span><span class="n">tracks</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">midi_track_iterator</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_event_to_midi_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event_to_convert</span><span class="p">:</span> <span class="n">ConvertableEvent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">mido</span><span class="o">.</span><span class="n">MidiFile</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Convert mutwo event object to mido `MidiFile` object.&quot;&quot;&quot;</span>
+
+        <span class="n">midi_file</span> <span class="o">=</span> <span class="n">mido</span><span class="o">.</span><span class="n">MidiFile</span><span class="p">(</span>
+            <span class="n">ticks_per_beat</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_ticks_per_beat</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_midi_file_type</span>
+        <span class="p">)</span>
+
+        <span class="c1"># depending on the event types timing structure different methods are called</span>
+        <span class="k">match</span> <span class="n">event_to_convert</span><span class="p">:</span>
+            <span class="k">case</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Concurrence</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Concurrence -&gt; MidiFile&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_add_simultaneous_event_to_midi_file</span><span class="p">(</span><span class="n">event_to_convert</span><span class="p">,</span> <span class="n">midi_file</span><span class="p">)</span>
+            <span class="k">case</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Consecution -&gt; MidiFile&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_add_consecution_to_midi_file</span><span class="p">(</span><span class="n">event_to_convert</span><span class="p">,</span> <span class="n">midi_file</span><span class="p">)</span>
+            <span class="k">case</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;SimpleEvent -&gt; MidiFile&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_add_chronon_to_midi_file</span><span class="p">(</span><span class="n">event_to_convert</span><span class="p">,</span> <span class="n">midi_file</span><span class="p">)</span>
+            <span class="k">case</span> <span class="k">_</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Can&#39;t convert object &#39;</span><span class="si">{</span><span class="n">event_to_convert</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;of type &#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">event_to_convert</span><span class="p">)</span><span class="si">}</span><span class="s2">&#39; to a MidiFile. &quot;</span>
+                    <span class="s2">&quot;Supported types include all inherited classes &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;from &#39;</span><span class="si">{</span><span class="n">ConvertableEvent</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>
+                <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">midi_file</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#               public methods for interaction with the user             #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+<div class="viewcode-block" id="EventToMidiFile.convert"><a class="viewcode-back" href="../../../api/mutwo.midi_converters.html#mutwo.midi_converters.EventToMidiFile.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">event_to_convert</span><span class="p">:</span> <span class="n">ConvertableEvent</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">mido</span><span class="o">.</span><span class="n">MidiFile</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Render a Midi file to the converters path attribute from the given event.</span>
+
+<span class="sd">        :param event_to_convert: The given event that shall be translated</span>
+<span class="sd">            to a Midi file.</span>
+<span class="sd">        :type event_to_convert: core_events.SimpleEvent | core_events.Consecution[core_events.SimpleEvent] | core_events.Concurrence[core_events.Consecution[core_events.SimpleEvent]]</span>
+<span class="sd">        :param path: If this is a string the method will write a midi</span>
+<span class="sd">            file to the given path. The typical file type extension &#39;.mid&#39;</span>
+<span class="sd">            is recommended, but not mandatory. If set to `None` the</span>
+<span class="sd">            method won&#39;t write a midi file to the disk, but it will simply</span>
+<span class="sd">            return a :class:`mido.MidiFile` object. Default to `None`.</span>
+<span class="sd">        :type path: typing.Optional[str]</span>
+
+<span class="sd">        The following example generates a midi file that contains a simple ascending</span>
+<span class="sd">        pentatonic scale:</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo import core_events</span>
+<span class="sd">        &gt;&gt;&gt; from mutwo import music_events</span>
+<span class="sd">        &gt;&gt;&gt; from mutwo import music_parameters</span>
+<span class="sd">        &gt;&gt;&gt; from mutwo import midi_converters</span>
+<span class="sd">        &gt;&gt;&gt; ascending_scale = core_events.Consecution(</span>
+<span class="sd">        ...     [</span>
+<span class="sd">        ...         music_events.NoteLike(music_parameters.WesternPitch(pitch), duration=1, volume=0.5)</span>
+<span class="sd">        ...         for pitch in &#39;c d e g a&#39;.split(&#39; &#39;)</span>
+<span class="sd">        ...     ]</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &gt;&gt;&gt; midi_converter = midi_converters.EventToMidiFile(</span>
+<span class="sd">        ...     available_midi_channel_tuple=(0,)</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &gt;&gt;&gt; # &#39;.convert&#39; creates a file, but also returns the</span>
+<span class="sd">        &gt;&gt;&gt; # respective &#39;mido.MidiFile&#39; object</span>
+<span class="sd">        &gt;&gt;&gt; midifile = midi_converter.convert(ascending_scale, &#39;ascending_scale.mid&#39;)</span>
+
+<span class="sd">        **Disclaimer:** when passing nested structures, make sure that the</span>
+<span class="sd">        nested object matches the expected type. Unlike other mutwo</span>
+<span class="sd">        converter classes (like :class:`mutwo.core_converters.TempoConverter`)</span>
+<span class="sd">        :class:`EventToMidiFile` can&#39;t convert infinitely nested structures</span>
+<span class="sd">        (due to the particular way how Midi files are defined). The deepest potential</span>
+<span class="sd">        structure is a :class:`mutwo.core_events.Concurrence` (representing</span>
+<span class="sd">        the complete MidiFile) that contains :class:`mutwo.core_events.Consecution`</span>
+<span class="sd">        (where each ``Consecution`` represents one MidiTrack) that contains</span>
+<span class="sd">        :class:`mutwo.core_events.SimpleEvent` (where each ``SimpleEvent``</span>
+<span class="sd">        represents one midi note). If only one ``Consecution`` is send,</span>
+<span class="sd">        this ``Consecution`` will be read as one MidiTrack in a MidiFile.</span>
+<span class="sd">        If only one ``SimpleEvent`` get passed, this ``SimpleEvent`` will be</span>
+<span class="sd">        interpreted as one MidiEvent (note_on and note_off) inside one</span>
+<span class="sd">        MidiTrack inside one MidiFile.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">midi_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_to_midi_file</span><span class="p">(</span><span class="n">event_to_convert</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">midi_file</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="n">midi_file</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">midi_file</span></div></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.midi_converters.frontends</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Levin Eric Zimmermann.
+    </div>
+  </body>
+</html>

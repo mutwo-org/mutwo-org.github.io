@@ -1,0 +1,161 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mutwo.abjad_utilities.abjad &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.abjad_utilities.abjad</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mutwo.abjad_utilities.abjad</h1><div class="highlight"><pre>
+<span></span><span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">quicktions</span> <span class="k">as</span> <span class="nn">fractions</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">fractions</span>
+
+<span class="kn">import</span> <span class="nn">abjad</span>
+
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">abjad_utilities</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;concatenate_adjacent_tuplets&quot;</span><span class="p">,</span> <span class="s2">&quot;reduce_multiplier&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="reduce_multiplier"><a class="viewcode-back" href="../../../api/mutwo.abjad_utilities.html#mutwo.abjad_utilities.reduce_multiplier">[docs]</a><span class="k">def</span> <span class="nf">reduce_multiplier</span><span class="p">(</span><span class="n">voice</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Voice</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reduces multipliers of tuplets in ``voice``.</span>
+
+<span class="sd">    Essentially the same as :func:`rmakers.reduce_multiplier`, see:</span>
+<span class="sd">        https://github.com/Abjad/abjad-ext-rmakers/blob/ebb47f6/abjadext/rmakers/functions.py#L3781</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">abjad</span><span class="o">.</span><span class="n">select</span><span class="o">.</span><span class="n">tuplets</span><span class="p">(</span><span class="n">voice</span><span class="p">):</span>
+        <span class="n">fraction</span> <span class="o">=</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Fraction</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">multiplier</span><span class="o">.</span><span class="n">numerator</span><span class="p">,</span> <span class="n">t</span><span class="o">.</span><span class="n">multiplier</span><span class="o">.</span><span class="n">denominator</span><span class="p">)</span>
+        <span class="n">pair</span> <span class="o">=</span> <span class="n">fraction</span><span class="o">.</span><span class="n">numerator</span><span class="p">,</span> <span class="n">fraction</span><span class="o">.</span><span class="n">denominator</span>
+        <span class="n">t</span><span class="o">.</span><span class="n">multiplier</span> <span class="o">=</span> <span class="n">pair</span></div>
+
+
+<div class="viewcode-block" id="concatenate_adjacent_tuplets"><a class="viewcode-back" href="../../../api/mutwo.abjad_utilities.html#mutwo.abjad_utilities.concatenate_adjacent_tuplets">[docs]</a><span class="k">def</span> <span class="nf">concatenate_adjacent_tuplets</span><span class="p">(</span><span class="n">voice</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Voice</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Rewrite tuplets in voice, so that adjacent tuplets are concatenated if possible.</span>
+
+<span class="sd">    :param voice: The voice which should be rewritten. This :class:`abjad.Voice`</span>
+<span class="sd">        should contain bars (e.g. :class:`abjad.Container`) with leaves or tuplets.</span>
+<span class="sd">    :type voice: abjad.Voice</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="p">[</span><span class="n">_concatenate_adjacent_tuplets</span><span class="p">(</span><span class="n">bar</span><span class="p">)</span> <span class="k">for</span> <span class="n">bar</span> <span class="ow">in</span> <span class="n">voice</span><span class="p">]</span></div>
+
+
+<span class="k">def</span> <span class="nf">_concatenate_adjacent_tuplets</span><span class="p">(</span><span class="n">bar</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Container</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Concatenate adjacent tuplets in one bar&quot;&quot;&quot;</span>
+    <span class="n">tuplet_index_tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+        <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bar</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Tuplet</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">abjad_utilities</span><span class="o">.</span><span class="n">group_consecutive_numbers</span><span class="p">(</span><span class="n">tuplet_index_tuple</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">tuplet_index_list</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">g</span><span class="p">):</span>
+        <span class="n">_concatenate_adjacent_tuplets_for_one_group</span><span class="p">(</span><span class="n">bar</span><span class="p">,</span> <span class="n">tuplet_index_list</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_concatenate_adjacent_tuplets_for_one_group</span><span class="p">(</span><span class="n">bar</span><span class="p">:</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Container</span><span class="p">,</span> <span class="n">group</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">group</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># We can&#39;t concatenate 1 element</span>
+        <span class="k">return</span>
+
+    <span class="n">prolation_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">bar</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">implied_prolation</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">group</span><span class="p">]</span>
+    <span class="c1"># We now sort our tuplets by their prolation: if two or more</span>
+    <span class="c1"># consecutive tuplets have the same prolation, they are put into</span>
+    <span class="c1"># the same group.</span>
+    <span class="n">common_prolation_group_list</span> <span class="o">=</span> <span class="p">[[</span><span class="n">prolation_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="n">group</span><span class="p">[</span><span class="mi">0</span><span class="p">]]]]</span>
+    <span class="n">any_common</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">prolation</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">prolation_list</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+        <span class="k">if</span> <span class="n">prolation</span> <span class="o">==</span> <span class="n">common_prolation_group_list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">common_prolation_group_list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">any_common</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">common_prolation_group_list</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">prolation</span><span class="p">,</span> <span class="p">[</span><span class="n">i</span><span class="p">]])</span>
+
+    <span class="c1"># Only do expensive copy and inplace mutation if there is any</span>
+    <span class="c1"># group of consecutive tuplets which can be concatenated.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">any_common</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="n">tuplet_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">prolation</span><span class="p">,</span> <span class="n">tuplet_index_list</span> <span class="ow">in</span> <span class="n">common_prolation_group_list</span><span class="p">:</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Tuplet</span><span class="p">(</span><span class="n">prolation</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tuplet_index_list</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">bar</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                <span class="n">t</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">abjad</span><span class="o">.</span><span class="n">mutate</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">component</span><span class="p">))</span>
+        <span class="n">tuplet_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+
+    <span class="n">bar</span><span class="p">[</span><span class="n">group</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="n">group</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">tuplet_list</span>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.abjad_utilities.abjad</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2024, mutwo authors.
+    </div>
+  </body>
+</html>

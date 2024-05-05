@@ -1,0 +1,974 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mutwo.core_events.envelopes &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.core_events.envelopes</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mutwo.core_events.envelopes</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Envelope events&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">bisect</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">integrate</span>
+
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_constants</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_events</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_parameters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_utilities</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Envelope&quot;</span><span class="p">,</span> <span class="s2">&quot;RelativeEnvelope&quot;</span><span class="p">,</span> <span class="s2">&quot;TempoEnvelope&quot;</span><span class="p">)</span>
+
+<span class="n">T</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Envelope"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.Envelope">[docs]</a><span class="k">class</span> <span class="nc">Envelope</span><span class="p">(</span>
+    <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">,</span>
+    <span class="n">typing</span><span class="o">.</span><span class="n">Generic</span><span class="p">[</span><span class="n">T</span><span class="p">],</span>
+    <span class="n">class_specific_side_attribute_tuple</span><span class="o">=</span><span class="p">(</span>
+        <span class="s2">&quot;event_to_parameter&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;event_to_curve_shape&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;value_to_parameter&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;parameter_to_value&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;apply_parameter_on_event&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;apply_curve_shape_on_event&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;default_event_class&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;initialise_default_event_class&quot;</span><span class="p">,</span>
+    <span class="p">),</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Model continuous changing values (e.g. glissandi, crescendo).</span>
+
+<span class="sd">    :param event_iterable_or_point_sequence: An iterable filled with events</span>
+<span class="sd">        or with points. If the sequence is filled with points, the points</span>
+<span class="sd">        will be converted to events. Each event represents a point in a</span>
+<span class="sd">        two dimensional graph where the x-axis presents time and the y-axis</span>
+<span class="sd">        a changing value. Any event class can be used. It is</span>
+<span class="sd">        more important that the used event classes fit with the functions</span>
+<span class="sd">        passed in the following parameters.</span>
+<span class="sd">    :type event_iterable_or_point_sequence: typing.Iterable[T]</span>
+<span class="sd">    :param event_to_parameter: A function which receives an event and has to</span>
+<span class="sd">        return a parameter object (any object). By default the function will</span>
+<span class="sd">        ask the event for its `value` property. If the property can&#39;t be found</span>
+<span class="sd">        it will return 0.</span>
+<span class="sd">    :type event_to_parameter: typing.Callable[[core_events.abc.Event], core_constants.ParameterType]</span>
+<span class="sd">    :param event_to_curve_shape: A function which receives an event and has</span>
+<span class="sd">        to return a curve_shape. A curve_shape is either a float, an integer</span>
+<span class="sd">        or a fraction. For a curve_shape = 0 a linear transition between two</span>
+<span class="sd">        points is created. For a curve_shape &gt; 0 the envelope changes slower</span>
+<span class="sd">        at the beginning and faster at the end, for a curve_shape &lt; 0 it is</span>
+<span class="sd">        the inverse behaviour. The default function will ask the event for its</span>
+<span class="sd">        `curve_shape` property. If the property can&#39;t be found</span>
+<span class="sd">        it will return 0.</span>
+<span class="sd">    :type event_to_curve_shape: typing.Callable[[core_events.abc.Event], CurveShape]</span>
+<span class="sd">    :param parameter_to_value: Convert a parameter to a value. A value is any</span>
+<span class="sd">        object which supports mathematical operations.</span>
+<span class="sd">    :type parameter_to_value: typing.Callable[[Value], core_constants.ParameterType]</span>
+<span class="sd">    :param value_to_parameter: A callable object which converts a value to a parameter.</span>
+<span class="sd">    :type value_to_parameter: typing.Callable[[Value], core_constants.ParameterType]</span>
+<span class="sd">    :param apply_parameter_on_event: A callable object which applies a parameter on an event.</span>
+<span class="sd">    :type apply_parameter_on_event: typing.Callable[[core_events.abc.Event, core_constants.ParameterType], None]</span>
+<span class="sd">    :param apply_curve_shape_on_event: A callable object which applies a curve shape on an event.</span>
+<span class="sd">    :type apply_curve_shape_on_event: typing.Callable[[core_events.abc.Event, CurveShape], None]</span>
+<span class="sd">    :param default_event_class: The default event class which describes a point.</span>
+<span class="sd">    :type default_event_class: type[core_events.abc.Event]</span>
+<span class="sd">    :param initialise_default_event_class:</span>
+<span class="sd">    :type initialise_default_event_class: typing.Callable[[type[core_events.abc.Event], core_constants.DurationType], core_events.abc.Event]</span>
+
+<span class="sd">    This class is inspired by Marc Evansteins `Envelope` class in his</span>
+<span class="sd">    `expenvelope &lt;https://git.sr.ht/~marcevanstein/expenvelope&gt;`_</span>
+<span class="sd">    python package and is made to fit better into the `mutwo` ecosystem.</span>
+
+<span class="sd">    **Hint:**</span>
+
+<span class="sd">    When comparing two envelopes (e.g. `env0 == env1`) `mutwo` will only return</span>
+<span class="sd">    `True` in case all control points (= chronons inside the envelope) are</span>
+<span class="sd">    equal between both envelopes. So `mutwo` won&#39;t make the much more</span>
+<span class="sd">    complicated test to check if two envelopes have the same shape (= the same</span>
+<span class="sd">    value at each `env0.value_at(x) == env1.value_at(x)` for each possible</span>
+<span class="sd">    `x`). Such a test is not implemented yet.</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import core_events</span>
+<span class="sd">    &gt;&gt;&gt; core_events.Envelope([[0, 0, 1], [0.5, 1]])</span>
+<span class="sd">    Envelope([SimpleEvent(curve_shape = 1, duration = DirectDuration(duration = 1/2), value = 0), SimpleEvent(curve_shape = 0, duration = DirectDuration(duration = 0), value = 1)])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Type definitions</span>
+    <span class="n">Value</span> <span class="o">=</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span>
+    <span class="n">CurveShape</span> <span class="o">=</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span>
+    <span class="n">IncompletePoint</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">core_constants</span><span class="o">.</span><span class="n">DurationType</span><span class="p">,</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span><span class="p">]</span>
+    <span class="n">CompletePoint</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">[</span>
+        <span class="n">core_constants</span><span class="o">.</span><span class="n">DurationType</span><span class="p">,</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span><span class="p">,</span> <span class="n">CurveShape</span>  <span class="c1"># type: ignore</span>
+    <span class="p">]</span>
+    <span class="n">Point</span> <span class="o">=</span> <span class="n">CompletePoint</span> <span class="o">|</span> <span class="n">IncompletePoint</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">event_iterable_or_point_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="n">T</span><span class="p">]</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Point</span><span class="p">],</span>
+        <span class="n">tempo_envelope</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">TempoEnvelope</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">event_to_parameter</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">],</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">event</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span>
+            <span class="n">event</span><span class="p">,</span> <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_PARAMETER_ATTRIBUTE_NAME</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_PARAMETER_ATTRIBUTE_NAME</span><span class="p">)</span>
+        <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">event_to_curve_shape</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">],</span> <span class="n">CurveShape</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">event</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span>
+            <span class="n">event</span><span class="p">,</span> <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_CURVE_SHAPE_ATTRIBUTE_NAME</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_CURVE_SHAPE_ATTRIBUTE_NAME</span><span class="p">)</span>
+        <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">parameter_to_value</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">Value</span><span class="p">],</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">parameter</span><span class="p">:</span> <span class="n">parameter</span><span class="p">,</span>
+        <span class="n">value_to_parameter</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">Value</span><span class="p">],</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">value</span><span class="p">:</span> <span class="n">value</span><span class="p">,</span>
+        <span class="n">apply_parameter_on_event</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">,</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span><span class="p">],</span> <span class="kc">None</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">event</span><span class="p">,</span> <span class="n">parameter</span><span class="p">:</span> <span class="nb">setattr</span><span class="p">(</span>
+            <span class="n">event</span><span class="p">,</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_PARAMETER_ATTRIBUTE_NAME</span><span class="p">,</span>
+            <span class="n">parameter</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">apply_curve_shape_on_event</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">,</span> <span class="n">CurveShape</span><span class="p">],</span> <span class="kc">None</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">event</span><span class="p">,</span> <span class="n">curve_shape</span><span class="p">:</span> <span class="nb">setattr</span><span class="p">(</span>
+            <span class="n">event</span><span class="p">,</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_CURVE_SHAPE_ATTRIBUTE_NAME</span><span class="p">,</span>
+            <span class="n">curve_shape</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">default_event_class</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">]</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">SimpleEvent</span><span class="p">,</span>
+        <span class="n">initialise_default_event_class</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="nb">type</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">],</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">DurationType</span><span class="p">],</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">,</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">chronon_class</span><span class="p">,</span> <span class="n">duration</span><span class="p">:</span> <span class="n">chronon_class</span><span class="p">(</span>
+            <span class="n">duration</span>
+        <span class="p">),</span>  <span class="c1"># type: ignore</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">event_to_parameter</span> <span class="o">=</span> <span class="n">event_to_parameter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">event_to_curve_shape</span> <span class="o">=</span> <span class="n">event_to_curve_shape</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value_to_parameter</span> <span class="o">=</span> <span class="n">value_to_parameter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameter_to_value</span> <span class="o">=</span> <span class="n">parameter_to_value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">apply_parameter_on_event</span> <span class="o">=</span> <span class="n">apply_parameter_on_event</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">apply_curve_shape_on_event</span> <span class="o">=</span> <span class="n">apply_curve_shape_on_event</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_event_class</span> <span class="o">=</span> <span class="n">default_event_class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialise_default_event_class</span> <span class="o">=</span> <span class="n">initialise_default_event_class</span>
+
+        <span class="n">event_iterable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_iterable_or_point_sequence_to_event_iterable</span><span class="p">(</span>
+            <span class="n">event_iterable_or_point_sequence</span>
+        <span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">event_iterable</span><span class="p">,</span> <span class="n">tempo_envelope</span><span class="p">)</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                      public class methods                              #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+<div class="viewcode-block" id="Envelope.from_points"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.Envelope.from_points">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_points</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">point</span><span class="p">:</span> <span class="n">Point</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Envelope</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Create new :class:`Envelope` from points.</span>
+
+<span class="sd">        This is merely a convenience wrapper to write</span>
+
+<span class="sd">            &gt;&gt;&gt; Envelope.from_points([0, 1], [1, 100])</span>
+<span class="sd">            Envelope([SimpleEvent(curve_shape = 0, duration = DirectDuration(duration = 1), value = 1), SimpleEvent(curve_shape = 0, duration = DirectDuration(duration = 0), value = 100)])</span>
+
+<span class="sd">        instead of</span>
+
+<span class="sd">            &gt;&gt;&gt; Envelope([[0, 1], [1, 100]])</span>
+<span class="sd">            Envelope([SimpleEvent(curve_shape = 0, duration = DirectDuration(duration = 1), value = 1), SimpleEvent(curve_shape = 0, duration = DirectDuration(duration = 0), value = 100)])</span>
+
+<span class="sd">        to mimic the default initialization behaviour of</span>
+<span class="sd">        `expenvelope.Envelope`. It&#39;s recommended to initialise</span>
+<span class="sd">        an Envelope without this method. This method will be</span>
+<span class="sd">        removed sooner or later.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                           magic methods                                #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="nd">@typing</span><span class="o">.</span><span class="n">overload</span>  <span class="c1"># type: ignore</span>
+    <span class="k">def</span> <span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index_or_slice</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">event_or_sequence</span><span class="p">:</span> <span class="n">T</span><span class="p">):</span>
+        <span class="o">...</span>
+
+    <span class="nd">@typing</span><span class="o">.</span><span class="n">overload</span>
+    <span class="k">def</span> <span class="fm">__setitem__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">index_or_slice</span><span class="p">:</span> <span class="nb">slice</span><span class="p">,</span>
+        <span class="n">event_or_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="n">T</span><span class="p">]</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="n">Envelope</span><span class="o">.</span><span class="n">Point</span><span class="p">],</span>
+    <span class="p">):</span>
+        <span class="o">...</span>
+
+    <span class="k">def</span> <span class="fm">__setitem__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">index_or_slice</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">slice</span><span class="p">,</span>
+        <span class="n">event_or_sequence</span><span class="p">:</span> <span class="n">T</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="n">T</span><span class="p">]</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="n">Envelope</span><span class="o">.</span><span class="n">Point</span><span class="p">],</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index_or_slice</span><span class="p">,</span> <span class="nb">slice</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">event_or_sequence</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Iterable</span>
+        <span class="p">):</span>
+            <span class="n">event_or_sequence</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_iterable_or_point_sequence_to_event_iterable</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+                <span class="n">event_or_sequence</span>  <span class="c1"># type: ignore</span>
+            <span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setitem__</span><span class="p">(</span><span class="n">index_or_slice</span><span class="p">,</span> <span class="n">event_or_sequence</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                    private static methods                              #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_point_sequence_to_corrected_point_list</span><span class="p">(</span>
+        <span class="n">point_or_invalid_type_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Point</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Envelope</span><span class="o">.</span><span class="n">CompletePoint</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
+        <span class="n">corrected_point_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Envelope</span><span class="o">.</span><span class="n">CompletePoint</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">point_or_invalid_type_sequence</span><span class="p">:</span>
+            <span class="n">point_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">point_count</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">point</span> <span class="o">+=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,)</span>  <span class="c1"># type: ignore</span>
+            <span class="k">elif</span> <span class="n">point_count</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">InvalidPointError</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">point_count</span><span class="p">)</span>
+            <span class="n">corrected_point_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+        <span class="k">return</span> <span class="n">corrected_point_list</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                         private methods                                #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="k">def</span> <span class="nf">_make_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">curve_shape</span><span class="p">):</span>
+        <span class="n">event</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initialise_default_event_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">default_event_class</span><span class="p">,</span> <span class="n">duration</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">apply_parameter_on_event</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">parameter</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">apply_curve_shape_on_event</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">curve_shape</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">event</span>
+
+    <span class="k">def</span> <span class="nf">_point_sequence_to_event_list</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">point_or_invalid_type_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Point</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">]:</span>
+        <span class="n">corrected_point_list</span> <span class="o">=</span> <span class="n">Envelope</span><span class="o">.</span><span class="n">_point_sequence_to_corrected_point_list</span><span class="p">(</span>
+            <span class="n">point_or_invalid_type_sequence</span>
+        <span class="p">)</span>
+        <span class="n">corrected_point_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="n">event_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">point0</span><span class="p">,</span> <span class="n">point1</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">corrected_point_list</span><span class="p">,</span> <span class="n">corrected_point_list</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+            <span class="k">if</span> <span class="n">point0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">absolute_time0</span><span class="p">,</span> <span class="n">value_or_parameter</span><span class="p">,</span> <span class="n">curve_shape</span> <span class="o">=</span> <span class="n">point0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Found unexpected position of None in provided points.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">point1</span><span class="p">:</span>
+                <span class="n">absolute_time1</span> <span class="o">=</span> <span class="n">point1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">assert</span> <span class="n">absolute_time1</span> <span class="o">&gt;=</span> <span class="n">absolute_time0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">absolute_time1</span> <span class="o">=</span> <span class="n">absolute_time0</span>
+            <span class="n">duration</span> <span class="o">=</span> <span class="n">absolute_time1</span> <span class="o">-</span> <span class="n">absolute_time0</span>
+            <span class="n">event</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_event</span><span class="p">(</span><span class="n">duration</span><span class="p">,</span> <span class="n">value_or_parameter</span><span class="p">,</span> <span class="n">curve_shape</span><span class="p">)</span>
+            <span class="n">event_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">event_list</span>
+
+    <span class="k">def</span> <span class="nf">_event_iterable_or_point_sequence_to_event_iterable</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">event_iterable_or_point_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="n">T</span><span class="p">]</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Point</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">]:</span>
+        <span class="n">item_type_list</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="nb">isinstance</span><span class="p">(</span><span class="n">event_or_point</span><span class="p">,</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">event_or_point</span> <span class="ow">in</span> <span class="n">event_iterable_or_point_sequence</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">item_type_list</span><span class="p">):</span>
+            <span class="n">event_iterable</span> <span class="o">=</span> <span class="n">event_iterable_or_point_sequence</span>
+        <span class="k">elif</span> <span class="nb">any</span><span class="p">(</span><span class="n">item_type_list</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s2">&quot;Found inconsistent iterable with mixed types. &quot;</span>
+                <span class="s2">&quot;Please only use events or only use points for &quot;</span>
+                <span class="s2">&quot;&#39;event_iterable_or_point_sequence&#39;. First 200 &quot;</span>
+                <span class="s2">&quot;characters of the problematic iterable: </span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">event_iterable_or_point_sequence</span><span class="p">)[:</span><span class="mi">200</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">event_iterable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_point_sequence_to_event_list</span><span class="p">(</span>
+                <span class="n">event_iterable_or_point_sequence</span>  <span class="c1"># type: ignore</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">event_iterable</span>  <span class="c1"># type: ignore</span>
+
+    <span class="k">def</span> <span class="nf">_event_to_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Value</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameter_to_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">event_to_parameter</span><span class="p">(</span><span class="n">event</span><span class="p">))</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                         public properties                              #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">parameter_tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Get `parameter` for each event inside :class:`Envelope`.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">event_to_parameter</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">value_tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Value</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Get `value` for each event inside :class:`Envelope`.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameter_to_value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameter_tuple</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">curve_shape_tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">CurveShape</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Get `curve_shape` for each event inside :class:`Envelope`.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">event_to_curve_shape</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_static</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return `True` if :class:`Envelope` only has one static value.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value_tuple</span><span class="p">))</span> <span class="o">&lt;=</span> <span class="mi">1</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                          public methods                                #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+<div class="viewcode-block" id="Envelope.value_at"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.Envelope.value_at">[docs]</a>    <span class="k">def</span> <span class="nf">value_at</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">absolute_time</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Value</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get `value` at `absolute_time`.</span>
+
+<span class="sd">        :param absolute_time: Absolute position in time at which value shall be found.</span>
+<span class="sd">            This is &#39;x&#39; in the function notation &#39;f(x)&#39;.</span>
+<span class="sd">        :type absolute_time: core_parameters.abc.Duration | typing.Any</span>
+
+<span class="sd">        This function interpolates between the control points according to</span>
+<span class="sd">        their `curve_shape` property.</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo import core_events</span>
+<span class="sd">        &gt;&gt;&gt; e = core_events.Envelope([[0, 0], [1, 2]])</span>
+<span class="sd">        &gt;&gt;&gt; e.value_at(0)</span>
+<span class="sd">        0</span>
+<span class="sd">        &gt;&gt;&gt; e.value_at(1)</span>
+<span class="sd">        2</span>
+<span class="sd">        &gt;&gt;&gt; e.value_at(0.5)</span>
+<span class="sd">        1.0</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">absolute_time</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">UNKNOWN_OBJECT_TO_DURATION</span><span class="p">(</span>
+            <span class="n">absolute_time</span>
+        <span class="p">)</span>
+        <span class="n">absolute_time_in_floats</span> <span class="o">=</span> <span class="n">absolute_time</span><span class="o">.</span><span class="n">duration_in_floats</span>
+
+        <span class="p">(</span>
+            <span class="n">absolute_time_in_floats_tuple</span><span class="p">,</span>
+            <span class="n">duration_in_floats</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_absolute_time_in_floats_tuple_and_duration</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">use_only_first_event</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">absolute_time_in_floats</span> <span class="o">&lt;=</span> <span class="n">absolute_time_in_floats_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">EmptyEnvelopeError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;value_at&quot;</span><span class="p">)</span>
+
+        <span class="n">use_only_last_event</span> <span class="o">=</span> <span class="n">absolute_time_in_floats</span> <span class="o">&gt;=</span> <span class="p">(</span>
+            <span class="c1"># If the duration of the last event == 0 there is the danger</span>
+            <span class="c1"># of floating point errors (the value in absolute_time_tuple could</span>
+            <span class="c1"># be slightly higher than the duration of the Envelope. If this</span>
+            <span class="c1"># happens the function will raise an AssertionError, because</span>
+            <span class="c1"># &quot;_get_index_at_from_absolute_time_tuple&quot; will return</span>
+            <span class="c1"># &quot;None&quot;). With explicitly testing if the last duration</span>
+            <span class="c1"># equals 0 we can avoid this danger.</span>
+            <span class="n">absolute_time_in_floats_tuple</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">duration</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="k">else</span> <span class="n">duration_in_floats</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">use_only_first_event</span> <span class="ow">or</span> <span class="n">use_only_last_event</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">use_only_first_event</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_to_value</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+
+        <span class="n">event_0_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_index_at_from_absolute_time_tuple</span><span class="p">(</span>
+            <span class="n">absolute_time</span><span class="p">,</span> <span class="n">absolute_time_in_floats_tuple</span><span class="p">,</span> <span class="n">duration_in_floats</span>
+        <span class="p">)</span>
+        <span class="k">assert</span> <span class="n">event_0_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+        <span class="n">value0</span><span class="p">,</span> <span class="n">value1</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_event_to_value</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">event_0_index</span> <span class="o">+</span> <span class="n">n</span><span class="p">])</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">curve_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">event_to_curve_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">event_0_index</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span>
+            <span class="n">absolute_time_in_floats</span><span class="p">,</span>
+            <span class="n">absolute_time_in_floats_tuple</span><span class="p">[</span><span class="n">event_0_index</span><span class="p">],</span>
+            <span class="n">absolute_time_in_floats_tuple</span><span class="p">[</span><span class="n">event_0_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
+            <span class="n">value0</span><span class="p">,</span>
+            <span class="n">value1</span><span class="p">,</span>
+            <span class="n">curve_shape</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Envelope.parameter_at"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.Envelope.parameter_at">[docs]</a>    <span class="k">def</span> <span class="nf">parameter_at</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">absolute_time</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get `parameter` at `absolute_time`.</span>
+
+<span class="sd">        :param absolute_time: Absolute position in time at which parameter shall</span>
+<span class="sd">            be found. This is &#39;x&#39; in the function notation &#39;f(x)&#39;.</span>
+<span class="sd">        :type absolute_time: core_parameters.abc.Duration | typing.Any</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value_to_parameter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value_at</span><span class="p">(</span><span class="n">absolute_time</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Envelope.sample_at"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.Envelope.sample_at">[docs]</a>    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">sample_at</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">absolute_time</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+        <span class="n">append_duration</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Envelope</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Discretize envelope at given time</span>
+
+<span class="sd">        :param absolute_time: Position in time where the envelope should</span>
+<span class="sd">            define a new event.</span>
+<span class="sd">        :type absolute_time: core_parameters.abc.Duration | typing.Any</span>
+<span class="sd">        :param append_duration: In case we add a new control point after any</span>
+<span class="sd">            already defined point, the duration of this control point will be</span>
+<span class="sd">            equal to &quot;append_duration&quot;. Default to core_parameters.DirectDuration(0)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">find_duration</span><span class="p">(</span>
+            <span class="n">absolute_time</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">,</span>
+            <span class="n">absolute_time_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+        <span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Find duration of new control point&quot;&quot;&quot;</span>
+            <span class="n">next_event_start_index</span> <span class="o">=</span> <span class="n">bisect</span><span class="o">.</span><span class="n">bisect_right</span><span class="p">(</span>
+                <span class="n">absolute_time_tuple</span><span class="p">,</span> <span class="n">absolute_time</span>
+            <span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">next_event_start</span> <span class="o">=</span> <span class="n">absolute_time_tuple</span><span class="p">[</span><span class="n">next_event_start_index</span><span class="p">]</span>
+            <span class="c1"># In case we call &quot;sample_at&quot; at a position after any already</span>
+            <span class="c1"># specified point.</span>
+            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                <span class="n">duration_new_event</span> <span class="o">=</span> <span class="n">append_duration</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">duration_new_event</span> <span class="o">=</span> <span class="n">next_event_start</span> <span class="o">-</span> <span class="n">absolute_time</span>
+
+            <span class="k">return</span> <span class="n">duration_new_event</span>
+
+        <span class="k">def</span> <span class="nf">find_curve_shape</span><span class="p">(</span>
+            <span class="n">absolute_time</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">,</span>
+            <span class="n">absolute_time_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+            <span class="n">envelope_duration</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Find curve shape of new control point&quot;&quot;&quot;</span>
+            <span class="n">old_event_index</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="o">.</span><span class="n">_get_index_at_from_absolute_time_tuple</span><span class="p">(</span>
+                    <span class="n">absolute_time</span><span class="p">,</span> <span class="n">absolute_time_tuple</span><span class="p">,</span> <span class="n">envelope_duration</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">old_event_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">old_event</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">old_event_index</span><span class="p">]</span>
+                <span class="n">curve_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">event_to_curve_shape</span><span class="p">(</span><span class="n">old_event</span><span class="p">)</span>
+                <span class="n">curve_shape_old_event</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="p">(</span><span class="n">absolute_time</span> <span class="o">-</span> <span class="n">absolute_time_tuple</span><span class="p">[</span><span class="n">old_event_index</span><span class="p">])</span>
+                    <span class="o">/</span> <span class="n">old_event</span><span class="o">.</span><span class="n">duration</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">duration_in_floats</span> <span class="o">*</span> <span class="n">curve_shape</span>
+                <span class="n">curve_shape_new_event</span> <span class="o">=</span> <span class="n">curve_shape</span> <span class="o">-</span> <span class="n">curve_shape_old_event</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">apply_curve_shape_on_event</span><span class="p">(</span><span class="n">old_event</span><span class="p">,</span> <span class="n">curve_shape_old_event</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">curve_shape_new_event</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="k">return</span> <span class="n">curve_shape_new_event</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">EmptyEnvelopeError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;sample_at&quot;</span><span class="p">)</span>
+
+        <span class="n">absolute_time</span><span class="p">,</span> <span class="n">append_duration</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">UNKNOWN_OBJECT_TO_DURATION</span><span class="p">(</span><span class="n">unknown_object</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">unknown_object</span> <span class="ow">in</span> <span class="p">(</span><span class="n">absolute_time</span><span class="p">,</span> <span class="n">append_duration</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_valid_absolute_time</span><span class="p">(</span><span class="n">absolute_time</span><span class="p">)</span>
+
+        <span class="c1"># We only add a new event in case there isn&#39;t any event yet at</span>
+        <span class="c1"># given point in time.</span>
+        <span class="k">if</span> <span class="n">absolute_time</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">absolute_time_tuple</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">absolute_time_tuple</span><span class="p">):</span>
+            <span class="n">envelope_duration</span> <span class="o">=</span> <span class="n">absolute_time_tuple</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">duration</span>
+            <span class="n">event</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_event</span><span class="p">(</span>
+                <span class="n">find_duration</span><span class="p">(</span><span class="n">absolute_time</span><span class="p">,</span> <span class="n">absolute_time_tuple</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parameter_at</span><span class="p">(</span><span class="n">absolute_time</span><span class="p">),</span>
+                <span class="n">find_curve_shape</span><span class="p">(</span><span class="n">absolute_time</span><span class="p">,</span> <span class="n">absolute_time_tuple</span><span class="p">,</span> <span class="n">envelope_duration</span><span class="p">),</span>
+            <span class="p">)</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">squash_in</span><span class="p">(</span><span class="n">absolute_time</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+            <span class="c1"># This means we want to squash in at a position much</span>
+            <span class="c1"># later than any already defined event.</span>
+            <span class="k">except</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">InvalidStartValueError</span><span class="p">:</span>
+                <span class="n">difference</span> <span class="o">=</span> <span class="n">absolute_time</span> <span class="o">-</span> <span class="n">envelope_duration</span>
+                <span class="bp">self</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">duration</span> <span class="o">+=</span> <span class="n">difference</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Envelope.integrate_interval"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.Envelope.integrate_interval">[docs]</a>    <span class="k">def</span> <span class="nf">integrate_interval</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">DurationType</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">DurationType</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Integrate envelope above given interval.</span>
+
+<span class="sd">        :param start: Beginning of integration interval.</span>
+<span class="sd">        :type start: core_parameters.abc.Duration</span>
+<span class="sd">        :param end: End of integration interval.</span>
+<span class="sd">        :type end: core_parameters.abc.Duration</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">value_at</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Envelope.get_average_value"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.Envelope.get_average_value">[docs]</a>    <span class="k">def</span> <span class="nf">get_average_value</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">start</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">end</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Value</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Find average `value` in given interval.</span>
+
+<span class="sd">        :param start: The beginning of the interval. If set to `None` this</span>
+<span class="sd">            will be 0. Default to `None`.</span>
+<span class="sd">        :type start: typing.Optional[core_parameters.abc.Duration | typing.Any]</span>
+<span class="sd">        :param end: The end of the interval. If set to `None` this</span>
+<span class="sd">            will be the duration of the :class:`Envelope`.. Default to `None`.</span>
+<span class="sd">        :type end: typing.Optional[core_parameters.abc.Duration | typing.Any]</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo import core_events</span>
+<span class="sd">        &gt;&gt;&gt; e = core_events.Envelope([[0, 1], [2, 0]])</span>
+<span class="sd">        &gt;&gt;&gt; e.get_average_value()</span>
+<span class="sd">        0.5</span>
+<span class="sd">        &gt;&gt;&gt; e.get_average_value(0.5)</span>
+<span class="sd">        0.375</span>
+<span class="sd">        &gt;&gt;&gt; e.get_average_value(0.5, 1)</span>
+<span class="sd">        0.625</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">DirectDuration</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">end</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">duration</span>
+
+        <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">UNKNOWN_OBJECT_TO_DURATION</span><span class="p">(</span><span class="n">unknown_object</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">unknown_object</span> <span class="ow">in</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">duration</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span>
+        <span class="k">if</span> <span class="n">duration</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">core_utilities</span><span class="o">.</span><span class="n">InvalidAverageValueStartAndEndWarning</span><span class="p">())</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value_at</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">integrate_interval</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span> <span class="o">/</span> <span class="n">duration</span><span class="o">.</span><span class="n">duration</span></div>
+
+<div class="viewcode-block" id="Envelope.get_average_parameter"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.Envelope.get_average_parameter">[docs]</a>    <span class="k">def</span> <span class="nf">get_average_parameter</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">start</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">core_constants</span><span class="o">.</span><span class="n">DurationType</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">end</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">core_constants</span><span class="o">.</span><span class="n">DurationType</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Find average `parameter` in given interval.</span>
+
+<span class="sd">        :param start: The beginning of the interval. If set to `None` this</span>
+<span class="sd">            will be 0. Default to `None`.</span>
+<span class="sd">        :type start: typing.Optional[core_parameters.abc.Duration | typing.Any]</span>
+<span class="sd">        :param end: The end of the interval. If set to `None` this</span>
+<span class="sd">            will be the duration of the :class:`Envelope`.. Default to `None`.</span>
+<span class="sd">        :type end: typing.Optional[core_parameters.abc.Duration | typing.Any]</span>
+
+<span class="sd">        **Example:**</span>
+
+<span class="sd">        &gt;&gt;&gt; from mutwo import core_events</span>
+<span class="sd">        &gt;&gt;&gt; e = core_events.Envelope([[0, 1], [2, 0]])</span>
+<span class="sd">        &gt;&gt;&gt; e.get_average_parameter()</span>
+<span class="sd">        0.5</span>
+<span class="sd">        &gt;&gt;&gt; e.get_average_parameter(0.5)</span>
+<span class="sd">        0.375</span>
+<span class="sd">        &gt;&gt;&gt; e.get_average_parameter(0.5, 1)</span>
+<span class="sd">        0.625</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value_to_parameter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_average_value</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Envelope.cut_out"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.Envelope.cut_out">[docs]</a>    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">cut_out</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">start</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+        <span class="n">end</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Envelope</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
+        <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">UNKNOWN_OBJECT_TO_DURATION</span><span class="p">(</span><span class="n">unknown_object</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">unknown_object</span> <span class="ow">in</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="c1"># _assert_correct_start_and_end_values and _assert_valid_absolute_time</span>
+        <span class="c1"># is called when super().cut_out is called later.</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_at</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">append_duration</span><span class="o">=</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_at</span><span class="p">(</span><span class="n">end</span><span class="p">)</span>
+
+        <span class="n">last_point</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_event_at</span><span class="p">(</span><span class="n">end</span><span class="p">)</span>
+
+        <span class="c1"># In case last_point.duration == 0 &quot;get_event_at&quot; won&#39;t return</span>
+        <span class="c1"># any object. This only happens in case</span>
+        <span class="c1">#</span>
+        <span class="c1">#   end &gt; self.duration</span>
+        <span class="c1">#</span>
+        <span class="c1"># So the new point will be appended.</span>
+        <span class="k">if</span> <span class="n">last_point</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">last_point</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="n">last_point</span>
+
+        <span class="n">cut_out_envelope</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">cut_out</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+        <span class="n">cut_out_envelope</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">last_point</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;duration&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">cut_out_envelope</span></div>
+
+<div class="viewcode-block" id="Envelope.cut_off"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.Envelope.cut_off">[docs]</a>    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">cut_off</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">start</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+        <span class="n">end</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Envelope</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
+        <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">UNKNOWN_OBJECT_TO_DURATION</span><span class="p">(</span><span class="n">unknown_object</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">unknown_object</span> <span class="ow">in</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_valid_absolute_time</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_correct_start_and_end_values</span><span class="p">(</span>
+            <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">condition</span><span class="o">=</span><span class="k">lambda</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="n">start</span> <span class="o">&lt;</span> <span class="n">end</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">cut_off_duration</span> <span class="o">:=</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># It is sufficient to find the first control point</span>
+            <span class="c1"># by simply using &quot;parameter_at&quot; instead of &quot;sample_at&quot;:</span>
+            <span class="c1"># We don&#39;t need an accurate curve_shape or duration,</span>
+            <span class="c1"># because this point only exists in an infinitely short</span>
+            <span class="c1"># moment in time anyway (or better: its main function is</span>
+            <span class="c1"># to ensure that interpolation from the previous point</span>
+            <span class="c1"># to this point works as expected).</span>
+            <span class="n">parameter_0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameter_at</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+            <span class="n">event_0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_event</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">parameter_0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">sample_at</span><span class="p">(</span><span class="n">end</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cut_off</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">cut_off_duration</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">squash_in</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">event_0</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Envelope.extend_until"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.Envelope.extend_until">[docs]</a>    <span class="nd">@core_utilities</span><span class="o">.</span><span class="n">add_copy_option</span>
+    <span class="k">def</span> <span class="nf">extend_until</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">duration</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">,</span>
+        <span class="n">duration_to_white_space</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+            <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">],</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">]</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">prolong_chronon</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Envelope</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">EmptyEnvelopeError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;extend_until&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_at</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Envelope.split_at"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.Envelope.split_at">[docs]</a>    <span class="k">def</span> <span class="nf">split_at</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">absolute_time</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span><span class="p">,</span>
+        <span class="n">ignore_invalid_split_point</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Envelope</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">absolute_time</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">NoSplitTimeError</span><span class="p">()</span>
+
+        <span class="n">absolute_time</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">absolute_time</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">absolute_time</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">duration</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">ignore_invalid_split_point</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">SplitError</span><span class="p">(</span><span class="n">absolute_time</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># We copy, because the &#39;sample_at&#39; calls would change our envelope.</span>
+        <span class="bp">self</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">absolute_time</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sample_at</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">_make_event</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">value_to_parameter</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="mi">0</span><span class="p">))</span>
+
+        <span class="n">segment_tuple</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">split_at</span><span class="p">(</span>
+            <span class="o">*</span><span class="n">absolute_time</span><span class="p">,</span> <span class="n">ignore_invalid_split_point</span><span class="o">=</span><span class="n">ignore_invalid_split_point</span>
+        <span class="p">)</span>
+
+        <span class="c1"># We already added the interpolation points with &#39;self.sample_at(*t)&#39;,</span>
+        <span class="c1"># but they are always only available in the segments after the split</span>
+        <span class="c1"># point (because for each segment the start is included, but the end</span>
+        <span class="c1"># duration isn&#39;t included anymore). So we need to add them to the</span>
+        <span class="c1"># segments before the split points, otherwise &#39;value_at&#39; returns wrong</span>
+        <span class="c1"># values.</span>
+        <span class="k">for</span> <span class="n">segment0</span><span class="p">,</span> <span class="n">segment1</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">segment_tuple</span><span class="p">,</span> <span class="n">segment_tuple</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+            <span class="n">add</span><span class="p">(</span><span class="n">segment0</span><span class="p">,</span> <span class="n">segment1</span><span class="o">.</span><span class="n">value_at</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">segment_tuple</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">segment_tuple</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value_at</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">duration</span><span class="p">)</span>
+            <span class="c1"># Only add control point, if it isn&#39;t present</span>
+            <span class="c1"># yet anyway (minimal changes).</span>
+            <span class="c1"># This condition is &#39;true&#39; if we only split at</span>
+            <span class="c1"># start time (&#39;env.split_at(0)&#39;).</span>
+            <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">value_at</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">duration</span><span class="p">)</span> <span class="o">!=</span> <span class="n">v</span><span class="p">:</span>
+                <span class="n">add</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">segment_tuple</span></div></div>
+
+
+<div class="viewcode-block" id="RelativeEnvelope"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.RelativeEnvelope">[docs]</a><span class="k">class</span> <span class="nc">RelativeEnvelope</span><span class="p">(</span><span class="n">Envelope</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Generic</span><span class="p">[</span><span class="n">T</span><span class="p">]):</span>
+    <span class="n">__parent_doc_string</span> <span class="o">=</span> <span class="n">Envelope</span><span class="o">.</span><span class="vm">__doc__</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span>  <span class="c1"># type: ignore</span>
+    <span class="n">__after_parameter_text_index</span> <span class="o">=</span> <span class="n">__parent_doc_string</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="vm">__doc__</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="p">[</span><span class="s2">&quot;Envelope with relative durations and values / parameters.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">]</span>
+        <span class="o">+</span> <span class="n">__parent_doc_string</span><span class="p">[:</span><span class="n">__after_parameter_text_index</span><span class="p">]</span>
+        <span class="o">+</span> <span class="p">[</span>
+            <span class="s2">&quot;    :param base_parameter_and_relative_parameter_to_absolute_parameter: A function&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;        which runs when the :func:`resolve` is called. It expects the base parameter&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;        and the relative parameter (which is extracted from the envelope events)&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;        and should return an absolute parameter.&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="o">+</span> <span class="n">__parent_doc_string</span><span class="p">[</span><span class="n">__after_parameter_text_index</span><span class="p">:]</span>
+        <span class="o">+</span> <span class="p">[</span>
+            <span class="s2">&quot;    The :class:`RelativeEnvelope` adds the :func:`resolve` method&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;    to the base class :class:`Envelope`.&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="n">base_parameter_and_relative_parameter_to_absolute_parameter</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span><span class="p">,</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span><span class="p">],</span>
+            <span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span><span class="p">,</span>
+        <span class="p">],</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_parameter_and_relative_parameter_to_absolute_parameter</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">base_parameter_and_relative_parameter_to_absolute_parameter</span>
+        <span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="RelativeEnvelope.resolve"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.RelativeEnvelope.resolve">[docs]</a>    <span class="k">def</span> <span class="nf">resolve</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">duration</span><span class="p">:</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Duration</span> <span class="o">|</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+        <span class="n">base_parameter</span><span class="p">:</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span><span class="p">,</span>
+        <span class="n">resolve_envelope_class</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">Envelope</span><span class="p">]</span> <span class="o">=</span> <span class="n">Envelope</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Envelope</span><span class="p">:</span>
+        <span class="n">duration</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">UNKNOWN_OBJECT_TO_DURATION</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span>
+        <span class="n">point_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">duration_factor</span> <span class="o">=</span> <span class="n">duration</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">duration</span>
+        <span class="k">except</span> <span class="ne">ZeroDivisionError</span><span class="p">:</span>
+            <span class="n">duration_factor</span> <span class="o">=</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">DirectDuration</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">absolute_time</span><span class="p">,</span> <span class="n">event</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">absolute_time_tuple</span><span class="p">,</span> <span class="bp">self</span><span class="p">):</span>
+            <span class="n">relative_parameter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">event_to_parameter</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+            <span class="n">new_parameter</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">base_parameter_and_relative_parameter_to_absolute_parameter</span><span class="p">(</span>
+                    <span class="n">base_parameter</span><span class="p">,</span> <span class="n">relative_parameter</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">point</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">absolute_time</span> <span class="o">*</span> <span class="n">duration_factor</span><span class="p">,</span>
+                <span class="n">new_parameter</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">event_to_curve_shape</span><span class="p">(</span><span class="n">event</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="n">point_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">resolve_envelope_class</span><span class="p">(</span><span class="n">point_list</span><span class="p">)</span></div></div>
+
+
+<span class="n">TempoPoint</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">TypeAlias</span> <span class="o">=</span> <span class="s2">&quot;core_parameters.abc.TempoPoint | core_constants.Real&quot;</span>
+
+
+<div class="viewcode-block" id="TempoEnvelope"><a class="viewcode-back" href="../../../api/mutwo.core_events.html#mutwo.core_events.TempoEnvelope">[docs]</a><span class="k">class</span> <span class="nc">TempoEnvelope</span><span class="p">(</span><span class="n">Envelope</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Define dynamic or static tempo trajectories.</span>
+
+<span class="sd">    You can either define a new `TempoEnvelope` with instances</span>
+<span class="sd">    of classes which inherit from :class:`mutwo.core_parameters.abc.TempoPoint`</span>
+<span class="sd">    (for instance :class:`mutwo.core_parameters.DirectTempoPoint`) or with</span>
+<span class="sd">    `float` or `int` objects which represent beats per minute.</span>
+
+<span class="sd">    Please see the :class:`mutwo.core_events.Envelope` for full documentation</span>
+<span class="sd">    for initialization attributes.</span>
+
+<span class="sd">    The default parameters of the `TempoEnvelope` class expects</span>
+<span class="sd">    :class:`mutwo.core_events.SimpleEvent` to which a tempo point</span>
+<span class="sd">    was assigned by the name &quot;tempo_point&quot;. This is specified in the global</span>
+<span class="sd">    `mutwo.core_events.configurations.DEFAULT_TEMPO_ENVELOPE_PARAMETER_NAME`</span>
+<span class="sd">    and can be adjusted.</span>
+
+<span class="sd">    **Example:**</span>
+
+<span class="sd">    &gt;&gt;&gt; from mutwo import core_events</span>
+<span class="sd">    &gt;&gt;&gt; from mutwo import core_parameters</span>
+<span class="sd">    &gt;&gt;&gt; # (1) define with floats</span>
+<span class="sd">    &gt;&gt;&gt; #     So we have an envelope which moves from tempo 60 to 30</span>
+<span class="sd">    &gt;&gt;&gt; #     and back to 60.</span>
+<span class="sd">    &gt;&gt;&gt; tempo_envelope_with_float = core_events.TempoEnvelope(</span>
+<span class="sd">    ...     [[0, 60], [1, 30], [2, 60]]</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; # (2) define with tempo points</span>
+<span class="sd">    &gt;&gt;&gt; tempo_envelope_with_tempo_points = core_events.TempoEnvelope(</span>
+<span class="sd">    ...     [</span>
+<span class="sd">    ...         [0, core_parameters.DirectTempoPoint(60)],</span>
+<span class="sd">    ...         [1, core_parameters.DirectTempoPoint(30)],</span>
+<span class="sd">    ...         [2, core_parameters.DirectTempoPoint(30, reference=2)],</span>
+<span class="sd">    ...     ]</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="n">event_to_parameter</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+            <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">],</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span><span class="p">]</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">value_to_parameter</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+            <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">core_events</span><span class="o">.</span><span class="n">Envelope</span><span class="o">.</span><span class="n">Value</span><span class="p">],</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span><span class="p">]</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">parameter_to_value</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+            <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span><span class="p">],</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Envelope</span><span class="o">.</span><span class="n">Value</span><span class="p">]</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">apply_parameter_on_event</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+            <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">,</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">ParameterType</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">default_event_class</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">]</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">TempoChronon</span><span class="p">,</span>
+        <span class="n">initialise_default_event_class</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span>
+            <span class="p">[</span><span class="nb">type</span><span class="p">[</span><span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">],</span> <span class="n">core_constants</span><span class="o">.</span><span class="n">DurationType</span><span class="p">],</span>
+            <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">,</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">chronon_class</span><span class="p">,</span> <span class="n">duration</span><span class="p">:</span> <span class="n">chronon_class</span><span class="p">(</span>
+            <span class="n">tempo_point</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="n">duration</span>
+        <span class="p">),</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">def</span> <span class="nf">default_event_to_parameter</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TempoPoint</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span>
+                <span class="n">event</span><span class="p">,</span>
+                <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_TEMPO_ENVELOPE_PARAMETER_NAME</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">default_value_to_parameter</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TempoPoint</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">core_parameters</span><span class="o">.</span><span class="n">DirectTempoPoint</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">default_parameter_to_value</span><span class="p">(</span><span class="n">parameter</span><span class="p">:</span> <span class="n">TempoPoint</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+            <span class="c1"># Here we specify, that we allow either core_parameters.abc.TempoPoint</span>
+            <span class="c1"># or float/number objects.</span>
+            <span class="c1"># So in case we have a core_parameters.abc.TempoPoint &#39;getattr&#39; is</span>
+            <span class="c1"># successful, if not it will return &#39;parameter&#39;, because it</span>
+            <span class="c1"># will assume that we have a number based tempo point.</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span>
+                <span class="nb">getattr</span><span class="p">(</span><span class="n">parameter</span><span class="p">,</span> <span class="s2">&quot;absolute_tempo_in_beats_per_minute&quot;</span><span class="p">,</span> <span class="n">parameter</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">default_apply_parameter_on_event</span><span class="p">(</span>
+            <span class="n">event</span><span class="p">:</span> <span class="n">core_events</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Event</span><span class="p">,</span> <span class="n">parameter</span><span class="p">:</span> <span class="n">TempoPoint</span>
+        <span class="p">):</span>
+            <span class="nb">setattr</span><span class="p">(</span>
+                <span class="n">event</span><span class="p">,</span>
+                <span class="n">core_events</span><span class="o">.</span><span class="n">configurations</span><span class="o">.</span><span class="n">DEFAULT_TEMPO_ENVELOPE_PARAMETER_NAME</span><span class="p">,</span>
+                <span class="n">parameter</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+            <span class="n">event_to_parameter</span><span class="o">=</span><span class="n">event_to_parameter</span> <span class="ow">or</span> <span class="n">default_event_to_parameter</span><span class="p">,</span>
+            <span class="n">value_to_parameter</span><span class="o">=</span><span class="n">value_to_parameter</span> <span class="ow">or</span> <span class="n">default_value_to_parameter</span><span class="p">,</span>
+            <span class="n">parameter_to_value</span><span class="o">=</span><span class="n">parameter_to_value</span> <span class="ow">or</span> <span class="n">default_parameter_to_value</span><span class="p">,</span>
+            <span class="n">apply_parameter_on_event</span><span class="o">=</span><span class="n">apply_parameter_on_event</span>
+            <span class="ow">or</span> <span class="n">default_apply_parameter_on_event</span><span class="p">,</span>
+            <span class="n">default_event_class</span><span class="o">=</span><span class="n">default_event_class</span><span class="p">,</span>
+            <span class="n">initialise_default_event_class</span><span class="o">=</span><span class="n">initialise_default_event_class</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">):</span>
+        <span class="c1"># TempoEnvelope can&#39;t use the default &#39;__eq__&#39; method inherited</span>
+        <span class="c1"># from list, because this would create endless recursion</span>
+        <span class="c1"># (because every event has a TempoEnvelope, so Python would forever</span>
+        <span class="c1">#  compare the TempoEnvelopes of TempoEnvelopes).</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="c1"># Prefer lazy evaluation for better performance</span>
+                <span class="c1"># (use &#39;and&#39; instead of &#39;all&#39;).</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">absolute_time_tuple</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">absolute_time_tuple</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">curve_shape_tuple</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">curve_shape_tuple</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">value_tuple</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">value_tuple</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.core_events.envelopes</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Levin Eric Zimmermann.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,143 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Installation &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Understanding events" href="events.html" />
+    <link rel="prev" title="Quick start" href="quickstart.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="events.html" title="Understanding events"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="quickstart.html" title="Quick start"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">mutwo  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Installation</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">¶</a></h1>
+<p><a class="reference internal" href="api/api_documentation.html#module-mutwo" title="mutwo"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mutwo</span></code></a> is written and used in the programming language <a class="reference external" href="https://www.python.org/">Python</a>.
+You need to have Python 3.10 or any later version to use <em>mutwo</em>.
+Perhaps your machine already has Python installed, if not <a class="reference external" href="https://www.python.org/about/gettingstarted/">consult the Python documentation</a>.
+To check whether you python version is new enough, simply run:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>--version
+</pre></div>
+</div>
+<section id="python-dependencies">
+<h2>Python dependencies<a class="headerlink" href="#python-dependencies" title="Permalink to this heading">¶</a></h2>
+<p><em>Mutwo</em> packages are available on the <a class="reference external" href="https://pypi.org/">Python package ecosystem pypi</a> and can be installed via <a class="reference external" href="https://pip.pypa.io/en/stable/">the package installer pip</a>.
+<em>Mutwo</em> doesn’t consist of one single package, but is split into small packages where each of those packages fulfill only one specific purpose.
+In this way users only need to install the functionality they need and <em>mutwo</em> becomes easily extendable.
+All <em>mutwo</em> packages depend on the fundamental <a class="reference external" href="https://pypi.org/project/mutwo.core/">mutwo.core</a> package.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pip3<span class="w"> </span>install<span class="w"> </span>mutwo.core
+</pre></div>
+</div>
+<p>In order to use different backends or frontends (midi, abjad, …) and to have more inner functionality,  <em>mutwo</em> needs additional packages.</p>
+<p>To represent musical structures in mutwo, you need <a class="reference external" href="https://pypi.org/project/mutwo.music/">mutwo.music</a>:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pip3<span class="w"> </span>install<span class="w"> </span>mutwo.music
+</pre></div>
+</div>
+<p>If want to import or export MIDI files, you need to install <a class="reference external" href="https://pypi.org/project/mutwo.midi/">mutwo.midi</a>:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pip3<span class="w"> </span>install<span class="w"> </span>mutwo.midi
+</pre></div>
+</div>
+</section>
+<section id="other-dependencies">
+<h2>Other dependencies<a class="headerlink" href="#other-dependencies" title="Permalink to this heading">¶</a></h2>
+<p>Some export or import functionalities need additional software that isn’t automatically installed when using pip.
+You need to manually install this additional software by either using your OS package manager (Linux) or by downloading and installing precompiled binaries (OSX, Windows)</p>
+<p>To use the Csound converter, install <a class="reference external" href="https://csound.com/">Csound</a> first.
+To use Lilypond via mutwos abjad converter (<a class="reference external" href="https://pypi.org/project/mutwo.abjad/">mutwo.abjad</a>), install <a class="reference external" href="https://lilypond.org/">Lilypond</a> first.</p>
+</section>
+<section id="use-nix-to-install-python-and-other-dependencies-together">
+<h2>Use nix to install python and other dependencies together<a class="headerlink" href="#use-nix-to-install-python-and-other-dependencies-together" title="Permalink to this heading">¶</a></h2>
+<p>Alternatively to pip and your OS package manager, you can use the package manager <a class="reference external" href="https://nixos.org/">Nix</a> to install all <em>mutwo</em> dependencies together.
+<em>Mutwo</em> has <a class="reference external" href="https://github.com/mutwo-org/mutwo-nix">its own repo</a> for the packages.</p>
+</section>
+<section id="operating-system">
+<h2>Operating system<a class="headerlink" href="#operating-system" title="Permalink to this heading">¶</a></h2>
+<p><em>mutwo</em> is tested on Linux, but may equally well work on OSX or Windows.</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="events.html" title="Understanding events"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="quickstart.html" title="Quick start"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">mutwo  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Installation</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2024, mutwo authors.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,60 @@
+
+.. currentmodule:: mutwo.timeline_converters
+
+mutwo.timeline_converters
+=========================
+
+.. contents:: Table of content
+   :depth: 3
+
+.. automodule:: mutwo.timeline_converters
+   :members:
+
+
+.. list-table::
+   :align: center
+   :width: 95%
+   :header-rows: 1
+
+   * - Object
+     - Documentation
+   * - :class:`mutwo.timeline_converters.TimeLineToEventPlacementDict`
+     - 
+   * - :class:`mutwo.timeline_converters.TimeLineToConcurrence`
+     - Create event with Concurrence for each tag.
+   * - :class:`mutwo.timeline_converters.TimeLineToEventPlacementTuple`
+     - Fetch from :class:`~mutwo.timeline_interfaces.TimeLine` all :class:`~mutwo.timeline_interfaces.EventPlacement` which contains of user defined tags.
+   * - :class:`mutwo.timeline_converters.EventPlacementTupleToGaplessEventPlacementTuple`
+     - Fill empty :class:`~mutwo.timeline_interfaces.EventPlacement` into the gaps between two `EventPlacement`.
+   * - :class:`mutwo.timeline_converters.EventPlacementTupleToSplitEventPlacementDict`
+     - Split :class:`~mutwo.timeline_interfaces.EventPlacement` into new `EventPlacement`s by tags.
+
+
+
+
+.. autoclass:: mutwo.timeline_converters.TimeLineToEventPlacementDict
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.timeline_converters.TimeLineToConcurrence
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.timeline_converters.TimeLineToEventPlacementTuple
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.timeline_converters.EventPlacementTupleToGaplessEventPlacementTuple
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.timeline_converters.EventPlacementTupleToSplitEventPlacementDict
+
+        .. autoclasstoc::
+    
+
+

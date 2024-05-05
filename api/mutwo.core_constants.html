@@ -1,0 +1,123 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>mutwo.core_constants &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+    
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="mutwo.core_converters" href="mutwo.core_converters.html" />
+    <link rel="prev" title="mutwo.core_configurations" href="mutwo.core_configurations.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mutwo.core_converters.html" title="mutwo.core_converters"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="mutwo.core_configurations.html" title="mutwo.core_configurations"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="api_documentation.html" accesskey="U">mutwo API documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.core_constants</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="mutwo-core-constants">
+<h1><a class="toc-backref" href="#id1" role="doc-backlink">mutwo.core_constants</a><a class="headerlink" href="#mutwo-core-constants" title="Permalink to this heading">¶</a></h1>
+<nav class="contents" id="table-of-content">
+<p class="topic-title">Table of content</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#mutwo-core-constants" id="id1">mutwo.core_constants</a></p></li>
+</ul>
+</nav>
+<span class="target" id="module-mutwo.core_constants"></span><p>Definition of global constants which are used all over mutwo.</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="mutwo.core_constants.Real">
+<span class="sig-name descname"><span class="pre">Real</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">TypeAlias</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">float</span> <span class="pre">|</span> <span class="pre">fractions.Fraction</span> <span class="pre">|</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">quicktions.Fraction</span></em><a class="headerlink" href="#mutwo.core_constants.Real" title="Permalink to this definition">¶</a></dt>
+<dd><p>The main reason for this constant is a mypy issue with Pythons buildin
+<a class="reference external" href="https://docs.python.org/3/library/numbers.html">numbers module</a> which
+is documented <cite>here &lt;https://github.com/python/mypy/issues/3186&gt;_. Mypy
+doesn’t accept numbers abstract base classes. Until numbers will be
+supported users have to define their own typing data for general number
+classes. PEP 3141 recommends users to simply annotate arguments with
+‘float’, but this wouldn’t include `fractions.Fraction</cite> which is often
+necessary in musical contexts (as github user arseniiv also remarked).</p>
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mutwo.core_converters.html" title="mutwo.core_converters"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="mutwo.core_configurations.html" title="mutwo.core_configurations"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="api_documentation.html" >mutwo API documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.core_constants</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2024, mutwo authors.
+    </div>
+  </body>
+</html>

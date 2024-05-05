@@ -1,0 +1,58 @@
+
+.. currentmodule:: mutwo.music_utilities
+
+mutwo.music_utilities
+=====================
+
+.. contents:: Table of content
+   :depth: 3
+
+.. automodule:: mutwo.music_utilities
+   :members:
+
+
+.. list-table::
+   :align: center
+   :width: 95%
+   :header-rows: 1
+
+   * - Object
+     - Documentation
+   * - :class:`mutwo.music_utilities.DuplicatePlayingIndicatorConverterMappingWarning`
+     - 
+   * - :class:`mutwo.music_utilities.UnsortedIntervalTupleError`
+     - 
+   * - :class:`mutwo.music_utilities.NotInstalledError`
+     - 
+   * - :class:`mutwo.music_utilities.IndicatorCollectionParser`
+     - Parse strings to :class:`~mutwo.music_parameters.abc.IndicatorCollection`.
+   * - :class:`mutwo.music_utilities.linear_space`
+     - Return evenly spaced numbers over a specified interval.
+
+
+
+
+.. autofunction:: linear_space
+    
+
+.. autoclass:: mutwo.music_utilities.DuplicatePlayingIndicatorConverterMappingWarning
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_utilities.UnsortedIntervalTupleError
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_utilities.NotInstalledError
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.music_utilities.IndicatorCollectionParser
+
+        .. autoclasstoc::
+    
+
+

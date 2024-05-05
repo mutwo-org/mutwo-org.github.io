@@ -1,0 +1,1595 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>mutwo.abjad_converters &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+    
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="mutwo.abjad_parameters" href="mutwo.abjad_parameters.html" />
+    <link rel="prev" title="mutwo API documentation" href="api_documentation.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mutwo.abjad_parameters.html" title="mutwo.abjad_parameters"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="api_documentation.html" title="mutwo API documentation"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="api_documentation.html" accesskey="U">mutwo API documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.abjad_converters</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="mutwo-abjad-converters">
+<h1><a class="toc-backref" href="#id5" role="doc-backlink">mutwo.abjad_converters</a><a class="headerlink" href="#mutwo-abjad-converters" title="Permalink to this heading">¶</a></h1>
+<nav class="contents" id="table-of-content">
+<p class="topic-title">Table of content</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#mutwo-abjad-converters" id="id5">mutwo.abjad_converters</a></p>
+<ul>
+<li><p><a class="reference internal" href="#module-mutwo.abjad_converters.configurations" id="id6">mutwo.abjad_converters.configurations</a></p></li>
+<li><p><a class="reference internal" href="#module-mutwo.abjad_converters.constants" id="id7">mutwo.abjad_converters.constants</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<span class="target" id="module-mutwo.abjad_converters"></span><p>Build Lilypond scores via <a class="reference external" href="https://github.com/Abjad/abjad">Abjad</a> from Mutwo data.</p>
+<p>The following converter classes help to quantize and translate Mutwo data to
+Western notation. Due to the complex nature of this task, Mutwo tries to offer as
+many optional arguments as possible through which the user can affect the conversion
+routines. The most important class and best starting point for organising a conversion
+setting is <a class="reference internal" href="#mutwo.abjad_converters.ConsecutionToAbjadVoice" title="mutwo.abjad_converters.ConsecutionToAbjadVoice"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConsecutionToAbjadVoice</span></code></a>.
+If one wants to build complete scores from within mutwo, the module offers the
+<a class="reference internal" href="#mutwo.abjad_converters.NestedCompoundToAbjadContainer" title="mutwo.abjad_converters.NestedCompoundToAbjadContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">NestedCompoundToAbjadContainer</span></code></a>.</p>
+<p><strong>Known bugs and limitations:</strong></p>
+<ol class="arabic simple">
+<li><p>Indicators attached to rests which follow another rest won’t be translated to
+<cite>abjad</cite>. This behaviour happens because
+<a class="reference internal" href="#mutwo.abjad_converters.LeafMakerConsecutionToQuantizedAbjadContainer" title="mutwo.abjad_converters.LeafMakerConsecutionToQuantizedAbjadContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">LeafMakerConsecutionToQuantizedAbjadContainer</span></code></a> and
+<a class="reference internal" href="#mutwo.abjad_converters.NauertConsecutionToQuantizedAbjadContainer" title="mutwo.abjad_converters.NauertConsecutionToQuantizedAbjadContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">NauertConsecutionToQuantizedAbjadContainer</span></code></a>
+tie rests before converting the data to <cite>abjad</cite> objects. With a different (maybe
+user-declared) quantizer this limitation can be fixed. For more details see
+the comment <a href="#id1"><span class="problematic" id="id2">`</span></a>here &lt;<a class="reference external" href="https://github.com/mutwo-org/mutwo.abjad/blob/58b0044/mutwo/abjad_converters/events/quantization.py#L102-L128">https://github.com/mutwo-org/mutwo.abjad/blob/58b0044/mutwo/abjad_converters/events/quantization.py#L102-L128</a>&gt;_.</p></li>
+<li><p>Quantization can be slow and not precise. Try both quantization classes.
+Change the parameters. Use different settings and classes for different
+parts of your music.</p></li>
+</ol>
+<table class="docutils align-center" style="width: 95%">
+<thead>
+<tr class="row-odd"><th class="head"><p>Object</p></th>
+<th class="head"><p>Documentation</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.abjad_converters.ConsecutionToQuantizedAbjadContainer" title="mutwo.abjad_converters.ConsecutionToQuantizedAbjadContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.abjad_converters.ConsecutionToQuantizedAbjadContainer</span></code></a></p></td>
+<td><p>Quantize <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a> objects.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.abjad_converters.NauertConsecutionToQuantizedAbjadContainer" title="mutwo.abjad_converters.NauertConsecutionToQuantizedAbjadContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.abjad_converters.NauertConsecutionToQuantizedAbjadContainer</span></code></a></p></td>
+<td><p>Quantize <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a> objects via <code class="xref py py-mod docutils literal notranslate"><span class="pre">abjadext.nauert</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.abjad_converters.NauertConsecutionToDurationLineBasedQuantizedAbjadContainer" title="mutwo.abjad_converters.NauertConsecutionToDurationLineBasedQuantizedAbjadContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.abjad_converters.NauertConsecutionToDurationLineBasedQuantizedAbjadContainer</span></code></a></p></td>
+<td><p>Quantize <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a> objects via <code class="xref py py-mod docutils literal notranslate"><span class="pre">abjadext.nauert</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.abjad_converters.LeafMakerConsecutionToQuantizedAbjadContainer" title="mutwo.abjad_converters.LeafMakerConsecutionToQuantizedAbjadContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.abjad_converters.LeafMakerConsecutionToQuantizedAbjadContainer</span></code></a></p></td>
+<td><p>Quantize <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a> object via <code class="xref py py-mod docutils literal notranslate"><span class="pre">abjad.LeafMaker</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.abjad_converters.LeafMakerConsecutionToDurationLineBasedQuantizedAbjadContainer" title="mutwo.abjad_converters.LeafMakerConsecutionToDurationLineBasedQuantizedAbjadContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.abjad_converters.LeafMakerConsecutionToDurationLineBasedQuantizedAbjadContainer</span></code></a></p></td>
+<td><p>Quantize <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a> object via <code class="xref py py-mod docutils literal notranslate"><span class="pre">abjad.LeafMaker</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.abjad_converters.CompoundToAbjadContainer" title="mutwo.abjad_converters.CompoundToAbjadContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.abjad_converters.CompoundToAbjadContainer</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.abjad_converters.ConsecutionToAbjadVoice" title="mutwo.abjad_converters.ConsecutionToAbjadVoice"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.abjad_converters.ConsecutionToAbjadVoice</span></code></a></p></td>
+<td><p>Convert <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a> to <code class="xref py py-class docutils literal notranslate"><span class="pre">abjad.Voice</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.abjad_converters.NestedCompoundToAbjadContainer" title="mutwo.abjad_converters.NestedCompoundToAbjadContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.abjad_converters.NestedCompoundToAbjadContainer</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.abjad_converters.NestedCompoundToCompoundToAbjadContainers" title="mutwo.abjad_converters.NestedCompoundToCompoundToAbjadContainers"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.abjad_converters.NestedCompoundToCompoundToAbjadContainers</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.abjad_converters.CycleBasedNestedCompoundToCompoundToAbjadContainers" title="mutwo.abjad_converters.CycleBasedNestedCompoundToCompoundToAbjadContainers"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.abjad_converters.CycleBasedNestedCompoundToCompoundToAbjadContainers</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.abjad_converters.TagBasedNestedCompoundToCompoundToAbjadContainers" title="mutwo.abjad_converters.TagBasedNestedCompoundToCompoundToAbjadContainers"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.abjad_converters.TagBasedNestedCompoundToCompoundToAbjadContainers</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.abjad_converters.MutwoLyricToAbjadString" title="mutwo.abjad_converters.MutwoLyricToAbjadString"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.abjad_converters.MutwoLyricToAbjadString</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.abjad_converters.MutwoPitchToAbjadPitch" title="mutwo.abjad_converters.MutwoPitchToAbjadPitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.abjad_converters.MutwoPitchToAbjadPitch</span></code></a></p></td>
+<td><p>Convert Mutwo Pitch objects to Abjad Pitch objects.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.abjad_converters.TempoToAbjadAttachmentTempo" title="mutwo.abjad_converters.TempoToAbjadAttachmentTempo"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.abjad_converters.TempoToAbjadAttachmentTempo</span></code></a></p></td>
+<td><p>Convert tempo envelope to <a class="reference internal" href="mutwo.abjad_parameters.html#mutwo.abjad_parameters.Tempo" title="mutwo.abjad_parameters.Tempo"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tempo</span></code></a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.abjad_converters.ComplexTempoToAbjadAttachmentTempo" title="mutwo.abjad_converters.ComplexTempoToAbjadAttachmentTempo"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.abjad_converters.ComplexTempoToAbjadAttachmentTempo</span></code></a></p></td>
+<td><p>Convert tempo to <a class="reference internal" href="mutwo.abjad_parameters.html#mutwo.abjad_parameters.Tempo" title="mutwo.abjad_parameters.Tempo"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tempo</span></code></a>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.abjad_converters.MutwoVolumeToAbjadAttachmentDynamic" title="mutwo.abjad_converters.MutwoVolumeToAbjadAttachmentDynamic"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.abjad_converters.MutwoVolumeToAbjadAttachmentDynamic</span></code></a></p></td>
+<td><p>Convert Mutwo Volume objects to <a class="reference internal" href="mutwo.abjad_parameters.html#mutwo.abjad_parameters.Dynamic" title="mutwo.abjad_parameters.Dynamic"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dynamic</span></code></a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.abjad_converters.MutwoPitchToHEJIAbjadPitch" title="mutwo.abjad_converters.MutwoPitchToHEJIAbjadPitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.abjad_converters.MutwoPitchToHEJIAbjadPitch</span></code></a></p></td>
+<td><p>Convert <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.JustIntonationPitch" title="mutwo.music_parameters.JustIntonationPitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">JustIntonationPitch</span></code></a> to abjad pitches.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.abjad_converters.ProcessAbjadContainerRoutine" title="mutwo.abjad_converters.ProcessAbjadContainerRoutine"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.abjad_converters.ProcessAbjadContainerRoutine</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.abjad_converters.AddDurationLineEngraver" title="mutwo.abjad_converters.AddDurationLineEngraver"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.abjad_converters.AddDurationLineEngraver</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.abjad_converters.PrepareForDurationLineBasedNotation" title="mutwo.abjad_converters.PrepareForDurationLineBasedNotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.abjad_converters.PrepareForDurationLineBasedNotation</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.abjad_converters.AddInstrumentName" title="mutwo.abjad_converters.AddInstrumentName"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.abjad_converters.AddInstrumentName</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mutwo.abjad_converters.AddAccidentalStyle" title="mutwo.abjad_converters.AddAccidentalStyle"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.abjad_converters.AddAccidentalStyle</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mutwo.abjad_converters.SetStaffSize" title="mutwo.abjad_converters.SetStaffSize"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.abjad_converters.SetStaffSize</span></code></a></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.ConsecutionToQuantizedAbjadContainer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ConsecutionToQuantizedAbjadContainer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">default_time_signature_sequence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(TimeSignature(pair=(4,</span> <span class="pre">4),</span> <span class="pre">hide=False,</span> <span class="pre">partial=None),)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_to_time_signature_tuple</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_chronon_rest</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/abjad_converters/events/quantization.html#ConsecutionToQuantizedAbjadContainer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.ConsecutionToQuantizedAbjadContainer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></p>
+<p>Quantize <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a> objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>default_time_signature_sequence</strong> (<em>Sequence</em><em>[</em><em>abjad.TimeSignature</em><em>]</em>) – Set time signatures to divide the quantized abjad data
+in desired bar sizes. If the converted <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a>
+is longer than the sum of all passed time signatures, the last time signature
+will be repeated for the remaining bars.</p></li>
+<li><p><strong>event_to_time_signature_tuple</strong> (<em>Optional</em><em>[</em><em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Event" title="mutwo.core_events.abc.Event"><em>Event</em></a><em>]</em><em>, </em><em>Optional</em><em>[</em><em>tuple</em><em>[</em><em>abjad.indicators.TimeSignature</em><em>, </em><em>...</em><em>]</em><em>]</em><em>]</em><em>]</em>) – Function which extracts a
+<cite>tuple[abjad.TimeSignature, …]</cite> from a <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Event" title="mutwo.core_events.abc.Event"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_events.abc.Event</span></code></a>.
+If set to <cite>None</cite> <cite>mutwo</cite> falls back to <cite>default_time_signature_sequence</cite>.
+Default to <cite>None</cite>.</p></li>
+<li><p><strong>is_chronon_rest</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><em>core_events.Chronon</em></a><em>]</em><em>, </em><em>bool</em><em>]</em><em>, </em><em>optional</em>) – Function to detect if the
+the inspected <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_events.Chronon</span></code></a> is a Rest. By
+default Mutwo simply checks if ‘pitch_list’ contain any objects. If not,
+the Event will be interpreted as a rest.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(consecution_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.ConsecutionToQuantizedAbjadContainer.convert">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">consecution_to_convert</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/abjad_converters/events/quantization.html#ConsecutionToQuantizedAbjadContainer.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.ConsecutionToQuantizedAbjadContainer.convert" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>consecution_to_convert</strong> (<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.basic.Consecution"><em>Consecution</em></a>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple[abjad.score.Container, tuple[tuple[tuple[int, …], …], …], tuple[bool, …]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.NauertConsecutionToQuantizedAbjadContainer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NauertConsecutionToQuantizedAbjadContainer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">default_time_signature_sequence=(TimeSignature(pair=(4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">4)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hide=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partial=None)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration_unit='beats'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attack_point_optimizer=&lt;abjadext.nauert.attackpointoptimizers.MeasurewiseAttackPointOptimizer</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_tree=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/abjad_converters/events/quantization.html#NauertConsecutionToQuantizedAbjadContainer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.NauertConsecutionToQuantizedAbjadContainer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mutwo.abjad_converters.ConsecutionToQuantizedAbjadContainer" title="mutwo.abjad_converters.events.quantization.ConsecutionToQuantizedAbjadContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConsecutionToQuantizedAbjadContainer</span></code></a></p>
+<p>Quantize <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a> objects via <code class="xref py py-mod docutils literal notranslate"><span class="pre">abjadext.nauert</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>default_time_signature_sequence</strong> (<em>Sequence</em><em>[</em><em>abjad.TimeSignature</em><em>]</em>) – Set time signatures to divide the quantized abjad data
+in desired bar sizes. If the converted <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a>
+is longer than the sum of all passed time signatures, the last time signature
+will be repeated for the remaining bars.</p></li>
+<li><p><strong>duration_unit</strong> (<em>str</em>) – This defines the <cite>duration_unit</cite> of the passed
+<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a> (how the
+<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Event.duration" title="mutwo.core_events.abc.Event.duration"><code class="xref py py-attr docutils literal notranslate"><span class="pre">duration</span></code></a> attribute will be
+interpreted). Can either be ‘beats’ (default) or ‘miliseconds’.
+WARNING: ‘miliseconds’ isn’t working properly yet!</p></li>
+<li><p><strong>attack_point_optimizer</strong> (<em>Optional</em><em>[</em><em>AttackPointOptimizer</em><em>]</em>) – Optionally the user can pass a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">nauert.AttackPointOptimizer</span></code> object. Attack point optimizer help to
+split events and tie them for better looking notation. The default attack point
+optimizer is <code class="xref py py-class docutils literal notranslate"><span class="pre">nauert.MeasurewiseAttackPointOptimizer</span></code> which splits events
+to better represent metrical structures within bars. If no optimizer is desired
+this argument can be set to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>search_tree</strong> (<em>Optional</em><em>[</em><em>SearchTree</em><em>]</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<p>Unlike <a class="reference internal" href="#mutwo.abjad_converters.LeafMakerConsecutionToQuantizedAbjadContainer" title="mutwo.abjad_converters.LeafMakerConsecutionToQuantizedAbjadContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">LeafMakerConsecutionToQuantizedAbjadContainer</span></code></a> this converter
+supports nested tuplets and ties across tuplets. But this converter is much slower
+than the <a class="reference internal" href="#mutwo.abjad_converters.LeafMakerConsecutionToQuantizedAbjadContainer" title="mutwo.abjad_converters.LeafMakerConsecutionToQuantizedAbjadContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">LeafMakerConsecutionToQuantizedAbjadContainer</span></code></a>. Because the
+converter depends on the abjad extension <cite>nauert</cite> its quality is dependent on the
+inner mechanism of the used package. Because the quantization made by the <cite>nauert</cite>
+package can be somewhat indeterministic a lot of tweaking may be necessary for
+complex musical structures.</p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(consecution_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="#mutwo.abjad_converters.ConsecutionToQuantizedAbjadContainer" title="mutwo.abjad_converters.events.quantization.ConsecutionToQuantizedAbjadContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConsecutionToQuantizedAbjadContainer</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(consecution_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.NauertConsecutionToQuantizedAbjadContainer.convert">
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">consecution_to_convert</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/abjad_converters/events/quantization.html#NauertConsecutionToQuantizedAbjadContainer.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.NauertConsecutionToQuantizedAbjadContainer.convert" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>consecution_to_convert</strong> (<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.basic.Consecution"><em>Consecution</em></a>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple[abjad.score.Container, tuple[tuple[tuple[int, …], …], …], tuple[bool, …]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.NauertConsecutionToDurationLineBasedQuantizedAbjadContainer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NauertConsecutionToDurationLineBasedQuantizedAbjadContainer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration_line_minimum_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration_line_thickness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/abjad_converters/events/quantization.html#NauertConsecutionToDurationLineBasedQuantizedAbjadContainer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.NauertConsecutionToDurationLineBasedQuantizedAbjadContainer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mutwo.abjad_converters.NauertConsecutionToQuantizedAbjadContainer" title="mutwo.abjad_converters.events.quantization.NauertConsecutionToQuantizedAbjadContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">NauertConsecutionToQuantizedAbjadContainer</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_DurationLineBasedQuantizedAbjadContainerMixin</span></code></p>
+<p>Quantize <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a> objects via <code class="xref py py-mod docutils literal notranslate"><span class="pre">abjadext.nauert</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>default_time_signature_sequence</strong> (<em>Sequence</em><em>[</em><em>abjad.TimeSignature</em><em>]</em>) – Set time signatures to divide the quantized abjad data
+in desired bar sizes. If the converted <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a>
+is longer than the sum of all passed time signatures, the last time signature
+will be repeated for the remaining bars.</p></li>
+<li><p><strong>duration_unit</strong> – This defines the <cite>duration_unit</cite> of the passed
+<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a> (how the
+<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Event.duration" title="mutwo.core_events.abc.Event.duration"><code class="xref py py-attr docutils literal notranslate"><span class="pre">duration</span></code></a> attribute will be
+interpreted). Can either be ‘beats’ (default) or ‘miliseconds’.
+WARNING: ‘miliseconds’ isn’t working properly yet!</p></li>
+<li><p><strong>attack_point_optimizer</strong> – Optionally the user can pass a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">nauert.AttackPointOptimizer</span></code> object. Attack point optimizer help to
+split events and tie them for better looking notation. The default attack point
+optimizer is <code class="xref py py-class docutils literal notranslate"><span class="pre">nauert.MeasurewiseAttackPointOptimizer</span></code> which splits events
+to better represent metrical structures within bars. If no optimizer is desired
+this argument can be set to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>duration_line_minimum_length</strong> (<em>int</em>) – The minimum length of a duration line.</p></li>
+<li><p><strong>duration_line_thickness</strong> (<em>int</em>) – The thickness of a duration line.</p></li>
+</ul>
+</dd>
+</dl>
+<p>This converter differs from its parent class through
+the usage of duration lines for indicating rhythm instead of using
+flags, beams, dots and note head colors.</p>
+<p><strong>Note</strong>:</p>
+<p>Don’t forget to add the ‘Duration_line_engraver’ to the resulting
+abjad Voice, otherwise Lilypond won’t be able to render the desired output.</p>
+<p><strong>Example:</strong></p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">abjad</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">abjad_converters</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_events</span><span class="p">,</span> <span class="n">music_events</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">converter</span> <span class="o">=</span> <span class="n">abjad_converters</span><span class="o">.</span><span class="n">ConsecutionToAbjadVoice</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">abjad_converters</span><span class="o">.</span><span class="n">LeafMakerConsecutionToDurationLineBasedQuantizedAbjadContainer</span><span class="p">(</span>
+<span class="gp">... </span>       <span class="p">)</span>
+<span class="gp">... </span>   <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seq</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span>
+<span class="gp">... </span>        <span class="n">music_events</span><span class="o">.</span><span class="n">NoteLike</span><span class="p">(</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">),</span>
+<span class="gp">... </span>        <span class="n">music_events</span><span class="o">.</span><span class="n">NoteLike</span><span class="p">(</span><span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+<span class="gp">... </span>        <span class="n">music_events</span><span class="o">.</span><span class="n">NoteLike</span><span class="p">([],</span> <span class="mf">0.25</span><span class="p">),</span>
+<span class="gp">... </span>        <span class="n">music_events</span><span class="o">.</span><span class="n">NoteLike</span><span class="p">(</span><span class="s2">&quot;e&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+<span class="gp">... </span>        <span class="n">music_events</span><span class="o">.</span><span class="n">NoteLike</span><span class="p">(</span><span class="s2">&quot;e&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="p">]</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">voice</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">voice</span><span class="o">.</span><span class="n">consists_commands</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Duration_line_engraver&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(consecution_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="#mutwo.abjad_converters.NauertConsecutionToQuantizedAbjadContainer" title="mutwo.abjad_converters.events.quantization.NauertConsecutionToQuantizedAbjadContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">NauertConsecutionToQuantizedAbjadContainer</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(consecution_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="#mutwo.abjad_converters.ConsecutionToQuantizedAbjadContainer" title="mutwo.abjad_converters.events.quantization.ConsecutionToQuantizedAbjadContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConsecutionToQuantizedAbjadContainer</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(consecution_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.NauertConsecutionToDurationLineBasedQuantizedAbjadContainer.convert">
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">consecution_to_convert</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/abjad_converters/events/quantization.html#NauertConsecutionToDurationLineBasedQuantizedAbjadContainer.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.NauertConsecutionToDurationLineBasedQuantizedAbjadContainer.convert" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>consecution_to_convert</strong> (<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.basic.Consecution"><em>Consecution</em></a>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple[abjad.score.Container, tuple[tuple[tuple[int, …], …], …], tuple[bool, …]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.LeafMakerConsecutionToQuantizedAbjadContainer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LeafMakerConsecutionToQuantizedAbjadContainer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_rewrite_meter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_beams</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">concatenate_adjacent_tuplets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduce_multiplier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/abjad_converters/events/quantization.html#LeafMakerConsecutionToQuantizedAbjadContainer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.LeafMakerConsecutionToQuantizedAbjadContainer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mutwo.abjad_converters.ConsecutionToQuantizedAbjadContainer" title="mutwo.abjad_converters.events.quantization.ConsecutionToQuantizedAbjadContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConsecutionToQuantizedAbjadContainer</span></code></a></p>
+<p>Quantize <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a> object via <code class="xref py py-mod docutils literal notranslate"><span class="pre">abjad.LeafMaker</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>default_time_signature_sequence</strong> (<em>Sequence</em><em>[</em><em>abjad.TimeSignature</em><em>]</em>) – Set time signatures to divide the quantized abjad data
+in desired bar sizes. If the converted
+<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a> is longer than the sum of
+all passed time signatures, the last time signature
+will be repeated for the remaining bars.</p></li>
+<li><p><strong>concatenate_adjacent_tuplets</strong> (<em>bool</em>) – Set to <cite>True</cite> if quantizer should concatenate
+adjacent tuplets via <a class="reference internal" href="mutwo.abjad_utilities.html#mutwo.abjad_utilities.concatenate_adjacent_tuplets" title="mutwo.abjad_utilities.concatenate_adjacent_tuplets"><code class="xref py py-func docutils literal notranslate"><span class="pre">mutwo.abjad_utilities.concatenate_adjacent_tuplets()</span></code></a>.
+Because this function can make processing slower (and may lead to not-yet-fixed
+bugs) it can be deactivated if not used. Default to <cite>True</cite>.</p></li>
+<li><p><strong>reduce_multiplier</strong> (<em>bool</em>) – Set to <cite>True</cite> if quantizer should call
+<a class="reference internal" href="mutwo.abjad_utilities.html#mutwo.abjad_utilities.reduce_multiplier" title="mutwo.abjad_utilities.reduce_multiplier"><code class="xref py py-func docutils literal notranslate"><span class="pre">mutwo.abjad_utilities.reduce_multiplier()</span></code></a> after consecution
+has been quantized. Can be useful if working with tuplets. If no tuplets
+are used it can be deactivated for faster conversion. Default to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
+<li><p><strong>do_rewrite_meter</strong> (<em>bool</em>) – </p></li>
+<li><p><strong>add_beams</strong> (<em>bool</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<p>This method is significantly faster than the
+<a class="reference internal" href="#mutwo.abjad_converters.NauertConsecutionToQuantizedAbjadContainer" title="mutwo.abjad_converters.NauertConsecutionToQuantizedAbjadContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">NauertConsecutionToQuantizedAbjadContainer</span></code></a>. But it also
+has several known limitations:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p><a class="reference internal" href="#mutwo.abjad_converters.LeafMakerConsecutionToQuantizedAbjadContainer" title="mutwo.abjad_converters.LeafMakerConsecutionToQuantizedAbjadContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">LeafMakerConsecutionToQuantizedAbjadContainer</span></code></a> doesn’t
+support nested tuplets.</p></li>
+<li><p><a class="reference internal" href="#mutwo.abjad_converters.LeafMakerConsecutionToQuantizedAbjadContainer" title="mutwo.abjad_converters.LeafMakerConsecutionToQuantizedAbjadContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">LeafMakerConsecutionToQuantizedAbjadContainer</span></code></a> doesn’t
+support ties across tuplets with different prolation (or across tuplets
+and not-tuplet notation). If ties are desired the user has to build them
+manually before passing the <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a>
+to the converter.</p></li>
+</ol>
+</div></blockquote>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(consecution_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="#mutwo.abjad_converters.ConsecutionToQuantizedAbjadContainer" title="mutwo.abjad_converters.events.quantization.ConsecutionToQuantizedAbjadContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConsecutionToQuantizedAbjadContainer</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(consecution_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.LeafMakerConsecutionToQuantizedAbjadContainer.convert">
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">consecution_to_convert</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/abjad_converters/events/quantization.html#LeafMakerConsecutionToQuantizedAbjadContainer.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.LeafMakerConsecutionToQuantizedAbjadContainer.convert" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>consecution_to_convert</strong> (<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.basic.Consecution"><em>Consecution</em></a>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple[abjad.score.Container, tuple[tuple[tuple[int, …], …], …], tuple[bool, …]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.LeafMakerConsecutionToDurationLineBasedQuantizedAbjadContainer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LeafMakerConsecutionToDurationLineBasedQuantizedAbjadContainer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration_line_minimum_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration_line_thickness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/abjad_converters/events/quantization.html#LeafMakerConsecutionToDurationLineBasedQuantizedAbjadContainer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.LeafMakerConsecutionToDurationLineBasedQuantizedAbjadContainer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mutwo.abjad_converters.LeafMakerConsecutionToQuantizedAbjadContainer" title="mutwo.abjad_converters.events.quantization.LeafMakerConsecutionToQuantizedAbjadContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">LeafMakerConsecutionToQuantizedAbjadContainer</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_DurationLineBasedQuantizedAbjadContainerMixin</span></code></p>
+<p>Quantize <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a> object via <code class="xref py py-mod docutils literal notranslate"><span class="pre">abjad.LeafMaker</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>default_time_signature_sequence</strong> (<em>Sequence</em><em>[</em><em>abjad.TimeSignature</em><em>]</em>) – Set time signatures to divide the quantized abjad data
+in desired bar sizes. If the converted
+<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a> is longer than the sum of
+all passed time signatures, the last time signature
+will be repeated for the remaining bars.</p></li>
+<li><p><strong>concatenate_adjacent_tuplets</strong> (<em>bool</em>) – Set to <cite>True</cite> if quantizer should concatenate
+adjacent tuplets via <a class="reference internal" href="mutwo.abjad_utilities.html#mutwo.abjad_utilities.concatenate_adjacent_tuplets" title="mutwo.abjad_utilities.concatenate_adjacent_tuplets"><code class="xref py py-func docutils literal notranslate"><span class="pre">mutwo.abjad_utilities.concatenate_adjacent_tuplets()</span></code></a>.
+Because this function can make processing slower (and may lead to not-yet-fixed
+bugs) it can be deactivated if not used. Default to <cite>True</cite>.</p></li>
+<li><p><strong>reduce_multiplier</strong> (<em>bool</em>) – Set to <cite>True</cite> if quantizer should call
+<a class="reference internal" href="mutwo.abjad_utilities.html#mutwo.abjad_utilities.reduce_multiplier" title="mutwo.abjad_utilities.reduce_multiplier"><code class="xref py py-func docutils literal notranslate"><span class="pre">mutwo.abjad_utilities.reduce_multiplier()</span></code></a> after consecution
+has been quantized. Can be useful if working with tuplets. If no tuplets
+are used it can be deactivated for faster conversion. Default to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
+<li><p><strong>duration_line_minimum_length</strong> (<em>int</em>) – The minimum length of a duration line.</p></li>
+<li><p><strong>duration_line_thickness</strong> (<em>int</em>) – The thickness of a duration line.</p></li>
+</ul>
+</dd>
+</dl>
+<p>This converter differs from its parent class through
+the usage of duration lines for indicating rhythm instead of using
+flags, beams, dots and note head colors.</p>
+<p><strong>Note</strong>:</p>
+<p>Don’t forget to add the ‘Duration_line_engraver’ to the resulting
+abjad Voice, otherwise Lilypond won’t be able to render the desired output.</p>
+<p><strong>Example:</strong></p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">abjad</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">abjad_converters</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_events</span><span class="p">,</span> <span class="n">music_events</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">converter</span> <span class="o">=</span> <span class="n">abjad_converters</span><span class="o">.</span><span class="n">ConsecutionToAbjadVoice</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">abjad_converters</span><span class="o">.</span><span class="n">LeafMakerConsecutionToDurationLineBasedQuantizedAbjadContainer</span><span class="p">(</span>
+<span class="gp">... </span>       <span class="p">)</span>
+<span class="gp">... </span>   <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seq</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span>
+<span class="gp">... </span>        <span class="n">music_events</span><span class="o">.</span><span class="n">NoteLike</span><span class="p">(</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">),</span>
+<span class="gp">... </span>        <span class="n">music_events</span><span class="o">.</span><span class="n">NoteLike</span><span class="p">(</span><span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+<span class="gp">... </span>        <span class="n">music_events</span><span class="o">.</span><span class="n">NoteLike</span><span class="p">([],</span> <span class="mf">0.25</span><span class="p">),</span>
+<span class="gp">... </span>        <span class="n">music_events</span><span class="o">.</span><span class="n">NoteLike</span><span class="p">(</span><span class="s2">&quot;e&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+<span class="gp">... </span>        <span class="n">music_events</span><span class="o">.</span><span class="n">NoteLike</span><span class="p">(</span><span class="s2">&quot;e&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="p">]</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">voice</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">voice</span><span class="o">.</span><span class="n">consists_commands</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Duration_line_engraver&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(consecution_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="#mutwo.abjad_converters.LeafMakerConsecutionToQuantizedAbjadContainer" title="mutwo.abjad_converters.events.quantization.LeafMakerConsecutionToQuantizedAbjadContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">LeafMakerConsecutionToQuantizedAbjadContainer</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(consecution_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="#mutwo.abjad_converters.ConsecutionToQuantizedAbjadContainer" title="mutwo.abjad_converters.events.quantization.ConsecutionToQuantizedAbjadContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConsecutionToQuantizedAbjadContainer</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(consecution_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.LeafMakerConsecutionToDurationLineBasedQuantizedAbjadContainer.convert">
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">consecution_to_convert</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/abjad_converters/events/quantization.html#LeafMakerConsecutionToDurationLineBasedQuantizedAbjadContainer.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.LeafMakerConsecutionToDurationLineBasedQuantizedAbjadContainer.convert" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>consecution_to_convert</strong> (<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.basic.Consecution"><em>Consecution</em></a>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple[abjad.score.Container, tuple[tuple[tuple[int, …], …], …], tuple[bool, …]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.CompoundToAbjadContainer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CompoundToAbjadContainer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">abjad_container_class</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lilypond_type_of_abjad_container</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compound_to_abjad_container_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_process_abjad_container_routine_sequence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_process_abjad_container_routine_sequence</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/abjad_converters/events/building.html#CompoundToAbjadContainer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.CompoundToAbjadContainer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(compound_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>abjad_container_class</strong> (<em>Type</em><em>[</em><em>Container</em><em>]</em>) – </p></li>
+<li><p><strong>lilypond_type_of_abjad_container</strong> (<em>str</em>) – </p></li>
+<li><p><strong>compound_to_abjad_container_name</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Compound" title="mutwo.core_events.abc.Compound"><em>Compound</em></a><em>]</em><em>, </em><em>str</em><em>]</em>) – </p></li>
+<li><p><strong>pre_process_abjad_container_routine_sequence</strong> (<em>Sequence</em><em>[</em><a class="reference internal" href="#mutwo.abjad_converters.ProcessAbjadContainerRoutine" title="mutwo.abjad_converters.process_container_routines.ProcessAbjadContainerRoutine"><em>ProcessAbjadContainerRoutine</em></a><em>]</em>) – </p></li>
+<li><p><strong>post_process_abjad_container_routine_sequence</strong> (<em>Sequence</em><em>[</em><a class="reference internal" href="#mutwo.abjad_converters.ProcessAbjadContainerRoutine" title="mutwo.abjad_converters.process_container_routines.ProcessAbjadContainerRoutine"><em>ProcessAbjadContainerRoutine</em></a><em>]</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.CompoundToAbjadContainer.convert">
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">compound_to_convert</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/abjad_converters/events/building.html#CompoundToAbjadContainer.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.CompoundToAbjadContainer.convert" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>compound_to_convert</strong> (<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Compound" title="mutwo.core_events.abc.Compound"><em>Compound</em></a>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Container</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.ConsecutionToAbjadVoice">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ConsecutionToAbjadVoice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">consecution_to_quantized_abjad_container=LeafMakerConsecutionToQuantizedAbjadContainer()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_tempo=FlexTempo(30.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chronon_to_pitch_list=ChrononToPitchList()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chronon_to_volume=ChrononToVolume()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chronon_to_grace_note_consecution=ChrononToGraceNoteConsecution()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chronon_to_after_grace_note_consecution=ChrononToAfterGraceNoteConsecution()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chronon_to_playing_indicator_collection=ChrononToPlayingIndicatorCollection()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chronon_to_notation_indicator_collection=ChrononToNotationIndicatorCollection()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chronon_to_lyric=ChrononToLyric()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutwo_pitch_to_abjad_pitch=MutwoPitchToAbjadPitch()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutwo_volume_to_abjad_attachment_dynamic=MutwoVolumeToAbjadAttachmentDynamic()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tempo_to_abjad_attachment_tempo=ComplexTempoToAbjadAttachmentTempo()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutwo_lyric_to_abjad_string=MutwoLyricToAbjadString()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_to_tempo=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">abjad_attachment_class_sequence=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_multimeasure_rests=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">abjad_container_class=&lt;class</span> <span class="pre">'abjad.score.Voice'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lilypond_type_of_abjad_container='Voice'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compound_to_abjad_container_name=&lt;function</span> <span class="pre">ConsecutionToAbjadVoice.&lt;lambda&gt;&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_process_abjad_container_routine_sequence=()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_process_abjad_container_routine_sequence=()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration_line_engraver=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prepare_for_duration_line_based_notation=True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/abjad_converters/events/building.html#ConsecutionToAbjadVoice"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.ConsecutionToAbjadVoice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mutwo.abjad_converters.CompoundToAbjadContainer" title="mutwo.abjad_converters.events.building.CompoundToAbjadContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">CompoundToAbjadContainer</span></code></a></p>
+<p>Convert <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a> to <code class="xref py py-class docutils literal notranslate"><span class="pre">abjad.Voice</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>consecution_to_quantized_abjad_container</strong> (<a class="reference internal" href="#mutwo.abjad_converters.ConsecutionToQuantizedAbjadContainer" title="mutwo.abjad_converters.ConsecutionToQuantizedAbjadContainer"><em>ConsecutionToQuantizedAbjadContainer</em></a><em>, </em><em>optional</em>) – Class which
+defines how the Mutwo data will be quantized. See
+<a class="reference internal" href="#mutwo.abjad_converters.ConsecutionToQuantizedAbjadContainer" title="mutwo.abjad_converters.ConsecutionToQuantizedAbjadContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConsecutionToQuantizedAbjadContainer</span></code></a> for more information.</p></li>
+<li><p><strong>default_tempo</strong> (<a class="reference internal" href="mutwo.core_parameters.html#mutwo.core_parameters.abc.Tempo" title="mutwo.core_parameters.abc.Tempo"><em>core_parameters.abc.Tempo</em></a>) – Fallback value in case <cite>event_to_tempo</cite>
+is set to <cite>None</cite> or returns <cite>None</cite>. This is the default for now, but likely
+to be removed in the future. If possible, better use
+<cite>event_to_tempo</cite>.</p></li>
+<li><p><strong>chronon_to_pitch_list</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><em>core_events.Chronon</em></a><em>]</em><em>, </em><a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Pitch" title="mutwo.music_parameters.abc.Pitch"><em>music_parameters.abc.Pitch</em></a><em>]</em><em>, </em><em>optional</em>) – Function to extract from a
+<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_events.Chronon</span></code></a> a tuple that contains pitch objects
+(objects that inherit from <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Pitch" title="mutwo.music_parameters.abc.Pitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.abc.Pitch</span></code></a>).
+By default it asks the Event for its
+<a class="reference internal" href="mutwo.music_events.html#mutwo.music_events.NoteLike.pitch_list" title="mutwo.music_events.NoteLike.pitch_list"><code class="xref py py-attr docutils literal notranslate"><span class="pre">pitch_list</span></code></a> attribute
+(because by default <a class="reference internal" href="mutwo.music_events.html#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_events.NoteLike</span></code></a> objects are expected).
+When using different Event classes than <a class="reference internal" href="mutwo.music_events.html#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoteLike</span></code></a>
+with a different name for their pitch property, this argument
+should be overridden.
+If the function call raises an <code class="xref py py-obj docutils literal notranslate"><span class="pre">AttributeError</span></code> (e.g. if no pitch can be
+extracted), mutwo will assume an event without any pitches.</p></li>
+<li><p><strong>chronon_to_volume</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><em>core_events.Chronon</em></a><em>]</em><em>, </em><a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Volume" title="mutwo.music_parameters.abc.Volume"><em>music_parameters.abc.Volume</em></a><em>]</em><em>, </em><em>optional</em>) – Function to extract the volume from a
+<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_events.Chronon</span></code></a> in the purpose of generating dynamic
+indicators. The function should return an object that inherits from
+<a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Volume" title="mutwo.music_parameters.abc.Volume"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.abc.Volume</span></code></a>. By default it asks the Event for
+its <a class="reference internal" href="mutwo.music_events.html#mutwo.music_events.NoteLike.volume" title="mutwo.music_events.NoteLike.volume"><code class="xref py py-attr docutils literal notranslate"><span class="pre">volume</span></code></a> attribute (because by default
+<a class="reference internal" href="mutwo.music_events.html#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_events.NoteLike</span></code></a> objects are expected).
+When using different Event classes than <a class="reference internal" href="mutwo.music_events.html#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoteLike</span></code></a>
+with a different name for their volume property, this argument should
+be overridden.
+If the function call raises an <code class="xref py py-obj docutils literal notranslate"><span class="pre">AttributeError</span></code> (e.g. if no volume can be
+extracted), mutwo will set <code class="xref py py-attr docutils literal notranslate"><span class="pre">pitch_list</span></code> to an empty list and set
+volume to 0.</p></li>
+<li><p><strong>chronon_to_grace_note_consecution</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><em>core_events.Chronon</em></a><em>]</em><em>, </em><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><em>core_events.Consecution</em></a><em>[</em><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><em>core_events.Chronon</em></a><em>]</em><em>]</em><em>, </em><em>optional</em>) – Function to extract from a
+<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_events.Chronon</span></code></a> a
+<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a>
+object filled with
+<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">Chronon</span></code></a>.
+By default it asks the Event for its
+<a class="reference internal" href="mutwo.music_events.html#mutwo.music_events.NoteLike.grace_note_consecution" title="mutwo.music_events.NoteLike.grace_note_consecution"><code class="xref py py-attr docutils literal notranslate"><span class="pre">grace_note_consecution</span></code></a>
+attribute (because by default <a class="reference internal" href="mutwo.music_events.html#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_events.NoteLike</span></code></a>
+objects are expected).
+When using different Event classes than <a class="reference internal" href="mutwo.music_events.html#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoteLike</span></code></a>
+with a different name for their <cite>grace_note_consecution</cite> property, this argument
+should be overridden. If the
+function call raises an <code class="xref py py-obj docutils literal notranslate"><span class="pre">AttributeError</span></code> (e.g. if no grace_note_consecution can be
+extracted), mutwo will use an empty
+<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a>.</p></li>
+<li><p><strong>chronon_to_after_grace_note_consecution</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><em>core_events.Chronon</em></a><em>]</em><em>, </em><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><em>core_events.Consecution</em></a><em>[</em><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><em>core_events.Chronon</em></a><em>]</em><em>]</em><em>, </em><em>optional</em>) – Function to extract from a
+<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_events.Chronon</span></code></a> a
+<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a>
+object filled with
+<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">Chronon</span></code></a>.
+By default it asks the Event for its
+<a class="reference internal" href="mutwo.music_events.html#mutwo.music_events.NoteLike.after_grace_note_consecution" title="mutwo.music_events.NoteLike.after_grace_note_consecution"><code class="xref py py-attr docutils literal notranslate"><span class="pre">after_grace_note_consecution</span></code></a>
+attribute (because by default <a class="reference internal" href="mutwo.music_events.html#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_events.NoteLike</span></code></a>
+objects are expected).
+When using different Event classes than <a class="reference internal" href="mutwo.music_events.html#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoteLike</span></code></a>
+with a different name for their <cite>after_grace_note_consecution</cite> property, this
+argument should be overridden. If the function call
+raises an <code class="xref py py-obj docutils literal notranslate"><span class="pre">AttributeError</span></code> (e.g. if no after_grace_note_consecution can be
+extracted), mutwo will use an empty
+<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a>.</p></li>
+<li><p><strong>chronon_to_playing_indicator_collection</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><em>core_events.Chronon</em></a><em>]</em><em>, </em><a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.PlayingIndicatorCollection" title="mutwo.music_parameters.PlayingIndicatorCollection"><em>music_parameters.PlayingIndicatorCollection</em></a><em>,</em><em>]</em><em>, </em><em>optional</em>) – Function to extract from a
+<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_events.Chronon</span></code></a> a
+<a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.PlayingIndicatorCollection" title="mutwo.music_parameters.playing_indicators.PlayingIndicatorCollection"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.playing_indicators.PlayingIndicatorCollection</span></code></a>
+object. By default it asks the Event for its
+<a class="reference internal" href="mutwo.music_events.html#mutwo.music_events.NoteLike.playing_indicator_collection" title="mutwo.music_events.NoteLike.playing_indicator_collection"><code class="xref py py-attr docutils literal notranslate"><span class="pre">playing_indicator_collection</span></code></a>
+attribute (because by default <a class="reference internal" href="mutwo.music_events.html#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_events.NoteLike</span></code></a>
+objects are expected).
+When using different Event classes than <a class="reference internal" href="mutwo.music_events.html#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoteLike</span></code></a>
+with a different name for their playing_indicators property, this argument
+should be overridden. If the
+function call raises an <code class="xref py py-obj docutils literal notranslate"><span class="pre">AttributeError</span></code> (e.g. if no playing indicator
+collection can be extracted), mutwo will build a playing indicator collection
+from <a class="reference internal" href="mutwo.music_events.html#mutwo.music_events.configurations.DEFAULT_PLAYING_INDICATORS_COLLECTION_CLASS" title="mutwo.music_events.configurations.DEFAULT_PLAYING_INDICATORS_COLLECTION_CLASS"><code class="xref py py-const docutils literal notranslate"><span class="pre">DEFAULT_PLAYING_INDICATORS_COLLECTION_CLASS</span></code></a>.</p></li>
+<li><p><strong>chronon_to_notation_indicator_collection</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><em>core_events.Chronon</em></a><em>]</em><em>, </em><a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.NotationIndicatorCollection" title="mutwo.music_parameters.NotationIndicatorCollection"><em>music_parameters.NotationIndicatorCollection</em></a><em>,</em><em>]</em><em>, </em><em>optional</em>) – Function to extract from a
+<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_events.Chronon</span></code></a> a
+<a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.NotationIndicatorCollection" title="mutwo.music_parameters.notation_indicators.NotationIndicatorCollection"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.notation_indicators.NotationIndicatorCollection</span></code></a>
+object. By default it asks the Event for its
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">notation_indicators</span></code>
+(because by default <a class="reference internal" href="mutwo.music_events.html#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_events.NoteLike</span></code></a> objects are expected).
+When using different Event classes than <code class="docutils literal notranslate"><span class="pre">NoteLike</span></code> with a different name for
+their playing_indicators property, this argument should be overridden. If the
+function call raises an <code class="xref py py-obj docutils literal notranslate"><span class="pre">AttributeError</span></code> (e.g. if no notation indicator
+collection can be extracted), mutwo will build a notation indicator collection
+from <a class="reference internal" href="mutwo.music_events.html#mutwo.music_events.configurations.DEFAULT_NOTATION_INDICATORS_COLLECTION_CLASS" title="mutwo.music_events.configurations.DEFAULT_NOTATION_INDICATORS_COLLECTION_CLASS"><code class="xref py py-const docutils literal notranslate"><span class="pre">DEFAULT_NOTATION_INDICATORS_COLLECTION_CLASS</span></code></a></p></li>
+<li><p><strong>chronon_to_lyric</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><em>core_events.Chronon</em></a><em>]</em><em>, </em><a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Lyric" title="mutwo.music_parameters.abc.Lyric"><em>music_parameters.abc.Lyric</em></a><em>]</em><em>, </em><em>optional</em>) – Function to extract the lyric from a
+<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_events.Chronon</span></code></a> in the purpose of generating lyrics.
+The function should return an object that inherits from
+<a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Lyric" title="mutwo.music_parameters.abc.Lyric"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.abc.Lyric</span></code></a>. By default it asks the Event for
+its <code class="xref py py-attr docutils literal notranslate"><span class="pre">lyric</span></code> attribute (because by default
+<a class="reference internal" href="mutwo.music_events.html#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_events.NoteLike</span></code></a> objects are expected).
+When using different Event classes than <a class="reference internal" href="mutwo.music_events.html#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoteLike</span></code></a>
+with a different name for their lyric property, this argument should
+be overridden.
+If the function call raises an <code class="xref py py-obj docutils literal notranslate"><span class="pre">AttributeError</span></code> (e.g. if no lyric can be
+extracted), mutwo will set <code class="xref py py-attr docutils literal notranslate"><span class="pre">lyric</span></code> to an empty text.</p></li>
+<li><p><strong>mutwo_pitch_to_abjad_pitch</strong> (<a class="reference internal" href="#mutwo.abjad_converters.MutwoPitchToAbjadPitch" title="mutwo.abjad_converters.MutwoPitchToAbjadPitch"><em>MutwoPitchToAbjadPitch</em></a><em>, </em><em>optional</em>) – Class which defines how to convert
+<a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Pitch" title="mutwo.music_parameters.abc.Pitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.abc.Pitch</span></code></a> objects to <code class="xref py py-class docutils literal notranslate"><span class="pre">abjad.Pitch</span></code> objects.
+See <a class="reference internal" href="#mutwo.abjad_converters.MutwoPitchToAbjadPitch" title="mutwo.abjad_converters.MutwoPitchToAbjadPitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoPitchToAbjadPitch</span></code></a> for more information.</p></li>
+<li><p><strong>mutwo_volume_to_abjad_attachment_dynamic</strong> (<a class="reference internal" href="#mutwo.abjad_converters.MutwoVolumeToAbjadAttachmentDynamic" title="mutwo.abjad_converters.MutwoVolumeToAbjadAttachmentDynamic"><em>MutwoVolumeToAbjadAttachmentDynamic</em></a><em>, </em><em>optional</em>) – Class which defines how
+to convert <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Volume" title="mutwo.music_parameters.abc.Volume"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.abc.Volume</span></code></a> objects to
+<a class="reference internal" href="mutwo.abjad_parameters.html#mutwo.abjad_parameters.Dynamic" title="mutwo.abjad_parameters.Dynamic"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.abjad_parameters.Dynamic</span></code></a> objects.
+See <a class="reference internal" href="#mutwo.abjad_converters.MutwoVolumeToAbjadAttachmentDynamic" title="mutwo.abjad_converters.MutwoVolumeToAbjadAttachmentDynamic"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoVolumeToAbjadAttachmentDynamic</span></code></a> for more information.</p></li>
+<li><p><strong>tempo_to_abjad_attachment_tempo</strong> (<a class="reference internal" href="#mutwo.abjad_converters.TempoToAbjadAttachmentTempo" title="mutwo.abjad_converters.TempoToAbjadAttachmentTempo"><em>TempoToAbjadAttachmentTempo</em></a><em>, </em><em>optional</em>) – Class which defines how
+to convert tempo envelopes to
+<a class="reference internal" href="mutwo.abjad_parameters.html#mutwo.abjad_parameters.Tempo" title="mutwo.abjad_parameters.Tempo"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.abjad_parameters.Tempo</span></code></a> objects.
+See <a class="reference internal" href="#mutwo.abjad_converters.TempoToAbjadAttachmentTempo" title="mutwo.abjad_converters.TempoToAbjadAttachmentTempo"><code class="xref py py-class docutils literal notranslate"><span class="pre">TempoToAbjadAttachmentTempo</span></code></a> for more information.</p></li>
+<li><p><strong>mutwo_lyric_to_abjad_string</strong> (<a class="reference internal" href="#mutwo.abjad_converters.MutwoLyricToAbjadString" title="mutwo.abjad_converters.MutwoLyricToAbjadString"><em>MutwoLyricToAbjadString</em></a>) – Callable which defines how
+to convert <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Lyric" title="mutwo.music_parameters.abc.Lyric"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.abc.Lyric</span></code></a> to a string.
+Consult <a class="reference internal" href="#mutwo.abjad_converters.MutwoLyricToAbjadString" title="mutwo.abjad_converters.MutwoLyricToAbjadString"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.abjad_converters.MutwoLyricToAbjadString</span></code></a>
+for more information.</p></li>
+<li><p><strong>event_to_tempo</strong> (<em>Optional</em><em>[</em><em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Event" title="mutwo.core_events.abc.Event"><em>core_events.abc.Event</em></a><em>]</em><em>, </em><em>Optional</em><em>[</em><a class="reference internal" href="mutwo.core_parameters.html#mutwo.core_parameters.abc.Tempo" title="mutwo.core_parameters.abc.Tempo"><em>core_parameters.abc.Tempo</em></a><em>]</em><em>]</em><em>]</em>) – A function which extracts a
+<a class="reference internal" href="mutwo.core_parameters.html#mutwo.core_parameters.abc.Tempo" title="mutwo.core_parameters.abc.Tempo"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_parameters.abc.Tempo</span></code></a> from a
+<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Event" title="mutwo.core_events.abc.Event"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.core_events.abc.Event</span></code></a>. If set to <cite>None</cite> or if the
+function returns <cite>None</cite> mutwo falls back to <cite>default_tempo</cite>.
+Default to <code class="docutils literal notranslate"><span class="pre">None</span></code>, but this will likely change in the future.</p></li>
+<li><p><strong>abjad_attachment_class_sequence</strong> (<em>Sequence</em><em>[</em><a class="reference internal" href="mutwo.abjad_parameters.html#mutwo.abjad_parameters.abc.AbjadAttachment" title="mutwo.abjad_parameters.abc.AbjadAttachment"><em>abjad_parameters.abc.AbjadAttachment</em></a><em>]</em><em>, </em><em>optional</em>) – A tuple which contains all available abjad attachment classes
+which shall be used by the converter.</p></li>
+<li><p><strong>write_multimeasure_rests</strong> (<em>bool</em>) – Set to <code class="docutils literal notranslate"><span class="pre">True</span></code> if the converter should replace
+rests that last a complete bar with multimeasure rests (rests with uppercase
+“R” in Lilypond). Default to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
+<li><p><strong>duration_line_engraver</strong> (<em>bool</em>) – If <cite>consecution_to_quantized_abjad_container</cite> is
+any duration line based converter, the converter adds
+<a class="reference internal" href="#mutwo.abjad_converters.AddDurationLineEngraver" title="mutwo.abjad_converters.AddDurationLineEngraver"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.abjad_converters.AddDurationLineEngraver</span></code></a> to
+<cite>post_process_abjad_container_routine_sequence</cite>. Default to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
+<li><p><strong>prepare_for_duration_line_based_notation</strong> (<em>bool</em>) – If
+<cite>consecution_to_quantized_abjad_container</cite> is
+any duration line based converter, the converter adds
+<a class="reference internal" href="#mutwo.abjad_converters.PrepareForDurationLineBasedNotation" title="mutwo.abjad_converters.PrepareForDurationLineBasedNotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.abjad_converters.PrepareForDurationLineBasedNotation</span></code></a> to
+<cite>post_process_abjad_container_routine_sequence</cite>. Default to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
+<li><p><strong>abjad_container_class</strong> (<em>Type</em><em>[</em><em>Container</em><em>]</em>) – </p></li>
+<li><p><strong>lilypond_type_of_abjad_container</strong> (<em>str</em>) – </p></li>
+<li><p><strong>compound_to_abjad_container_name</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Compound" title="mutwo.core_events.abc.Compound"><em>Compound</em></a><em>]</em><em>, </em><em>Optional</em><em>[</em><em>str</em><em>]</em><em>]</em>) – </p></li>
+<li><p><strong>pre_process_abjad_container_routine_sequence</strong> (<em>Sequence</em><em>[</em><a class="reference internal" href="#mutwo.abjad_converters.ProcessAbjadContainerRoutine" title="mutwo.abjad_converters.process_container_routines.ProcessAbjadContainerRoutine"><em>ProcessAbjadContainerRoutine</em></a><em>]</em>) – </p></li>
+<li><p><strong>post_process_abjad_container_routine_sequence</strong> (<em>Sequence</em><em>[</em><a class="reference internal" href="#mutwo.abjad_converters.ProcessAbjadContainerRoutine" title="mutwo.abjad_converters.process_container_routines.ProcessAbjadContainerRoutine"><em>ProcessAbjadContainerRoutine</em></a><em>]</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(consecution_to_convert)</p></td>
+<td><p>Convert passed <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a>.</p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="#mutwo.abjad_converters.CompoundToAbjadContainer" title="mutwo.abjad_converters.events.building.CompoundToAbjadContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">CompoundToAbjadContainer</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(compound_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.ConsecutionToAbjadVoice.ExtractedData">
+<span class="sig-name descname"><span class="pre">ExtractedData</span></span><a class="headerlink" href="#mutwo.abjad_converters.ConsecutionToAbjadVoice.ExtractedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Pitch" title="mutwo.music_parameters.abc.Pitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pitch</span></code></a>], <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Volume" title="mutwo.music_parameters.abc.Volume"><code class="xref py py-class docutils literal notranslate"><span class="pre">Volume</span></code></a>, <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.basic.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a>[<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.basic.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">Chronon</span></code></a>], <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.basic.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a>[<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.basic.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">Chronon</span></code></a>], <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.PlayingIndicatorCollection" title="mutwo.music_parameters.playing_indicators.PlayingIndicatorCollection"><code class="xref py py-class docutils literal notranslate"><span class="pre">PlayingIndicatorCollection</span></code></a>, <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.NotationIndicatorCollection" title="mutwo.music_parameters.notation_indicators.NotationIndicatorCollection"><code class="xref py py-class docutils literal notranslate"><span class="pre">NotationIndicatorCollection</span></code></a>, <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Lyric" title="mutwo.music_parameters.abc.Lyric"><code class="xref py py-class docutils literal notranslate"><span class="pre">Lyric</span></code></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.ConsecutionToAbjadVoice.ExtractedDataPerChronon">
+<span class="sig-name descname"><span class="pre">ExtractedDataPerChronon</span></span><a class="headerlink" href="#mutwo.abjad_converters.ConsecutionToAbjadVoice.ExtractedDataPerChronon" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Pitch" title="mutwo.music_parameters.abc.Pitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pitch</span></code></a>], <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Volume" title="mutwo.music_parameters.abc.Volume"><code class="xref py py-class docutils literal notranslate"><span class="pre">Volume</span></code></a>, <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.basic.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a>[<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.basic.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">Chronon</span></code></a>], <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.basic.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a>[<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Chronon" title="mutwo.core_events.basic.Chronon"><code class="xref py py-class docutils literal notranslate"><span class="pre">Chronon</span></code></a>], <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.PlayingIndicatorCollection" title="mutwo.music_parameters.playing_indicators.PlayingIndicatorCollection"><code class="xref py py-class docutils literal notranslate"><span class="pre">PlayingIndicatorCollection</span></code></a>, <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.NotationIndicatorCollection" title="mutwo.music_parameters.notation_indicators.NotationIndicatorCollection"><code class="xref py py-class docutils literal notranslate"><span class="pre">NotationIndicatorCollection</span></code></a>, <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Lyric" title="mutwo.music_parameters.abc.Lyric"><code class="xref py py-class docutils literal notranslate"><span class="pre">Lyric</span></code></a>], …]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.ConsecutionToAbjadVoice.convert">
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">consecution_to_convert</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/abjad_converters/events/building.html#ConsecutionToAbjadVoice.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.ConsecutionToAbjadVoice.convert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert passed <a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>consecution_to_convert</strong> (<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><em>mutwo.core_events.Consecution</em></a>) – The
+<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.Consecution" title="mutwo.core_events.Consecution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Consecution</span></code></a> which shall
+be converted to the <code class="xref py py-class docutils literal notranslate"><span class="pre">abjad.Voice</span></code> object.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Voice</em></p>
+</dd>
+</dl>
+<p><strong>Example:</strong></p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">abjad</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_events</span><span class="p">,</span> <span class="n">music_events</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">abjad_converters</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seq</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span>
+<span class="gp">... </span>        <span class="n">music_events</span><span class="o">.</span><span class="n">NoteLike</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="s2">&quot;c a g e&quot;</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">6</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="p">]</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">converter</span> <span class="o">=</span> <span class="n">abjad_converters</span><span class="o">.</span><span class="n">ConsecutionToAbjadVoice</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">voice</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.NestedCompoundToAbjadContainer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NestedCompoundToAbjadContainer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nested_compound_to_compound_to_abjad_container_converters_converter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">abjad_container_class</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lilypond_type_of_abjad_container</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compound_to_abjad_container_name=&lt;function</span> <span class="pre">NestedCompoundToAbjadContainer.&lt;lambda&gt;&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_process_abjad_container_routine_sequence=()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_process_abjad_container_routine_sequence=()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/abjad_converters/events/building.html#NestedCompoundToAbjadContainer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.NestedCompoundToAbjadContainer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mutwo.abjad_converters.CompoundToAbjadContainer" title="mutwo.abjad_converters.events.building.CompoundToAbjadContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">CompoundToAbjadContainer</span></code></a></p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<details><summary>Inherited from <a class="reference internal" href="#mutwo.abjad_converters.CompoundToAbjadContainer" title="mutwo.abjad_converters.events.building.CompoundToAbjadContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">CompoundToAbjadContainer</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(compound_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nested_compound_to_compound_to_abjad_container_converters_converter</strong> (<a class="reference internal" href="#mutwo.abjad_converters.NestedCompoundToCompoundToAbjadContainers" title="mutwo.abjad_converters.events.building.NestedCompoundToCompoundToAbjadContainers"><em>NestedCompoundToCompoundToAbjadContainers</em></a>) – </p></li>
+<li><p><strong>abjad_container_class</strong> (<em>Type</em><em>[</em><em>Container</em><em>]</em>) – </p></li>
+<li><p><strong>lilypond_type_of_abjad_container</strong> (<em>str</em>) – </p></li>
+<li><p><strong>compound_to_abjad_container_name</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Compound" title="mutwo.core_events.abc.Compound"><em>Compound</em></a><em>]</em><em>, </em><em>str</em><em>]</em>) – </p></li>
+<li><p><strong>pre_process_abjad_container_routine_sequence</strong> (<em>Sequence</em><em>[</em><a class="reference internal" href="#mutwo.abjad_converters.ProcessAbjadContainerRoutine" title="mutwo.abjad_converters.process_container_routines.ProcessAbjadContainerRoutine"><em>ProcessAbjadContainerRoutine</em></a><em>]</em>) – </p></li>
+<li><p><strong>post_process_abjad_container_routine_sequence</strong> (<em>Sequence</em><em>[</em><a class="reference internal" href="#mutwo.abjad_converters.ProcessAbjadContainerRoutine" title="mutwo.abjad_converters.process_container_routines.ProcessAbjadContainerRoutine"><em>ProcessAbjadContainerRoutine</em></a><em>]</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.NestedCompoundToCompoundToAbjadContainers">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NestedCompoundToCompoundToAbjadContainers</span></span><a class="reference internal" href="../_modules/mutwo/abjad_converters/events/building.html#NestedCompoundToCompoundToAbjadContainers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.NestedCompoundToCompoundToAbjadContainers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(nested_compound_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.NestedCompoundToCompoundToAbjadContainers.convert">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nested_compound_to_convert</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/abjad_converters/events/building.html#NestedCompoundToCompoundToAbjadContainers.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.NestedCompoundToCompoundToAbjadContainers.convert" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>nested_compound_to_convert</strong> (<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Compound" title="mutwo.core_events.abc.Compound"><em>Compound</em></a>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple[<a class="reference internal" href="#mutwo.abjad_converters.CompoundToAbjadContainer" title="mutwo.abjad_converters.events.building.CompoundToAbjadContainer">mutwo.abjad_converters.events.building.CompoundToAbjadContainer</a>, …]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.CycleBasedNestedCompoundToCompoundToAbjadContainers">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CycleBasedNestedCompoundToCompoundToAbjadContainers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">compound_to_abjad_container_converter_sequence</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/abjad_converters/events/building.html#CycleBasedNestedCompoundToCompoundToAbjadContainers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.CycleBasedNestedCompoundToCompoundToAbjadContainers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mutwo.abjad_converters.NestedCompoundToCompoundToAbjadContainers" title="mutwo.abjad_converters.events.building.NestedCompoundToCompoundToAbjadContainers"><code class="xref py py-class docutils literal notranslate"><span class="pre">NestedCompoundToCompoundToAbjadContainers</span></code></a></p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(nested_compound_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="#mutwo.abjad_converters.NestedCompoundToCompoundToAbjadContainers" title="mutwo.abjad_converters.events.building.NestedCompoundToCompoundToAbjadContainers"><code class="xref py py-class docutils literal notranslate"><span class="pre">NestedCompoundToCompoundToAbjadContainers</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(nested_compound_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>compound_to_abjad_container_converter_sequence</strong> (<em>Sequence</em><em>[</em><a class="reference internal" href="#mutwo.abjad_converters.CompoundToAbjadContainer" title="mutwo.abjad_converters.events.building.CompoundToAbjadContainer"><em>CompoundToAbjadContainer</em></a><em>]</em>) – </p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.CycleBasedNestedCompoundToCompoundToAbjadContainers.convert">
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nested_compound_to_convert</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/abjad_converters/events/building.html#CycleBasedNestedCompoundToCompoundToAbjadContainers.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.CycleBasedNestedCompoundToCompoundToAbjadContainers.convert" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>nested_compound_to_convert</strong> (<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Compound" title="mutwo.core_events.abc.Compound"><em>Compound</em></a>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple[<a class="reference internal" href="#mutwo.abjad_converters.CompoundToAbjadContainer" title="mutwo.abjad_converters.events.building.CompoundToAbjadContainer">mutwo.abjad_converters.events.building.CompoundToAbjadContainer</a>, …]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.TagBasedNestedCompoundToCompoundToAbjadContainers">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TagBasedNestedCompoundToCompoundToAbjadContainers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag_to_abjad_converter_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compound_to_tag=&lt;function</span> <span class="pre">TagBasedNestedCompoundToCompoundToAbjadContainers.&lt;lambda&gt;&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/abjad_converters/events/building.html#TagBasedNestedCompoundToCompoundToAbjadContainers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.TagBasedNestedCompoundToCompoundToAbjadContainers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mutwo.abjad_converters.NestedCompoundToCompoundToAbjadContainers" title="mutwo.abjad_converters.events.building.NestedCompoundToCompoundToAbjadContainers"><code class="xref py py-class docutils literal notranslate"><span class="pre">NestedCompoundToCompoundToAbjadContainers</span></code></a></p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(nested_compound_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="#mutwo.abjad_converters.NestedCompoundToCompoundToAbjadContainers" title="mutwo.abjad_converters.events.building.NestedCompoundToCompoundToAbjadContainers"><code class="xref py py-class docutils literal notranslate"><span class="pre">NestedCompoundToCompoundToAbjadContainers</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(nested_compound_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tag_to_abjad_converter_dict</strong> (<em>dict</em><em>[</em><em>str</em><em>, </em><a class="reference internal" href="#mutwo.abjad_converters.CompoundToAbjadContainer" title="mutwo.abjad_converters.events.building.CompoundToAbjadContainer"><em>mutwo.abjad_converters.events.building.CompoundToAbjadContainer</em></a><em>]</em>) – </p></li>
+<li><p><strong>compound_to_tag</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Compound" title="mutwo.core_events.abc.Compound"><em>Compound</em></a><em>]</em><em>, </em><em>str</em><em>]</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.TagBasedNestedCompoundToCompoundToAbjadContainers.convert">
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nested_compound_to_convert</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/abjad_converters/events/building.html#TagBasedNestedCompoundToCompoundToAbjadContainers.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.TagBasedNestedCompoundToCompoundToAbjadContainers.convert" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>nested_compound_to_convert</strong> (<a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Compound" title="mutwo.core_events.abc.Compound"><em>Compound</em></a>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple[<a class="reference internal" href="#mutwo.abjad_converters.CompoundToAbjadContainer" title="mutwo.abjad_converters.events.building.CompoundToAbjadContainer">mutwo.abjad_converters.events.building.CompoundToAbjadContainer</a>, …]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.MutwoLyricToAbjadString">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MutwoLyricToAbjadString</span></span><a class="reference internal" href="../_modules/mutwo/abjad_converters/parameters/lyrics.html#MutwoLyricToAbjadString"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.MutwoLyricToAbjadString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(mutwo_lyric_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.MutwoLyricToAbjadString.convert">
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mutwo_lyric_to_convert</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/abjad_converters/parameters/lyrics.html#MutwoLyricToAbjadString.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.MutwoLyricToAbjadString.convert" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mutwo_lyric_to_convert</strong> (<a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Lyric" title="mutwo.music_parameters.abc.Lyric"><em>Lyric</em></a>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.MutwoPitchToAbjadPitch">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MutwoPitchToAbjadPitch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">allowed_division_sequence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(Fraction(1,</span> <span class="pre">2),)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/abjad_converters/parameters/pitches.html#MutwoPitchToAbjadPitch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.MutwoPitchToAbjadPitch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></p>
+<p>Convert Mutwo Pitch objects to Abjad Pitch objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>allowed_division_sequence</strong> (<em>Sequence</em><em>[</em><em>fractions.Fraction</em><em>]</em>) – <a class="reference internal" href="#mutwo.abjad_converters.MutwoPitchToAbjadPitch" title="mutwo.abjad_converters.MutwoPitchToAbjadPitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoPitchToAbjadPitch</span></code></a> rounds
+microtonal <code class="xref py py-class docutils literal notranslate"><span class="pre">music_parameters.WesternPitch</span></code> in order to make them
+notatable with Lilypond. By default they are rounded to quarter-tones
+(because Lilypond support quarter-tones). If you’d like to omit quarter
+tones you can set this to <code class="docutils literal notranslate"><span class="pre">(fractions.Fraction(1,</span> <span class="pre">1),)</span></code>. See also
+the documentation of <cite>round_to</cite> method from
+<code class="xref py py-class docutils literal notranslate"><span class="pre">music_parameters.WesternPitch</span></code> for further information.</p>
+</dd>
+</dl>
+<p>This default class simply checks if the passed Mutwo object belongs to
+<a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.WesternPitch" title="mutwo.music_parameters.WesternPitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.WesternPitch</span></code></a>. If it does, Mutwo
+will initialise the Abjad Pitch from the <code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code> attribute.
+Otherwise Mutwo will simply initialise the Abjad Pitch from the
+objects <code class="xref py py-attr docutils literal notranslate"><span class="pre">hertz</span></code> attribute.</p>
+<p>If users desire to make more complex conversions (for instance
+due to <code class="docutils literal notranslate"><span class="pre">scordatura</span></code> or transpositions of instruments), one can simply
+inherit from this class to define more complex cases.</p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(pitch_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.MutwoPitchToAbjadPitch.convert">
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pitch_to_convert</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/abjad_converters/parameters/pitches.html#MutwoPitchToAbjadPitch.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.MutwoPitchToAbjadPitch.convert" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pitch_to_convert</strong> (<a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Pitch" title="mutwo.music_parameters.abc.Pitch"><em>Pitch</em></a>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Pitch</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.TempoToAbjadAttachmentTempo">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TempoToAbjadAttachmentTempo</span></span><a class="reference internal" href="../_modules/mutwo/abjad_converters/parameters/tempos.html#TempoToAbjadAttachmentTempo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.TempoToAbjadAttachmentTempo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></p>
+<p>Convert tempo envelope to <a class="reference internal" href="mutwo.abjad_parameters.html#mutwo.abjad_parameters.Tempo" title="mutwo.abjad_parameters.Tempo"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tempo</span></code></a>.</p>
+<p>Abstract base class for tempo envelope conversion. See
+<a class="reference internal" href="#mutwo.abjad_converters.ComplexTempoToAbjadAttachmentTempo" title="mutwo.abjad_converters.ComplexTempoToAbjadAttachmentTempo"><code class="xref py py-class docutils literal notranslate"><span class="pre">ComplexTempoToAbjadAttachmentTempo</span></code></a> for a concrete
+class.</p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(tempo_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.TempoToAbjadAttachmentTempo.convert">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tempo_to_convert</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/abjad_converters/parameters/tempos.html#TempoToAbjadAttachmentTempo.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.TempoToAbjadAttachmentTempo.convert" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tempo_to_convert</strong> (<a class="reference internal" href="mutwo.core_parameters.html#mutwo.core_parameters.abc.Tempo" title="mutwo.core_parameters.abc.Tempo"><em>Tempo</em></a>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple[tuple[float | fractions.Fraction | int | quicktions.Fraction, <a class="reference internal" href="mutwo.abjad_parameters.html#mutwo.abjad_parameters.Tempo" title="mutwo.abjad_parameters.attachments.Tempo">mutwo.abjad_parameters.attachments.Tempo</a>], …]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.ComplexTempoToAbjadAttachmentTempo">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ComplexTempoToAbjadAttachmentTempo</span></span><a class="reference internal" href="../_modules/mutwo/abjad_converters/parameters/tempos.html#ComplexTempoToAbjadAttachmentTempo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.ComplexTempoToAbjadAttachmentTempo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mutwo.abjad_converters.TempoToAbjadAttachmentTempo" title="mutwo.abjad_converters.parameters.tempos.TempoToAbjadAttachmentTempo"><code class="xref py py-class docutils literal notranslate"><span class="pre">TempoToAbjadAttachmentTempo</span></code></a></p>
+<p>Convert tempo to <a class="reference internal" href="mutwo.abjad_parameters.html#mutwo.abjad_parameters.Tempo" title="mutwo.abjad_parameters.Tempo"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tempo</span></code></a>.</p>
+<p>This object tries to intelligently set correct tempo abjad_parameters to an
+<code class="xref py py-class docutils literal notranslate"><span class="pre">abjad.Voice</span></code> object, appropriate to Western notation standards.
+Therefore it will not repeat tempo indications if they are merely repetitions
+of previous tempo indications and it will write ‘a tempo’ when returning to the
+same tempo after ritardandi or accelerandi.</p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(tempo_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="#mutwo.abjad_converters.TempoToAbjadAttachmentTempo" title="mutwo.abjad_converters.parameters.tempos.TempoToAbjadAttachmentTempo"><code class="xref py py-class docutils literal notranslate"><span class="pre">TempoToAbjadAttachmentTempo</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(tempo_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.ComplexTempoToAbjadAttachmentTempo.convert">
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tempo_to_convert</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/abjad_converters/parameters/tempos.html#ComplexTempoToAbjadAttachmentTempo.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.ComplexTempoToAbjadAttachmentTempo.convert" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tempo_to_convert</strong> (<a class="reference internal" href="mutwo.core_parameters.html#mutwo.core_parameters.abc.Tempo" title="mutwo.core_parameters.abc.Tempo"><em>Tempo</em></a>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple[tuple[float | fractions.Fraction | int | quicktions.Fraction, <a class="reference internal" href="mutwo.abjad_parameters.html#mutwo.abjad_parameters.Tempo" title="mutwo.abjad_parameters.attachments.Tempo">mutwo.abjad_parameters.attachments.Tempo</a>], …]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.MutwoVolumeToAbjadAttachmentDynamic">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MutwoVolumeToAbjadAttachmentDynamic</span></span><a class="reference internal" href="../_modules/mutwo/abjad_converters/parameters/volumes.html#MutwoVolumeToAbjadAttachmentDynamic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.MutwoVolumeToAbjadAttachmentDynamic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></p>
+<p>Convert Mutwo Volume objects to <a class="reference internal" href="mutwo.abjad_parameters.html#mutwo.abjad_parameters.Dynamic" title="mutwo.abjad_parameters.Dynamic"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dynamic</span></code></a>.</p>
+<p>This default class simply checks if the passed Mutwo object belongs to
+<a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.WesternVolume" title="mutwo.music_parameters.WesternVolume"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.WesternVolume</span></code></a>. If it does, Mutwo
+will initialise the <code class="xref py py-class docutils literal notranslate"><span class="pre">Tempo</span></code> object from the <code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code> attribute.
+Otherwise Mutwo will first initialise a <code class="xref py py-class docutils literal notranslate"><span class="pre">WesternVolume</span></code> object via
+its py:method:<cite>mutwo.music_parameters.WesternVolume.from_amplitude</cite> method.</p>
+<p>Hairpins aren’t notated with the aid of <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Volume" title="mutwo.music_parameters.abc.Volume"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.abc.Volume</span></code></a>
+objects, but with <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.Hairpin" title="mutwo.music_parameters.Hairpin"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.music_parameters.Hairpin</span></code></a>.</p>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(volume_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.MutwoVolumeToAbjadAttachmentDynamic.convert">
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">volume_to_convert</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/abjad_converters/parameters/volumes.html#MutwoVolumeToAbjadAttachmentDynamic.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.MutwoVolumeToAbjadAttachmentDynamic.convert" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>volume_to_convert</strong> (<a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Volume" title="mutwo.music_parameters.abc.Volume"><em>Volume</em></a>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Optional</em>[<a class="reference internal" href="mutwo.abjad_parameters.html#mutwo.abjad_parameters.Dynamic" title="mutwo.abjad_parameters.attachments.Dynamic"><em>Dynamic</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.MutwoPitchToHEJIAbjadPitch">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MutwoPitchToHEJIAbjadPitch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reference_pitch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'a'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prime_to_heji_accidental_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">otonality_indicator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">utonality_indicator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exponent_to_exponent_indicator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tempered_pitch_indicator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/abjad_converters/parameters/heji.html#MutwoPitchToHEJIAbjadPitch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.MutwoPitchToHEJIAbjadPitch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mutwo.abjad_converters.MutwoPitchToAbjadPitch" title="mutwo.abjad_converters.parameters.pitches.MutwoPitchToAbjadPitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoPitchToAbjadPitch</span></code></a></p>
+<p>Convert <a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.JustIntonationPitch" title="mutwo.music_parameters.JustIntonationPitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">JustIntonationPitch</span></code></a> to abjad pitches.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reference_pitch</strong> (<em>str</em><em>, </em><em>optional</em>) – The reference pitch (1/1). Should be a diatonic
+pitch name (see
+<code class="xref py py-const docutils literal notranslate"><span class="pre">DIATONIC_PITCH_CLASS_CONTAINER</span></code>)
+in English nomenclature. For any other reference pitch than ‘c’, Lilyponds
+midi rendering for pitches with the diatonic pitch ‘c’ will be slightly
+out of tune (because the first value of <a href="#id3"><span class="problematic" id="id4">:arg:`global_scale`</span></a>
+always have to be 0).</p></li>
+<li><p><strong>prime_to_heji_accidental_name</strong> (<em>dict</em><em>[</em><em>int</em><em>, </em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Mapping of a prime number
+to a string which indicates the respective prime number in the resulting
+accidental name. See
+<a class="reference internal" href="mutwo.ekmelily_converters.html#mutwo.ekmelily_converters.configurations.DEFAULT_PRIME_TO_HEJI_ACCIDENTAL_NAME_DICT" title="mutwo.ekmelily_converters.configurations.DEFAULT_PRIME_TO_HEJI_ACCIDENTAL_NAME_DICT"><code class="xref py py-const docutils literal notranslate"><span class="pre">mutwo.ekmelily_converters.configurations.DEFAULT_PRIME_TO_HEJI_ACCIDENTAL_NAME_DICT</span></code></a>
+for the default mapping.</p></li>
+<li><p><strong>otonality_indicator</strong> (<em>str</em><em>, </em><em>optional</em>) – String which indicates that the
+respective prime alteration is otonal. See
+<a class="reference internal" href="mutwo.ekmelily_converters.html#mutwo.ekmelily_converters.configurations.DEFAULT_OTONALITY_INDICATOR" title="mutwo.ekmelily_converters.configurations.DEFAULT_OTONALITY_INDICATOR"><code class="xref py py-const docutils literal notranslate"><span class="pre">mutwo.ekmelily_converters.configurations.DEFAULT_OTONALITY_INDICATOR</span></code></a>
+for the default value.</p></li>
+<li><p><strong>utonality_indicator</strong> (<em>str</em><em>, </em><em>optional</em>) – String which indicates that the
+respective prime alteration is utonal. See
+<a class="reference internal" href="mutwo.ekmelily_converters.html#mutwo.ekmelily_converters.configurations.DEFAULT_OTONALITY_INDICATOR" title="mutwo.ekmelily_converters.configurations.DEFAULT_OTONALITY_INDICATOR"><code class="xref py py-const docutils literal notranslate"><span class="pre">mutwo.ekmelily_converters.configurations.DEFAULT_OTONALITY_INDICATOR</span></code></a>
+for the default value.</p></li>
+<li><p><strong>exponent_to_exponent_indicator</strong> (<em>Callable</em><em>[</em><em>[</em><em>int</em><em>]</em><em>, </em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Function to convert the
+exponent of a prime number to string which indicates the respective
+exponent. See
+<a class="reference internal" href="mutwo.ekmelily_converters.html#mutwo.ekmelily_converters.configurations.DEFAULT_EXPONENT_TO_EXPONENT_INDICATOR" title="mutwo.ekmelily_converters.configurations.DEFAULT_EXPONENT_TO_EXPONENT_INDICATOR"><code class="xref py py-func docutils literal notranslate"><span class="pre">mutwo.ekmelily_converters.configurations.DEFAULT_EXPONENT_TO_EXPONENT_INDICATOR()</span></code></a>
+for the default function.</p></li>
+<li><p><strong>tempered_pitch_indicator</strong> (<em>str</em><em>, </em><em>optional</em>) – String which indicates that the
+respective accidental is tempered (12 EDO). See
+<a class="reference internal" href="mutwo.ekmelily_converters.html#mutwo.ekmelily_converters.configurations.DEFAULT_TEMPERED_PITCH_INDICATOR" title="mutwo.ekmelily_converters.configurations.DEFAULT_TEMPERED_PITCH_INDICATOR"><code class="xref py py-const docutils literal notranslate"><span class="pre">mutwo.ekmelily_converters.configurations.DEFAULT_TEMPERED_PITCH_INDICATOR</span></code></a>
+for the default value.</p></li>
+</ul>
+</dd>
+</dl>
+<p>The resulting Abjad pitches are expected to be used in combination with tuning
+files that are generated by
+<a class="reference internal" href="mutwo.ekmelily_converters.html#mutwo.ekmelily_converters.HEJIEkmelilyTuningFileConverter" title="mutwo.ekmelily_converters.HEJIEkmelilyTuningFileConverter"><code class="xref py py-class docutils literal notranslate"><span class="pre">mutwo.ekmelily_converters.HEJIEkmelilyTuningFileConverter</span></code></a>
+and with the Lilypond extension
+<a class="reference external" href="http://www.ekmelic-music.org/en/extra/ekmelily.htm">Ekmelily</a>.
+You can find pre-generated tuning files
+<a class="reference external" href="https://github.com/levinericzimmermann/ekme-heji.ily">here</a>.</p>
+<p><strong>Example:</strong></p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_parameters</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">abjad_converters</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">JustIntonationPitch</span><span class="p">(</span><span class="s1">&#39;5/4&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">converter_on_a</span> <span class="o">=</span> <span class="n">abjad_converters</span><span class="o">.</span><span class="n">MutwoPitchToHEJIAbjadPitch</span><span class="p">(</span><span class="n">reference_pitch</span><span class="o">=</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">converter_on_c</span> <span class="o">=</span> <span class="n">abjad_converters</span><span class="o">.</span><span class="n">MutwoPitchToHEJIAbjadPitch</span><span class="p">(</span><span class="n">reference_pitch</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">converter_on_a</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+<span class="go">NamedPitch(&quot;csoaa&#39;&#39;&quot;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">converter_on_c</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+<span class="go">NamedPitch(&quot;eoaa&#39;&quot;)</span>
+</pre></div>
+</div>
+<div class="autoclasstoc docutils container">
+<p class="rubric">Public Methods:</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(pitch_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<details><summary>Inherited from <a class="reference internal" href="#mutwo.abjad_converters.MutwoPitchToAbjadPitch" title="mutwo.abjad_converters.parameters.pitches.MutwoPitchToAbjadPitch"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoPitchToAbjadPitch</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code>(pitch_to_convert)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter" title="mutwo.core_converters.abc.Converter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Converter</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="mutwo.core_converters.html#mutwo.core_converters.abc.Converter.convert" title="mutwo.core_converters.abc.Converter.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</details><details><summary>Inherited from <a class="reference internal" href="mutwo.core_utilities.html#mutwo.core_utilities.MutwoObject" title="mutwo.core_utilities.mutwo.MutwoObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">MutwoObject</span></code></a></summary><table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a deep copy of mutwo object.</p></td>
+</tr>
+</tbody>
+</table>
+</details></div>
+<hr class="docutils" />
+<dl class="py method">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.MutwoPitchToHEJIAbjadPitch.convert">
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pitch_to_convert</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/abjad_converters/parameters/heji.html#MutwoPitchToHEJIAbjadPitch.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.MutwoPitchToHEJIAbjadPitch.convert" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pitch_to_convert</strong> (<a class="reference internal" href="mutwo.music_parameters.html#mutwo.music_parameters.abc.Pitch" title="mutwo.music_parameters.abc.Pitch"><em>Pitch</em></a>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Pitch</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.ProcessAbjadContainerRoutine">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ProcessAbjadContainerRoutine</span></span><a class="reference internal" href="../_modules/mutwo/abjad_converters/process_container_routines.html#ProcessAbjadContainerRoutine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.ProcessAbjadContainerRoutine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+</dd></dl>
+
+<hr class="docutils" />
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.AddDurationLineEngraver">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AddDurationLineEngraver</span></span><a class="reference internal" href="../_modules/mutwo/abjad_converters/process_container_routines.html#AddDurationLineEngraver"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.AddDurationLineEngraver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mutwo.abjad_converters.ProcessAbjadContainerRoutine" title="mutwo.abjad_converters.process_container_routines.ProcessAbjadContainerRoutine"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessAbjadContainerRoutine</span></code></a></p>
+</dd></dl>
+
+<hr class="docutils" />
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.PrepareForDurationLineBasedNotation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PrepareForDurationLineBasedNotation</span></span><a class="reference internal" href="../_modules/mutwo/abjad_converters/process_container_routines.html#PrepareForDurationLineBasedNotation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.PrepareForDurationLineBasedNotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mutwo.abjad_converters.ProcessAbjadContainerRoutine" title="mutwo.abjad_converters.process_container_routines.ProcessAbjadContainerRoutine"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessAbjadContainerRoutine</span></code></a></p>
+</dd></dl>
+
+<hr class="docutils" />
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.AddInstrumentName">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AddInstrumentName</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">compound_to_instrument_name=&lt;function</span> <span class="pre">AddInstrumentName.&lt;lambda&gt;&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compound_to_short_instrument_name=&lt;function</span> <span class="pre">AddInstrumentName.&lt;lambda&gt;&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument_name_font_size='teeny'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">short_instrument_name_font_size='teeny'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/abjad_converters/process_container_routines.html#AddInstrumentName"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.AddInstrumentName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mutwo.abjad_converters.ProcessAbjadContainerRoutine" title="mutwo.abjad_converters.process_container_routines.ProcessAbjadContainerRoutine"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessAbjadContainerRoutine</span></code></a></p>
+<hr class="docutils" />
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>compound_to_instrument_name</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Compound" title="mutwo.core_events.abc.Compound"><em>Compound</em></a><em>]</em><em>, </em><em>str</em><em>]</em>) – </p></li>
+<li><p><strong>compound_to_short_instrument_name</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="mutwo.core_events.html#mutwo.core_events.abc.Compound" title="mutwo.core_events.abc.Compound"><em>Compound</em></a><em>]</em><em>, </em><em>str</em><em>]</em>) – </p></li>
+<li><p><strong>instrument_name_font_size</strong> (<em>str</em>) – </p></li>
+<li><p><strong>short_instrument_name_font_size</strong> (<em>str</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.AddAccidentalStyle">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AddAccidentalStyle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">accidental_style</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/abjad_converters/process_container_routines.html#AddAccidentalStyle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.AddAccidentalStyle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mutwo.abjad_converters.ProcessAbjadContainerRoutine" title="mutwo.abjad_converters.process_container_routines.ProcessAbjadContainerRoutine"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessAbjadContainerRoutine</span></code></a></p>
+<hr class="docutils" />
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>accidental_style</strong> (<em>str</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.SetStaffSize">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SetStaffSize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">difference_of_size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mutwo/abjad_converters/process_container_routines.html#SetStaffSize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mutwo.abjad_converters.SetStaffSize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mutwo.abjad_converters.ProcessAbjadContainerRoutine" title="mutwo.abjad_converters.process_container_routines.ProcessAbjadContainerRoutine"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessAbjadContainerRoutine</span></code></a></p>
+<hr class="docutils" />
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>difference_of_size</strong> (<em>int</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<section id="module-mutwo.abjad_converters.configurations">
+<span id="mutwo-abjad-converters-configurations"></span><h2><a class="toc-backref" href="#id6" role="doc-backlink">mutwo.abjad_converters.configurations</a><a class="headerlink" href="#module-mutwo.abjad_converters.configurations" title="Permalink to this heading">¶</a></h2>
+<p>Configure <a class="reference internal" href="#module-mutwo.abjad_converters" title="mutwo.abjad_converters"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mutwo.abjad_converters</span></code></a>.</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.configurations.DEFAULT_ABJAD_ATTACHMENT_CLASS_TUPLE">
+<span class="sig-name descname"><span class="pre">DEFAULT_ABJAD_ATTACHMENT_CLASS_TUPLE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(&lt;class</span> <span class="pre">'mutwo.abjad_parameters.attachments.AfterGraceNoteConsecution'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'mutwo.abjad_parameters.attachments.Arpeggio'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'mutwo.abjad_parameters.attachments.Articulation'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'mutwo.abjad_parameters.attachments.ArtificalHarmonic'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'mutwo.abjad_parameters.attachments.BarLine'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'mutwo.abjad_parameters.attachments.BartokPizzicato'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'mutwo.abjad_parameters.attachments.BendAfter'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'mutwo.abjad_parameters.attachments.BreathMark'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'mutwo.abjad_parameters.attachments.Clef'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'mutwo.abjad_parameters.attachments.Cue'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'mutwo.abjad_parameters.attachments.DurationLineDashed'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'mutwo.abjad_parameters.attachments.DurationLineTriller'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'mutwo.abjad_parameters.attachments.Dynamic'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'mutwo.abjad_parameters.attachments.DynamicChangeIndicationStop'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'mutwo.abjad_parameters.attachments.Fermata'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'mutwo.abjad_parameters.attachments.Glissando'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'mutwo.abjad_parameters.attachments.GraceNoteConsecution'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'mutwo.abjad_parameters.attachments.Hairpin'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'mutwo.abjad_parameters.attachments.LaissezVibrer'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'mutwo.abjad_parameters.attachments.MarginMarkup'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'mutwo.abjad_parameters.attachments.Markup'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'mutwo.abjad_parameters.attachments.NaturalHarmonicNodeList'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'mutwo.abjad_parameters.attachments.Ornamentation'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'mutwo.abjad_parameters.attachments.Ottava'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'mutwo.abjad_parameters.attachments.Pedal'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'mutwo.abjad_parameters.attachments.Prall'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'mutwo.abjad_parameters.attachments.RehearsalMark'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'mutwo.abjad_parameters.attachments.Slur'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'mutwo.abjad_parameters.attachments.StringContactPoint'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'mutwo.abjad_parameters.attachments.Tempo'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'mutwo.abjad_parameters.attachments.Tie'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'mutwo.abjad_parameters.attachments.Tremolo'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'mutwo.abjad_parameters.attachments.Trill'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'mutwo.abjad_parameters.attachments.WoodwindFingering'&gt;)</span></em><a class="headerlink" href="#mutwo.abjad_converters.configurations.DEFAULT_ABJAD_ATTACHMENT_CLASS_TUPLE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default value for argument <cite>abjad_attachment_classes</cite> in
+<code class="xref py py-class docutils literal notranslate"><span class="pre">ConsecutionToAbjadVoiceConverter</span></code>.</p>
+</dd></dl>
+
+</section>
+<section id="module-mutwo.abjad_converters.constants">
+<span id="mutwo-abjad-converters-constants"></span><h2><a class="toc-backref" href="#id7" role="doc-backlink">mutwo.abjad_converters.constants</a><a class="headerlink" href="#module-mutwo.abjad_converters.constants" title="Permalink to this heading">¶</a></h2>
+<p>Constants for <a class="reference internal" href="#module-mutwo.abjad_converters" title="mutwo.abjad_converters"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mutwo.abjad_converters</span></code></a>.</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="mutwo.abjad_converters.constants.INEFFECTIVE_INDICATOR_FOR_MULTIMEASURE_REST_TUPLE">
+<span class="sig-name descname"><span class="pre">INEFFECTIVE_INDICATOR_FOR_MULTIMEASURE_REST_TUPLE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(&lt;class</span> <span class="pre">'abjad.indicators.Fermata'&gt;,)</span></em><a class="headerlink" href="#mutwo.abjad_converters.constants.INEFFECTIVE_INDICATOR_FOR_MULTIMEASURE_REST_TUPLE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define indicators which don’t work with multimeasure rests.</p>
+<p>Some indicators aren’t rendered in Lilypond when applied to multimeasure
+rests. Therefore mutwo.abjad avoids creating multimeasure rests if a
+to a rest any of the given indicator classes where attached.</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mutwo.abjad_parameters.html" title="mutwo.abjad_parameters"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="api_documentation.html" title="mutwo API documentation"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="api_documentation.html" >mutwo API documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.abjad_converters</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2024, mutwo authors.
+    </div>
+  </body>
+</html>

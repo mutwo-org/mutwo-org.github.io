@@ -1,0 +1,73 @@
+
+.. currentmodule:: mutwo.core_parameters
+
+mutwo.core_parameters
+=====================
+
+.. contents:: Table of content
+   :depth: 3
+
+.. automodule:: mutwo.core_parameters
+   :members:
+
+
+.. list-table::
+   :align: center
+   :width: 95%
+   :header-rows: 1
+
+   * - Object
+     - Documentation
+   * - :class:`mutwo.core_parameters.DirectDuration`
+     - Simple `Duration` which is directly initialised by its value.
+   * - :class:`mutwo.core_parameters.RatioDuration`
+     - `Duration` defined by a ratio (= a fraction).
+   * - :class:`mutwo.core_parameters.DirectTempo`
+     - Simple `Tempo` that is directly initialised by its tempo.
+   * - :class:`mutwo.core_parameters.WesternTempo`
+     - A tempo useful for western notation.
+   * - :class:`mutwo.core_parameters.FlexTempo`
+     - A flex tempo.
+
+
+
+
+.. autoclass:: mutwo.core_parameters.DirectDuration
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.core_parameters.RatioDuration
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.core_parameters.DirectTempo
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.core_parameters.WesternTempo
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.core_parameters.FlexTempo
+
+        .. autoclasstoc::
+    
+
+
+mutwo.core_parameters.abc
+-------------------------
+
+.. automodule:: mutwo.core_parameters.abc
+   :members:
+
+
+mutwo.core_parameters.configurations
+------------------------------------
+
+.. automodule:: mutwo.core_parameters.configurations
+   :members:
+

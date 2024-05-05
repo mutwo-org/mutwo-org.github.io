@@ -1,0 +1,66 @@
+
+.. currentmodule:: mutwo.core_events
+
+mutwo.core_events
+=================
+
+.. contents:: Table of content
+   :depth: 3
+
+.. automodule:: mutwo.core_events
+   :members:
+
+
+.. list-table::
+   :align: center
+   :width: 95%
+   :header-rows: 1
+
+   * - Object
+     - Documentation
+   * - :class:`mutwo.core_events.Chronon`
+     - A :class:`Chronon` is an event that cannot be further subdivided (a leaf of a tree).
+   * - :class:`mutwo.core_events.Consecution`
+     - A :class:`Consecution`hosts events that take place one after the other.
+   * - :class:`mutwo.core_events.Concurrence`
+     - A :class:`Concurrence` hosts events that take place at the same time.
+   * - :class:`mutwo.core_events.Envelope`
+     - Model continuous changing values (e.g. glissandi, crescendo).
+
+
+
+
+.. autoclass:: mutwo.core_events.Chronon
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.core_events.Consecution
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.core_events.Concurrence
+
+        .. autoclasstoc::
+    
+
+.. autoclass:: mutwo.core_events.Envelope
+
+        .. autoclasstoc::
+    
+
+
+mutwo.core_events.abc
+---------------------
+
+.. automodule:: mutwo.core_events.abc
+   :members:
+
+
+mutwo.core_events.configurations
+--------------------------------
+
+.. automodule:: mutwo.core_events.configurations
+   :members:
+

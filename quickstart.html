@@ -1,0 +1,176 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Quick start &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="installation.html" />
+    <link rel="prev" title="Welcome to mutwos documentation!" href="index.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="installation.html" title="Installation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to mutwos documentation!"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">mutwo  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Quick start</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="quick-start">
+<h1>Quick start<a class="headerlink" href="#quick-start" title="Permalink to this heading">¶</a></h1>
+<p>This is a very concise overview how to start fundamental <em>mutwo</em> operations.</p>
+<section id="install-all-needed-packages">
+<h2>Install all needed packages<a class="headerlink" href="#install-all-needed-packages" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pip3<span class="w"> </span>install<span class="w"> </span>mutwo.core<span class="w"> </span>mutwo.music<span class="w"> </span>mutwo.midi<span class="w"> </span>mutwo.abjad
+</pre></div>
+</div>
+<p>To render musical notation, <a class="reference external" href="https://lilypond.org/doc/v2.24/Documentation/learning/installing.html">install Lilypond</a>.</p>
+</section>
+<section id="define-tones-chords-rests">
+<h2>Define tones, chords, rests<a class="headerlink" href="#define-tones-chords-rests" title="Permalink to this heading">¶</a></h2>
+<p>Tones, chords and rests can all be represented by using <a class="reference internal" href="api/mutwo.music_events.html#mutwo.music_events.NoteLike" title="mutwo.music_events.NoteLike"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoteLike</span></code></a>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_events</span>
+<span class="n">tone</span> <span class="o">=</span> <span class="n">music_events</span><span class="o">.</span><span class="n">NoteLike</span><span class="p">(</span><span class="s1">&#39;cs2&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">)</span>
+<span class="n">chord</span> <span class="o">=</span> <span class="n">music_events</span><span class="o">.</span><span class="n">NoteLike</span><span class="p">(</span><span class="s1">&#39;c3 e3 g3&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;pp&#39;</span><span class="p">)</span>
+<span class="n">rest</span> <span class="o">=</span> <span class="n">music_events</span><span class="o">.</span><span class="n">NoteLike</span><span class="p">([],</span> <span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="define-a-melody-and-a-polyphony">
+<h2>Define a melody and a polyphony<a class="headerlink" href="#define-a-melody-and-a-polyphony" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_events</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_events</span>
+
+<span class="n">melody</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Consecution</span><span class="p">(</span>
+    <span class="p">[</span><span class="n">music_events</span><span class="o">.</span><span class="n">NoteLike</span><span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">music_events</span><span class="o">.</span><span class="n">NoteLike</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span> <span class="n">music_events</span><span class="o">.</span><span class="n">NoteLike</span><span class="p">(</span><span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+<span class="p">)</span>
+
+<span class="n">reversed_melody</span> <span class="o">=</span> <span class="n">melody</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">reversed_melody</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+
+<span class="n">polyphony</span> <span class="o">=</span> <span class="n">core_events</span><span class="o">.</span><span class="n">Concurrence</span><span class="p">([</span><span class="n">melody</span><span class="p">,</span> <span class="n">reversed_melody</span><span class="p">])</span>
+</pre></div>
+</div>
+</section>
+<section id="export-the-polyphony-to-a-midi-file">
+<h2>Export the polyphony to a MIDI file<a class="headerlink" href="#export-the-polyphony-to-a-midi-file" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">midi_converters</span>
+<span class="n">e2m</span> <span class="o">=</span> <span class="n">midi_converters</span><span class="o">.</span><span class="n">EventToMidiFile</span><span class="p">()</span>
+<span class="n">e2m</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">polyphony</span><span class="p">,</span> <span class="s1">&#39;polyphony.mid&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<audio controls="controls">
+  <source src="polyphony.ogg" type="audio/ogg">
+  Your browser does not support the <code>audio</code> element.
+</audio><p>(rendered with <a class="reference external" href="https://timidity.sourceforge.net/">TiMidity++</a>)</p>
+</section>
+<section id="import-a-midi-file">
+<h2>Import a MIDI file<a class="headerlink" href="#import-a-midi-file" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">midi_converters</span>
+<span class="n">m2e</span> <span class="o">=</span> <span class="n">midi_converters</span><span class="o">.</span><span class="n">MidiFileToEvent</span><span class="p">()</span>
+<span class="n">event</span> <span class="o">=</span> <span class="n">m2e</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s1">&#39;polyphony.mid&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="export-the-polyphony-to-a-musical-notation">
+<h2>Export the polyphony to a musical notation<a class="headerlink" href="#export-the-polyphony-to-a-musical-notation" title="Permalink to this heading">¶</a></h2>
+<p><em>Mutwo</em> uses <a class="reference external" href="https://abjad.github.io/">Abjad</a> as an intermediate agent between itself and <a class="reference external" href="https://lilypond.org/">Lilypond</a>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">abjad_converters</span>
+<span class="kn">import</span> <span class="nn">abjad</span>
+
+<span class="n">ac</span> <span class="o">=</span> <span class="n">abjad_converters</span><span class="o">.</span><span class="n">ConsecutionToAbjadVoice</span><span class="p">()</span>
+
+<span class="n">s0</span> <span class="o">=</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Staff</span><span class="p">([</span><span class="n">ac</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">polyphony</span><span class="p">[</span><span class="mi">0</span><span class="p">])])</span>
+<span class="n">s1</span> <span class="o">=</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Staff</span><span class="p">([</span><span class="n">ac</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">polyphony</span><span class="p">[</span><span class="mi">1</span><span class="p">])])</span>
+
+<span class="n">score</span> <span class="o">=</span> <span class="n">abjad</span><span class="o">.</span><span class="n">Score</span><span class="p">([</span><span class="n">s0</span><span class="p">,</span> <span class="n">s1</span><span class="p">])</span>
+
+<span class="n">lilypond_file</span> <span class="o">=</span> <span class="n">abjad</span><span class="o">.</span><span class="n">LilyPondFile</span><span class="p">()</span>
+<span class="n">lilypond_file</span><span class="o">.</span><span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">score</span><span class="p">)</span>
+
+<span class="n">abjad</span><span class="o">.</span><span class="n">persist</span><span class="o">.</span><span class="n">as_pdf</span><span class="p">(</span><span class="n">lilypond_file</span><span class="p">,</span> <span class="s1">&#39;polyphony.pdf&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/polyphony.png" src="_images/polyphony.png" />
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="installation.html" title="Installation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to mutwos documentation!"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">mutwo  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Quick start</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2024, mutwo authors.
+    </div>
+  </body>
+</html>

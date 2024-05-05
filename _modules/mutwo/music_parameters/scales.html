@@ -1,0 +1,497 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mutwo.music_parameters.scales &#8212; mutwo  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autoclasstoc.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.music_parameters.scales</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for mutwo.music_parameters.scales</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Write musical scales e.g. minor scale, pelog scale.</span>
+
+<span class="sd">The mutwo scale model is influenced by the music21 scale model.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_constants</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">core_utilities</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_parameters</span>
+<span class="kn">from</span> <span class="nn">mutwo</span> <span class="kn">import</span> <span class="n">music_utilities</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;ScaleFamily&quot;</span><span class="p">,</span> <span class="s2">&quot;RepeatingScaleFamily&quot;</span><span class="p">,</span> <span class="s2">&quot;Scale&quot;</span><span class="p">)</span>
+
+
+<span class="n">IntervalSequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">TypeAlias</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PitchInterval</span><span class="p">]</span>
+<span class="n">WeightSequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">TypeAlias</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">]</span>
+
+<span class="n">IntervalTuple</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">TypeAlias</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PitchInterval</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+<span class="n">WeightTuple</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">TypeAlias</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+
+<span class="n">PitchTuple</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">TypeAlias</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+
+<span class="n">ScaleDegree</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">TypeAlias</span> <span class="o">=</span> <span class="nb">int</span>
+<span class="n">ScaleIndex</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">TypeAlias</span> <span class="o">=</span> <span class="nb">int</span>
+
+<span class="n">PeriodRepetitionCount</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">TypeAlias</span> <span class="o">=</span> <span class="nb">int</span>
+<span class="sd">&quot;&quot;&quot;How often the repeating interval has been applied (e.g. the octave).&quot;&quot;&quot;</span>
+
+<span class="n">ScalePosition</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">TypeAlias</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">ScaleDegree</span><span class="p">,</span> <span class="n">PeriodRepetitionCount</span><span class="p">]</span>
+
+<span class="n">PeriodRepetitionCountTuple</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">TypeAlias</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">PeriodRepetitionCount</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+<span class="n">ScaleDegreeTuple</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">TypeAlias</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">ScaleDegree</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+<span class="n">ScaleDegreeSequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">TypeAlias</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">ScaleDegree</span><span class="p">]</span>
+<span class="n">PeriodRepetitionCountSequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">TypeAlias</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">PeriodRepetitionCount</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="ScaleFamily"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.ScaleFamily">[docs]</a><span class="k">class</span> <span class="nc">ScaleFamily</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A :class:`ScaleFamily` is a sorted sequence of :class:`mutwo.music_parameters.abc.PitchInterval`.</span>
+
+<span class="sd">    Scale families are frozen/immutable.</span>
+
+<span class="sd">    The equivalent of a `ScaleFamily` in `music21` is an `AbstractScale`.</span>
+
+<span class="sd">    `Mutwos` implementation supports assigning weights to each interval</span>
+<span class="sd">    to express an hierarchy within the scale.</span>
+
+<span class="sd">    You need to explicitly add the prime (1/1) to the interval set</span>
+<span class="sd">    if the tonic should appear within the given scale.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">interval_sequence</span><span class="p">:</span> <span class="n">IntervalSequence</span><span class="p">,</span>
+        <span class="n">weight_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">WeightSequence</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">scale_degree_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">ScaleDegreeSequence</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">period_repetition_count_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+            <span class="n">PeriodRepetitionCountSequence</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">interval_tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">interval_sequence</span><span class="p">)</span>
+
+        <span class="n">weight_tuple</span> <span class="o">=</span> <span class="n">ScaleFamily</span><span class="o">.</span><span class="n">_weight_sequence_to_weight_tuple</span><span class="p">(</span>
+            <span class="n">weight_sequence</span><span class="p">,</span> <span class="n">interval_tuple</span>
+        <span class="p">)</span>
+        <span class="n">scale_degree_tuple</span> <span class="o">=</span> <span class="n">ScaleFamily</span><span class="o">.</span><span class="n">_scale_degree_sequence_to_scale_tuple</span><span class="p">(</span>
+            <span class="n">scale_degree_sequence</span><span class="p">,</span> <span class="n">interval_tuple</span>
+        <span class="p">)</span>
+        <span class="n">period_repetition_count_tuple</span> <span class="o">=</span> <span class="n">ScaleFamily</span><span class="o">.</span><span class="n">_period_repetition_count_sequence_to_period_repetition_count_tuple</span><span class="p">(</span>
+            <span class="n">period_repetition_count_sequence</span><span class="p">,</span> <span class="n">interval_tuple</span>
+        <span class="p">)</span>
+
+        <span class="n">is_rising</span> <span class="o">=</span> <span class="n">ScaleFamily</span><span class="o">.</span><span class="n">_is_interval_tuple_rising</span><span class="p">(</span><span class="n">interval_tuple</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interval_tuple</span> <span class="o">=</span> <span class="n">interval_tuple</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_weight_tuple</span> <span class="o">=</span> <span class="n">weight_tuple</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scale_degree_tuple</span> <span class="o">=</span> <span class="n">scale_degree_tuple</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_period_repetition_count_tuple</span> <span class="o">=</span> <span class="n">period_repetition_count_tuple</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_rising</span> <span class="o">=</span> <span class="n">is_rising</span>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">test_if_objects_are_equal_by_parameter_tuple</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;interval_tuple&quot;</span><span class="p">,</span> <span class="s2">&quot;weight_tuple&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_sequence_to_tuple</span><span class="p">(</span>
+        <span class="n">sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]],</span>
+        <span class="n">interval_tuple</span><span class="p">:</span> <span class="n">IntervalTuple</span><span class="p">,</span>
+        <span class="n">auto_create_tuple</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">IntervalTuple</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span>
+        <span class="n">item_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="n">sequence</span> <span class="o">=</span> <span class="n">sequence</span> <span class="ow">or</span> <span class="n">auto_create_tuple</span><span class="p">(</span><span class="n">interval_tuple</span><span class="p">)</span>
+        <span class="n">tuple_</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">tuple_</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span>
+            <span class="n">interval_tuple</span>
+        <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;We need as many </span><span class="si">{</span><span class="n">item_name</span><span class="si">}</span><span class="s2"> entries as there are interval entries!&quot;</span>
+
+        <span class="k">return</span> <span class="n">tuple_</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_scale_degree_sequence_to_scale_tuple</span><span class="p">(</span>
+        <span class="n">scale_degree_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">ScaleDegreeSequence</span><span class="p">],</span>
+        <span class="n">interval_tuple</span><span class="p">:</span> <span class="n">IntervalTuple</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ScaleDegreeTuple</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ScaleFamily</span><span class="o">.</span><span class="n">_sequence_to_tuple</span><span class="p">(</span>
+            <span class="n">scale_degree_sequence</span><span class="p">,</span>
+            <span class="n">interval_tuple</span><span class="p">,</span>
+            <span class="k">lambda</span> <span class="n">interval_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">interval_tuple</span><span class="p">))),</span>
+            <span class="s2">&quot;interval&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_weight_sequence_to_weight_tuple</span><span class="p">(</span>
+        <span class="n">weight_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">WeightSequence</span><span class="p">],</span> <span class="n">interval_tuple</span><span class="p">:</span> <span class="n">IntervalTuple</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="n">ScaleFamily</span><span class="o">.</span><span class="n">_sequence_to_tuple</span><span class="p">(</span>
+            <span class="n">weight_sequence</span><span class="p">,</span>
+            <span class="n">interval_tuple</span><span class="p">,</span>
+            <span class="k">lambda</span> <span class="n">interval_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">interval_tuple</span><span class="p">),</span>
+            <span class="s2">&quot;weight&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_period_repetition_count_sequence_to_period_repetition_count_tuple</span><span class="p">(</span>
+        <span class="n">period_repetition_count_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+            <span class="n">PeriodRepetitionCountSequence</span>
+        <span class="p">],</span>
+        <span class="n">interval_tuple</span><span class="p">:</span> <span class="n">IntervalTuple</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">core_constants</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="n">ScaleFamily</span><span class="o">.</span><span class="n">_sequence_to_tuple</span><span class="p">(</span>
+            <span class="n">period_repetition_count_sequence</span><span class="p">,</span>
+            <span class="n">interval_tuple</span><span class="p">,</span>
+            <span class="k">lambda</span> <span class="n">interval_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">(</span><span class="mi">0</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">interval_tuple</span><span class="p">),</span>
+            <span class="s2">&quot;period repetition count&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_is_interval_tuple_rising</span><span class="p">(</span><span class="n">interval_tuple</span><span class="p">:</span> <span class="n">IntervalTuple</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="n">rising_interval_tuple</span><span class="p">,</span> <span class="n">falling_interval_tuple</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">interval_tuple</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="n">reverse</span><span class="p">))</span> <span class="k">for</span> <span class="n">reverse</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">is_rising</span> <span class="o">=</span> <span class="n">interval_tuple</span> <span class="o">==</span> <span class="n">rising_interval_tuple</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_rising</span> <span class="ow">and</span> <span class="n">interval_tuple</span> <span class="o">!=</span> <span class="n">falling_interval_tuple</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">music_utilities</span><span class="o">.</span><span class="n">UnsortedIntervalTupleError</span><span class="p">(</span><span class="n">interval_tuple</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">is_rising</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">interval_tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">IntervalTuple</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval_tuple</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">weight_tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WeightTuple</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_weight_tuple</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">scale_degree_tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ScaleDegreeTuple</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scale_degree_tuple</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">period_repetition_count_tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PeriodRepetitionCountTuple</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_period_repetition_count_tuple</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_rising</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_rising</span>
+
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">cached_property</span>
+    <span class="k">def</span> <span class="nf">is_falling</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_rising</span>
+
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">cached_property</span>
+    <span class="k">def</span> <span class="nf">scale_degree_count</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_degree_tuple</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="RepeatingScaleFamily"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.RepeatingScaleFamily">[docs]</a><span class="k">class</span> <span class="nc">RepeatingScaleFamily</span><span class="p">(</span><span class="n">ScaleFamily</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A `RepeatingScaleFamily` is a sorted sequence of repeating intervals over a repetition interval.</span>
+
+<span class="sd">    Most musical scales are based on :class:`RepeatingScaleFamily`, because</span>
+<span class="sd">    most musical scales repeat after one octave.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">repeating_interval_sequence</span><span class="p">:</span> <span class="n">IntervalSequence</span><span class="p">,</span>
+        <span class="n">repetition_interval</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PitchInterval</span> <span class="o">=</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">DirectPitchInterval</span><span class="p">(</span>
+            <span class="mi">1200</span>
+        <span class="p">),</span>
+        <span class="n">min_pitch_interval</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PitchInterval</span> <span class="o">=</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">DirectPitchInterval</span><span class="p">(</span>
+            <span class="o">-</span><span class="mi">1200</span> <span class="o">*</span> <span class="mi">5</span>
+        <span class="p">),</span>
+        <span class="n">max_pitch_interval</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">PitchInterval</span> <span class="o">=</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">DirectPitchInterval</span><span class="p">(</span>
+            <span class="mi">1200</span> <span class="o">*</span> <span class="mi">5</span>
+        <span class="p">),</span>
+        <span class="n">repeating_weight_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">WeightSequence</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">repeating_scale_degree_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">ScaleDegreeSequence</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">repeating_period_repetition_count_sequence</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span>
+            <span class="n">PeriodRepetitionCountSequence</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="c1"># TODO(Make this somehow readable.)</span>
+        <span class="n">repeating_interval_tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">repeating_interval_sequence</span><span class="p">)</span>
+        <span class="n">repeating_weight_tuple</span> <span class="o">=</span> <span class="n">ScaleFamily</span><span class="o">.</span><span class="n">_weight_sequence_to_weight_tuple</span><span class="p">(</span>
+            <span class="n">repeating_weight_sequence</span><span class="p">,</span> <span class="n">repeating_interval_tuple</span>
+        <span class="p">)</span>
+        <span class="n">repeating_scale_degree_tuple</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">ScaleFamily</span><span class="o">.</span><span class="n">_scale_degree_sequence_to_scale_tuple</span><span class="p">(</span>
+                <span class="n">repeating_scale_degree_sequence</span><span class="p">,</span> <span class="n">repeating_interval_tuple</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">repeating_period_repetition_count_tuple</span> <span class="o">=</span> <span class="n">ScaleFamily</span><span class="o">.</span><span class="n">_period_repetition_count_sequence_to_period_repetition_count_tuple</span><span class="p">(</span>
+            <span class="n">repeating_period_repetition_count_sequence</span><span class="p">,</span> <span class="n">repeating_interval_tuple</span>
+        <span class="p">)</span>
+
+        <span class="n">is_rising</span> <span class="o">=</span> <span class="n">ScaleFamily</span><span class="o">.</span><span class="n">_is_interval_tuple_rising</span><span class="p">(</span><span class="n">repeating_interval_tuple</span><span class="p">)</span>
+
+        <span class="n">interval_range</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">repeating_interval_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">interval</span> <span class="o">-</span> <span class="n">repeating_interval_tuple</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">interval</span>
+        <span class="p">)</span>
+
+        <span class="k">assert</span> <span class="nb">abs</span><span class="p">(</span><span class="n">interval_range</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">abs</span><span class="p">(</span><span class="n">repetition_interval</span><span class="o">.</span><span class="n">interval</span><span class="p">),</span> <span class="p">(</span>
+            <span class="s2">&quot;Repetition interval has to be bigger than &quot;</span>
+            <span class="s2">&quot;ambitus of repeating interval sequence!&quot;</span>
+        <span class="p">)</span>
+
+        <span class="n">interval_data_list</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="n">interval</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">scale_degree</span><span class="p">,</span> <span class="n">period_repetition_count</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">interval</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">scale_degree</span><span class="p">,</span> <span class="n">period_repetition_count</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                <span class="n">repeating_interval_tuple</span><span class="p">,</span>
+                <span class="n">repeating_weight_tuple</span><span class="p">,</span>
+                <span class="n">repeating_scale_degree_tuple</span><span class="p">,</span>
+                <span class="n">repeating_period_repetition_count_tuple</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">interval</span> <span class="o">&gt;=</span> <span class="n">min_pitch_interval</span> <span class="ow">and</span> <span class="n">interval</span> <span class="o">&lt;</span> <span class="n">max_pitch_interval</span>
+        <span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">local_repetition_interval</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="n">repetition_interval</span><span class="p">,</span>
+            <span class="n">repetition_interval</span><span class="o">.</span><span class="n">inverse</span><span class="p">(</span><span class="n">mutate</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+        <span class="p">):</span>
+            <span class="n">last_interval_data_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="nb">zip</span><span class="p">(</span>
+                    <span class="n">repeating_interval_tuple</span><span class="p">,</span>
+                    <span class="n">repeating_weight_tuple</span><span class="p">,</span>
+                    <span class="n">repeating_scale_degree_tuple</span><span class="p">,</span>
+                    <span class="n">repeating_period_repetition_count_tuple</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">local_repetition_interval</span><span class="o">.</span><span class="n">interval</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">period_repetition_delta</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">period_repetition_delta</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">new_interval_data_list</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">for</span> <span class="p">(</span>
+                    <span class="n">interval</span><span class="p">,</span>
+                    <span class="n">weight</span><span class="p">,</span>
+                    <span class="n">scale_degree</span><span class="p">,</span>
+                    <span class="n">period_repetition_count</span><span class="p">,</span>
+                <span class="p">)</span> <span class="ow">in</span> <span class="n">last_interval_data_list</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="p">(</span>
+                        <span class="p">(</span><span class="n">new_interval</span> <span class="o">:=</span> <span class="n">interval</span> <span class="o">+</span> <span class="n">local_repetition_interval</span><span class="p">)</span>
+                        <span class="o">&lt;</span> <span class="n">max_pitch_interval</span>
+                    <span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">new_interval</span> <span class="o">&gt;=</span> <span class="n">min_pitch_interval</span><span class="p">):</span>
+                        <span class="n">new_interval_data_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                            <span class="p">(</span>
+                                <span class="n">new_interval</span><span class="p">,</span>
+                                <span class="n">weight</span><span class="p">,</span>
+                                <span class="n">scale_degree</span><span class="p">,</span>
+                                <span class="n">period_repetition_count</span> <span class="o">+</span> <span class="n">period_repetition_delta</span><span class="p">,</span>
+                            <span class="p">)</span>
+                        <span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">interval_data_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">new_interval_data_list</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">is_valid</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="n">last_interval_data_list</span> <span class="o">=</span> <span class="n">new_interval_data_list</span>
+
+        <span class="n">interval_data_list</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="ow">not</span> <span class="n">is_rising</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">interval_data_list</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="Scale"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.Scale">[docs]</a><span class="k">class</span> <span class="nc">Scale</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A :class:`Scale` is a sorted sequence of :class:`~mutwo.music_parameters.abc.Pitch`.</span>
+
+<span class="sd">    The equivalent of a `Scale` in `music21` is an `ConcreteScale`.</span>
+
+<span class="sd">    :class:`Scale` uses a specific nomenclature to differentiate between</span>
+<span class="sd">    different positions in a musical scale:</span>
+
+<span class="sd">        1. `scale_degree`: A scale degree is an octave independent position of</span>
+<span class="sd">           a :class:`~mutwo.music_parameters.abc.Pitch`.</span>
+
+<span class="sd">        2. `scale_index`: A scale index is an absolute index of a</span>
+<span class="sd">           :class:`~mutwo.music_parameters.abc.Pitch` within a</span>
+<span class="sd">           specific scale.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tonic</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">,</span> <span class="n">scale_family</span><span class="p">:</span> <span class="n">ScaleFamily</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tonic</span> <span class="o">=</span> <span class="n">tonic</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scale_family</span> <span class="o">=</span> <span class="n">scale_family</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                           magic methods                                #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pitch_tuple</span>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">core_utilities</span><span class="o">.</span><span class="n">test_if_objects_are_equal_by_parameter_tuple</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;tonic&quot;</span><span class="p">,</span> <span class="s2">&quot;scale_family&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                           private methods                              #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="k">def</span> <span class="nf">_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">property_name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;pitch_tuple&quot;</span><span class="p">,</span> <span class="s2">&quot;scale_position_tuple&quot;</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="nb">delattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">property_name</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                           public properties                            #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tonic</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tonic</span>
+
+    <span class="nd">@tonic</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">tonic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tonic</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tonic</span> <span class="o">=</span> <span class="n">tonic</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reset</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">scale_family</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ScaleFamily</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scale_family</span>
+
+    <span class="nd">@scale_family</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">scale_family</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scale_family</span><span class="p">:</span> <span class="n">ScaleFamily</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scale_family</span> <span class="o">=</span> <span class="n">scale_family</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reset</span><span class="p">()</span>
+
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">cached_property</span>
+    <span class="k">def</span> <span class="nf">pitch_tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PitchTuple</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tonic</span> <span class="o">+</span> <span class="n">interval</span> <span class="k">for</span> <span class="n">interval</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_family</span><span class="o">.</span><span class="n">interval_tuple</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">weight_tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WeightTuple</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_family</span><span class="o">.</span><span class="n">weight_tuple</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">scale_degree_tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ScaleDegreeTuple</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_family</span><span class="o">.</span><span class="n">scale_degree_tuple</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">period_repetition_count_tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PeriodRepetitionCountTuple</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_family</span><span class="o">.</span><span class="n">period_repetition_count_tuple</span>
+
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">cached_property</span>
+    <span class="k">def</span> <span class="nf">scale_position_tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">ScalePosition</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_degree_tuple</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">period_repetition_count_tuple</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_rising</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_family</span><span class="o">.</span><span class="n">is_rising</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_falling</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_family</span><span class="o">.</span><span class="n">is_falling</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">scale_degree_count</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_family</span><span class="o">.</span><span class="n">scale_degree_count</span>
+
+    <span class="c1"># ###################################################################### #</span>
+    <span class="c1">#                           public methods                               #</span>
+    <span class="c1"># ###################################################################### #</span>
+
+<div class="viewcode-block" id="Scale.pitch_to_scale_degree"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.Scale.pitch_to_scale_degree">[docs]</a>    <span class="k">def</span> <span class="nf">pitch_to_scale_degree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pitch</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ScaleDegree</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_degree_tuple</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pitch_tuple</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">pitch</span><span class="p">)]</span></div>
+
+<div class="viewcode-block" id="Scale.scale_position_to_pitch"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.Scale.scale_position_to_pitch">[docs]</a>    <span class="k">def</span> <span class="nf">scale_position_to_pitch</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">scale_position</span><span class="p">:</span> <span class="n">ScalePosition</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pitch_tuple</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_position_tuple</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">scale_position</span><span class="p">)]</span></div>
+
+<div class="viewcode-block" id="Scale.pitch_to_scale_position"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.Scale.pitch_to_scale_position">[docs]</a>    <span class="k">def</span> <span class="nf">pitch_to_scale_position</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">pitch</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_position_tuple</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pitch_tuple</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">pitch</span><span class="p">)]</span></div>
+
+<div class="viewcode-block" id="Scale.pitch_to_scale_index"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.Scale.pitch_to_scale_index">[docs]</a>    <span class="k">def</span> <span class="nf">pitch_to_scale_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pitch</span><span class="p">:</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ScaleIndex</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pitch_tuple</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">pitch</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Scale.scale_index_to_pitch"><a class="viewcode-back" href="../../../api/mutwo.music_parameters.html#mutwo.music_parameters.Scale.scale_index_to_pitch">[docs]</a>    <span class="k">def</span> <span class="nf">scale_index_to_pitch</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">scale_index</span><span class="p">:</span> <span class="n">ScaleIndex</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">music_parameters</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Pitch</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pitch_tuple</span><span class="p">[</span><span class="n">scale_index</span><span class="p">]</span></div></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">mutwo  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mutwo.music_parameters.scales</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Levin Eric Zimmermann.
+    </div>
+  </body>
+</html>
